@@ -5,17 +5,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
 import com.telegram.bot.csgo.model.Constants;
-import com.telegram.bot.csgo.model.Help;
-import com.telegram.bot.csgo.model.Top10;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-import java.io.IOException;
-
-import static com.telegram.bot.csgo.Http.top30;
 
 public class Bot extends TelegramLongPollingBot {
 
@@ -33,46 +23,23 @@ public class Bot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         // We check if the update has a message and the message has text
         if (update.hasMessage() && update.getMessage().hasText()) {
-
             Long chatId = update.getMessage().getChatId();
             // Help
             if (update.getMessage().getText().equalsIgnoreCase(".хелп")) {
-                sendMessage(chatId, new Help());
+                sendMessage(chatId, MessageHelper.help());
             }
-
             // Top 10
-            if (update.getMessage().getText().equalsIgnoreCase(".топ30")) {
-                try {
-                    sendMessage(chatId, Http.top30());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-
+            if (update.getMessage().getText().equalsIgnoreCase(".топ10")) {
+                sendMessage(chatId, MessageHelper.topTeams(10));
             }
-
+            // Top 30
+            if (update.getMessage().getText().equalsIgnoreCase(".топ30")) {
+                    sendMessage(chatId, MessageHelper.topTeams(30));
+            }
             // Private message
             if (StringUtils.startsWith(update.getMessage().getText(), "@" + Constants.BOT_NAME)) {
-                String who = update.getMessage().getFrom().getUserName();
-                sendMessage(chatId, "Ну все... Молись @" + who + " сейчас отхватишь! \uD83D\uDCAA");
-
-
+                sendMessage(chatId, MessageHelper.toBot(update.getMessage().getFrom().getUserName()));
             }
-
-
-
-        }
-
-    }
-
-    private void sendMessage(Long chatId, String msg) {
-        SendMessage newMessage = new SendMessage();
-        newMessage.setChatId(chatId);
-        newMessage.setText(msg);
-        try {
-            execute(newMessage); // Call method to send the message
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
         }
     }
 
