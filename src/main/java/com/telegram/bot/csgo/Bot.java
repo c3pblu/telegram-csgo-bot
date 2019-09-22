@@ -24,17 +24,20 @@ public class Bot extends TelegramLongPollingBot {
         // We check if the update has a message and the message has text
         if (update.hasMessage() && update.getMessage().hasText()) {
             Long chatId = update.getMessage().getChatId();
+            String text = update.getMessage().getText();
             // Help
-            if (update.getMessage().getText().equalsIgnoreCase(".хелп")) {
+            if (text.equalsIgnoreCase(".хелп")) {
                 sendMessage(chatId, MessageHelper.help());
             }
-            // Top 10
-            if (update.getMessage().getText().equalsIgnoreCase(".топ10")) {
-                sendMessage(chatId, MessageHelper.topTeams(10));
+            // Top Players
+            if (text.equalsIgnoreCase(".топ10игроков") || text.equalsIgnoreCase(".топ20игроков") || text.equalsIgnoreCase(".топ30игроков")) {
+                Integer count = Integer.parseInt(text.substring(4, 6));
+                sendMessage(chatId, MessageHelper.topPlayers(count));
             }
-            // Top 30
-            if (update.getMessage().getText().equalsIgnoreCase(".топ30")) {
-                    sendMessage(chatId, MessageHelper.topTeams(30));
+            // Top Teams
+            if (text.equalsIgnoreCase(".топ10") || text.equalsIgnoreCase(".топ20") || text.equalsIgnoreCase(".топ30")) {
+                Integer count = Integer.parseInt(update.getMessage().getText().substring(4));
+                sendMessage(chatId, MessageHelper.topTeams(count));
             }
             // Private message
             if (StringUtils.startsWith(update.getMessage().getText(), "@" + Constants.BOT_NAME)) {
