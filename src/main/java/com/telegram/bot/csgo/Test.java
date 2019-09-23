@@ -14,7 +14,6 @@ import java.time.LocalDate;
 public class Test {
     public static void main(String args[]) throws IOException {
         HttpClient client = new HttpClient();
-        String year = String.valueOf(LocalDate.now().getYear());
         GetMethod get = new GetMethod("https://www.hltv.org/ranking/teams/2019/september/16");
         get.setFollowRedirects(true);
         get.setRequestHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36");
@@ -23,7 +22,7 @@ public class Test {
         get.releaseConnection();
 
         Document doc = Jsoup.parse(response);
-        System.out.println(doc.select("div.ranked-team").select("div.more").select("a[class=details moreLink]").attr("href"));
+        System.out.println(doc.select("div.ranked-team").select("div.ranking-header").select("img").attr("src"));
 
 
     }
