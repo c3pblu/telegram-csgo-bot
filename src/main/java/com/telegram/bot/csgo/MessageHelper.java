@@ -1,5 +1,12 @@
 package com.telegram.bot.csgo;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.HttpHeaders;
@@ -8,10 +15,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.ArrayList;
 
 public class MessageHelper {
 
@@ -52,10 +55,8 @@ public class MessageHelper {
 				row.append("]\n");
 				textMessage.append(row);
 			}
-			System.out.println(textMessage.toString());
 			sendMessage.setText(textMessage.toString());
-			return sendMessage;
-
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 			sendMessage.setText("Не смог получить данные с сайта...");
@@ -103,6 +104,7 @@ public class MessageHelper {
 				number++;
 			}
 			sendMessage.setText(textMessage.toString());
+			
 		} catch (IOException e) {
 			sendMessage.setText("Не смог получить данные с сайта...");
 
@@ -128,7 +130,10 @@ public class MessageHelper {
 
 	public static SendMessage toBot(String who) {
 		SendMessage message = new SendMessage();
-		message.setText("Ну все... Молись @" + who + " сейчас отхватишь! \uD83D\uDCAA");
+		Map<Integer, String> frases = new HashMap<>();
+		frases.put(0, "Ну все... Молись @" + who + " сейчас отхватишь! \uD83D\uDCAA");
+		frases.put(1, "Го 1 на 1 на квартиру @" + who + " или засцал?! \uD83D\uDCAA");
+		message.setText(frases.get(new Random().nextInt(1 + 1)));
 		return message;
 	}
 

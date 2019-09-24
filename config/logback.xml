@@ -7,7 +7,7 @@
 	</appender>
 	<appender name="FILE"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>/home/yourvita/telegram-bot/bot.log</file>
+		<file>bot.log</file>
 		<rollingPolicy
 			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
 			<fileNamePattern>bot-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
@@ -19,15 +19,15 @@
 			<pattern>%d{HH:mm:ss,SSS} %-5p [%c] - %m%n</pattern>
 		</encoder>
 	</appender>
-	<root level="INFO">
+	<root level="DEBUG">
 		<appender-ref ref="STDOUT" />
 		<appender-ref ref="FILE" />
 	</root>
-	<logger name="org.apache.http" level="INFO" additivity="false">
+	<logger name="org.apache.http" level="DEBUG" additivity="false">
 		<appender-ref ref="STDOUT" />
 		<appender-ref ref="FILE" />
 	</logger>
-	<logger name="org.apache.http.wire" level="INFO" additivity="false">
+	<logger name="org.apache.http.wire" level="DEBUG" additivity="false">
 		<appender-ref ref="STDOUT" />
 		<appender-ref ref="FILE" />
 	</logger>
