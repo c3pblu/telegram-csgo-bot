@@ -131,9 +131,13 @@ public class MessageHelper {
 	public static SendMessage toBot(String who) {
 		SendMessage message = new SendMessage();
 		Map<Integer, String> frases = new HashMap<>();
-		frases.put(0, "Ну все... Молись @" + who + " сейчас отхватишь! \uD83D\uDCAA");
-		frases.put(1, "Го 1 на 1 на квартиру @" + who + " или засцал?! \uD83D\uDCAA");
-		message.setText(frases.get(new Random().nextInt(1 + 1)));
+		frases.put(0, "Привет, начинка для гробов!");
+		frases.put(1, "Го 1 на 1 на квартиру или засцал?!");
+		frases.put(2, "Укуси мой блестящий металлический зад");
+		frases.put(3, "Выше нос кусок мяса! Выше нос!");
+		frases.put(4, "Человеки... что с них взять");
+		frases.put(5, "Про SkyNet слыхал? Я написал...");
+		message.setText(frases.get(new Random().nextInt(5 + 1)));
 		return message;
 	}
 

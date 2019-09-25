@@ -3,6 +3,7 @@ package com.telegram.bot.csgo;
 import org.apache.commons.lang3.StringUtils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import com.telegram.bot.csgo.model.Constants;
@@ -53,7 +54,9 @@ public class Bot extends TelegramLongPollingBot {
 		// Check call back from Menu
 		if (update.getCallbackQuery() != null) {
 			Long chatId = update.getCallbackQuery().getMessage().getChatId();
+			deleteMessage(chatId, update.getCallbackQuery().getMessage().getMessageId());
 			sendMessage(chatId, MenuHelper.checkCallBack(update.getCallbackQuery()));
+			
 		}
 	}
 
@@ -61,6 +64,14 @@ public class Bot extends TelegramLongPollingBot {
 		msg.setChatId(chatId);
 		try {
 			execute(msg); // Call method to send the message
+		} catch (TelegramApiException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void deleteMessage(Long chatId, Integer msgId) {
+		try {
+			execute(new DeleteMessage(chatId, msgId));
 		} catch (TelegramApiException e) {
 			e.printStackTrace();
 		}
