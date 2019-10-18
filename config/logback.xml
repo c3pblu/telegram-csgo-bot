@@ -7,7 +7,7 @@
 	</appender>
 	<appender name="FILE"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>D:\Garbage\BotLog\bot.log</file>
+		<file>/opt/telegram-bot/bot.log</file>
 		<rollingPolicy
 			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
 			<fileNamePattern>bot-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
