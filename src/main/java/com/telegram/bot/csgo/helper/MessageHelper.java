@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo;
+package com.telegram.bot.csgo.helper;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -16,16 +16,23 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-public class MessageHelper {
+public final class MessageHelper {
+	
+	private final static String USER_AGENT_NAME = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
+	private final static String HLTV = "https://www.hltv.org";
+	private final static String HTML = "html";
+	
+	private MessageHelper() {
+		
+	}
 
 	public static SendMessage topTeams(Integer count) {
 		HttpClient client = new HttpClient();
-		GetMethod get = new GetMethod("https://www.hltv.org/ranking/teams");
+		GetMethod get = new GetMethod(HLTV + "/ranking/teams");
 		get.setFollowRedirects(true);
-		get.setRequestHeader(HttpHeaders.USER_AGENT,
-				"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36");
+		get.setRequestHeader(HttpHeaders.USER_AGENT, USER_AGENT_NAME);
 		SendMessage sendMessage = new SendMessage();
-		sendMessage.setParseMode("html");
+		sendMessage.setParseMode(HTML);
 		try {
 			client.executeMethod(get);
 			String response = get.getResponseBodyAsString();
@@ -44,8 +51,10 @@ public class MessageHelper {
 				row.append("<b>").append(team.select("span.position").text()).append("</b> (");
 				row.append(team.select("div.change").text()).append(") ");
 				row.append("<a href=\'https://hltv.org")
-						.append(team.select("div.more").select("a[class=details moreLink]").attr("href")).append("\'>")
-						.append(team.select("span.name").text()).append("</a> ");
+						.append(team.select("div.more").select("a[class=details moreLink]").attr("href"))
+						.append("\'>")
+						.append(team.select("span.name").text())
+						.append("</a> ");
 				row.append(team.select("span.points").text()).append(" [");
 				ArrayList<String> listPlayers = new ArrayList<>();
 				for (Element player : team.select("div.rankingNicknames")) {
@@ -67,13 +76,11 @@ public class MessageHelper {
 	public static SendMessage topPlayers(Integer count) {
 		HttpClient client = new HttpClient();
 		String year = String.valueOf(LocalDate.now().getYear());
-		GetMethod get = new GetMethod(
-				"https://www.hltv.org/stats/players?startDate=" + year + "-01-01&endDate=" + year + "-12-31");
+		GetMethod get = new GetMethod(HLTV + "/stats/players?startDate=" + year + "-01-01&endDate=" + year + "-12-31");
 		get.setFollowRedirects(true);
-		get.setRequestHeader(HttpHeaders.USER_AGENT,
-				"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36");
+		get.setRequestHeader(HttpHeaders.USER_AGENT, USER_AGENT_NAME);
 		SendMessage sendMessage = new SendMessage();
-		sendMessage.setParseMode("html");
+		sendMessage.setParseMode(HTML);
 		try {
 			client.executeMethod(get);
 			String response = get.getResponseBodyAsString();
@@ -131,7 +138,7 @@ public class MessageHelper {
 	public static SendMessage toBot(String who) {
 		SendMessage message = new SendMessage();
 		Map<Integer, String> frases = new HashMap<>();
-		frases.put(0, "Привет, начинка для гробов!");
+		frases.put(0, "Опять начинка для гробов бредит...");
 		frases.put(1, "Го 1 на 1 на квартиру или засцал?!");
 		frases.put(2, "Укуси мой блестящий металлический зад");
 		frases.put(3, "Выше нос кусок мяса! Выше нос!");

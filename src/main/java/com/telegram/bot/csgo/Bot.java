@@ -1,14 +1,28 @@
 package com.telegram.bot.csgo;
 
+import java.time.Instant;
+
 import org.apache.commons.lang3.StringUtils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import com.telegram.bot.csgo.helper.MenuHelper;
+import com.telegram.bot.csgo.helper.MessageHelper;
 import com.telegram.bot.csgo.model.Constants;
 
 public class Bot extends TelegramLongPollingBot {
+	
+	private static final String HELP = ".хелп";
+	private static final String MENU = ".меню";
+	private static final String TOP_10 = ".топ10";
+	private static final String TOP_20 = ".топ20";
+	private static final String TOP_30 = ".топ30";
+	private static final String TOP_10_PLAYERS = ".топ10игроков";
+	private static final String TOP_20_PLAYERS = ".топ20игроков";
+	private static final String TOP_30_PLAYERS = ".топ30игроков";
 
 	@Override
 	public String getBotUsername() {
@@ -24,24 +38,31 @@ public class Bot extends TelegramLongPollingBot {
 	public void onUpdateReceived(Update update) {
 		// We check if the update has a message and the message has text
 		if (update.hasMessage() && update.getMessage().hasText()) {
+			// If message was more than 5 minutes before - return
+			long responseTime = Instant.now().getEpochSecond() - update.getMessage().getDate();
+			if (responseTime > 300) {
+				return;
+			}
+			
 			Long chatId = update.getMessage().getChatId();
 			String text = update.getMessage().getText();
+			
 			// Help
-			if (text.equalsIgnoreCase(".хелп")) {
+			if (text.equalsIgnoreCase(HELP)) {
 				sendMessage(chatId, MessageHelper.help());
 			}
 			// Menu
-			if (text.equalsIgnoreCase(".меню")) {
+			if (text.equalsIgnoreCase(MENU)) {
 				sendMessage(chatId, MenuHelper.menu());
 			}
 			// Top Players
-			if (text.equalsIgnoreCase(".топ10игроков") || text.equalsIgnoreCase(".топ20игроков")
-					|| text.equalsIgnoreCase(".топ30игроков")) {
+			if (text.equalsIgnoreCase(TOP_10_PLAYERS) || text.equalsIgnoreCase(TOP_20_PLAYERS)
+					|| text.equalsIgnoreCase(TOP_30_PLAYERS)) {
 				Integer count = Integer.parseInt(text.substring(4, 6));
 				sendMessage(chatId, MessageHelper.topPlayers(count));
 			}
 			// Top Teams
-			if (text.equalsIgnoreCase(".топ10") || text.equalsIgnoreCase(".топ20") || text.equalsIgnoreCase(".топ30")) {
+			if (text.equalsIgnoreCase(TOP_10) || text.equalsIgnoreCase(TOP_20) || text.equalsIgnoreCase(TOP_30)) {
 				Integer count = Integer.parseInt(update.getMessage().getText().substring(4));
 				sendMessage(chatId, MessageHelper.topTeams(count));
 			}

@@ -9,14 +9,12 @@
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>/opt/telegram-bot/bot.log</file>
 		<rollingPolicy
-			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-			<fileNamePattern>bot-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-			<maxFileSize>100MB</maxFileSize>
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>bot-%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>30</maxHistory>
-			<totalSizeCap>100MB</totalSizeCap>
 		</rollingPolicy>
 		<encoder>
-			<pattern>%d{HH:mm:ss,SSS} %-5p [%c] - %m%n</pattern>
+			<pattern>%d{HH:mm:ss.SSS} %-5p [%c] - %m%n</pattern>
 		</encoder>
 	</appender>
 	<root level="DEBUG">
@@ -27,7 +25,8 @@
 		<appender-ref ref="STDOUT" />
 		<appender-ref ref="FILE" />
 	</logger>
-	<logger name="org.apache.http.wire" level="DEBUG" additivity="false">
+	<logger name="org.apache.http.wire" level="DEBUG"
+		additivity="false">
 		<appender-ref ref="STDOUT" />
 		<appender-ref ref="FILE" />
 	</logger>

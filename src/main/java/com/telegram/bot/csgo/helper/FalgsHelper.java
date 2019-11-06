@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo;
+package com.telegram.bot.csgo.helper;
 
 import com.vdurmont.emoji.EmojiParser;
 
