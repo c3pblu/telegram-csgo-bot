@@ -6,12 +6,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import com.telegram.bot.csgo.helper.MenuHelper;
 import com.telegram.bot.csgo.helper.MessageHelper;
+import com.telegram.bot.csgo.model.BotMessage;
 import com.telegram.bot.csgo.model.Constants;
+import com.telegram.bot.csgo.model.HelpMessage;
+import com.telegram.bot.csgo.model.MenuMessage;
 
 public class Bot extends TelegramLongPollingBot {
 	
@@ -38,7 +41,7 @@ public class Bot extends TelegramLongPollingBot {
 	public void onUpdateReceived(Update update) {
 		// We check if the update has a message and the message has text
 		if (update.hasMessage() && update.getMessage().hasText()) {
-			// If message was more than 5 minutes before - return
+			// If message was more than 5 minutes before - skip message
 			long responseTime = Instant.now().getEpochSecond() - update.getMessage().getDate();
 			if (responseTime > 300) {
 				return;
@@ -49,11 +52,11 @@ public class Bot extends TelegramLongPollingBot {
 			
 			// Help
 			if (text.equalsIgnoreCase(HELP)) {
-				sendMessage(chatId, MessageHelper.help());
+				sendMessage(chatId, new HelpMessage());
 			}
 			// Menu
 			if (text.equalsIgnoreCase(MENU)) {
-				sendMessage(chatId, MenuHelper.menu());
+				sendMessage(chatId, new MenuMessage());
 			}
 			// Top Players
 			if (text.equalsIgnoreCase(TOP_10_PLAYERS) || text.equalsIgnoreCase(TOP_20_PLAYERS)
@@ -68,7 +71,7 @@ public class Bot extends TelegramLongPollingBot {
 			}
 			// Private message
 			if (StringUtils.startsWith(update.getMessage().getText(), "@" + Constants.BOT_NAME)) {
-				sendMessage(chatId, MessageHelper.toBot(update.getMessage().getFrom().getUserName()));
+				sendMessage(chatId, new BotMessage());
 			}
 		}
 
@@ -76,10 +79,48 @@ public class Bot extends TelegramLongPollingBot {
 		if (update.getCallbackQuery() != null) {
 			Long chatId = update.getCallbackQuery().getMessage().getChatId();
 			deleteMessage(chatId, update.getCallbackQuery().getMessage().getMessageId());
-			sendMessage(chatId, MenuHelper.checkCallBack(update.getCallbackQuery()));
+			sendMessage(chatId, checkCallBack(update.getCallbackQuery()));
 			
 		}
 	}
+	
+	
+	private SendMessage checkCallBack(CallbackQuery callBack) {
+		long responseTime = Instant.now().getEpochSecond() - callBack.getMessage().getDate();
+		// If message was more than 5 minutes before - return only message
+		if (responseTime > 300) {
+			return new SendMessage().setText("Упс, ты слишком долго думал парень!");
+		}
+		
+		String data = callBack.getData();
+		
+		if (data.equals(Constants.TOP_10)) {
+			return MessageHelper.topTeams(10);
+		}
+		if (data.equals(Constants.TOP_20)) {
+			return MessageHelper.topTeams(20);
+		}
+		if (data.equals(Constants.TOP_30)) {
+			return MessageHelper.topTeams(30);
+		}
+		if (data.equals(Constants.TOP_10_PLAYERS)) {
+			return MessageHelper.topPlayers(10);
+		}
+		if (data.equals(Constants.TOP_20_PLAYERS)) {
+			return MessageHelper.topPlayers(20);
+		}
+		if (data.equals(Constants.TOP_30_PLAYERS)) {
+			return MessageHelper.topPlayers(30);
+		}
+		if (data.equals(Constants.RESULTS)) {
+			return new SendMessage().setText("Comming Soon...");
+		}
+		if (data.equals(Constants.MATCHES)) {
+			return new SendMessage().setText("Comming Soon...");
+		}
+		return new SendMessage();
+	}
+	
 
 	private void sendMessage(Long chatId, SendMessage msg) {
 		msg.setChatId(chatId);

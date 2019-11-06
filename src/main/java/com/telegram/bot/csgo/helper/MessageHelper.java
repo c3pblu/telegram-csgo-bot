@@ -3,9 +3,6 @@ package com.telegram.bot.csgo.helper;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -117,35 +114,6 @@ public final class MessageHelper {
 
 		}
 		return sendMessage;
-	}
-
-	public static SendMessage help() {
-		SendMessage help = new SendMessage();
-		help.setParseMode("markdown");
-		help.setText("\u2139 Могу посмотреть, что там нового на HLTV.org\n" 
-				+ "Спрашивай, не стесняйся:\n"
-				+ "\u2705 *.хелп* - Эта информация\n" 
-				+ "\u2705 *.меню* - Меню\n"
-				+ "\u2705 *.топ10* - Top 10 Команд\n"
-				+ "\u2705 *.топ20* - Top 20 Команд\n" 
-				+ "\u2705 *.топ30* - Top 30 Команд\n"
-				+ "\u2705 *.топ10игроков* - Top 10 Игроков\n" 
-				+ "\u2705 *.топ20игроков* - Top 20 Игроков\n"
-				+ "\u2705 *.топ30игроков* - Top 30 Игроков");
-		return help;
-	}
-
-	public static SendMessage toBot(String who) {
-		SendMessage message = new SendMessage();
-		Map<Integer, String> frases = new HashMap<>();
-		frases.put(0, "Опять начинка для гробов бредит...");
-		frases.put(1, "Го 1 на 1 на квартиру или засцал?!");
-		frases.put(2, "Укуси мой блестящий металлический зад");
-		frases.put(3, "Выше нос кусок мяса! Выше нос!");
-		frases.put(4, "Человеки... что с них взять");
-		frases.put(5, "Про SkyNet слыхал? Я написал...");
-		message.setText(frases.get(new Random().nextInt(5 + 1)));
-		return message;
 	}
 
 }
