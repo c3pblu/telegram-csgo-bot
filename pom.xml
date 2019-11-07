@@ -6,7 +6,7 @@
 
 	<groupId>com.telegram.bot.csgo</groupId>
 	<artifactId>telegram-csgo-bot</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.2</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
