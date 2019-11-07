@@ -17,6 +17,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
+import com.telegram.bot.csgo.model.FavoriteTeams;
+import com.vdurmont.emoji.EmojiParser;
+
 public final class MessageHelper {
 
 	private final static String USER_AGENT_NAME = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
@@ -182,8 +185,8 @@ public final class MessageHelper {
 				textMessage.append(formattedTime).append(" - ");
 
 				if (!match.select("div.line-align").isEmpty()) {
-					textMessage.append(unlinkName(match.select("div.line-align").get(0).text())).append(" vs ")
-							.append(unlinkName(match.select("div.line-align").get(1).text())).append(" (")
+					textMessage.append(favoriteTeam(match.select("div.line-align").get(0).text(), false)).append(" vs ")
+							.append(favoriteTeam(match.select("div.line-align").get(1).text(), false)).append(" (")
 							.append(match.select("div.map-text").text()).append(") \u25AB ")
 							.append(match.select("td.event").text()).append("\n");
 
@@ -231,8 +234,8 @@ public final class MessageHelper {
 				for (Element resultCon : resultList.select("div.result-con")) {
 					Element team1 = resultCon.select("div.team").get(0);
 					Element team2 = resultCon.select("div.team").get(1);
-					String team1String = unlinkName(resultCon.select("div.team").get(0).text());
-					String team2String = unlinkName(resultCon.select("div.team").get(1).text());
+					String team1String = favoriteTeam(resultCon.select("div.team").get(0).text(), true);
+					String team2String = favoriteTeam(resultCon.select("div.team").get(1).text(), true);
 
 					if (team1.hasClass("team-won")) {
 						textMessage.append("<b>").append(team1String).append("</b>");
@@ -269,6 +272,19 @@ public final class MessageHelper {
 	private static String unlinkName(String name) {
 		if (name.contains(".")) {
 			name = name.replace('.', ',');
+		}
+		
+		return name;
+	}
+	
+	private static String favoriteTeam(String name, boolean isResult) {
+		name = unlinkName(name);
+		if (FavoriteTeams.isFavorite(name)) {
+			if (isResult == true) {
+				name = FavoriteTeams.getFlag(name) + name;
+			} else {
+				name = FavoriteTeams.getFlag(name) + "<b>" + name + "</b>";
+			}
 		}
 		return name;
 	}
