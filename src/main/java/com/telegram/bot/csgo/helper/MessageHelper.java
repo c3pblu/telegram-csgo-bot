@@ -148,9 +148,9 @@ public final class MessageHelper {
 						.append(match.select("div.event-name").text())
 						.append("\n")
 						.append("</b>")
-						.append(match.select("span.team-name").get(0).text())
+						.append(unlinkName(match.select("span.team-name").get(0).text()))
 						.append(" \uD83C\uDD9A ")
-						.append(match.select("span.team-name").get(1).text())
+						.append(unlinkName(match.select("span.team-name").get(1).text()))
 						.append(" (")
 						.append(match.select("tr.header").select("td.bestof").text())
 						.append(")\n");
@@ -163,17 +163,15 @@ public final class MessageHelper {
 	        		String first = match.select("td.livescore").select("span[data-livescore-map=" + (i + 1) + "]").get(0).text();
 	        		String second = match.select("td.livescore").select("span[data-livescore-map=" + (i + 1) + "]").get(1).text();
 
-	        		if (!first.equals("16") && !first.equals("0") && !first.equals("-") && !second.equals("16") && !second.equals("0") && !second.equals("-")) {
-	        			second = second.concat(" <b>Live</b>\u2757");
-	        		}
-	        		else if (second.equals("16")) {
-	        			second = "<b>16</b>";
-	        		}
-	        		
-	        		else if (first.equals("16")) {
-	        			first = "<b>16</b>";
-	        		}
-	        		
+					if (!(first.equals("-") && second.equals("-"))) {
+						if (Integer.parseInt(first) > Integer.parseInt(second)) {
+							first = "<b>" + first + "</b>";
+						}
+						else if (Integer.parseInt(first) < Integer.parseInt(second)) {
+							second = "<b>" + second + "</b>";
+						}
+					}
+
 	        		mapsString
 	        		.append("<b>")
 	        		.append(maps.get(i).text())
@@ -200,12 +198,12 @@ public final class MessageHelper {
 	        	String formattedTime = localTime.format(formatter);
 	        	textMessage.append(formattedTime)
 	        	.append(" - ")
-	        	.append(match.select("div.line-align").get(0).text())
+	        	.append(unlinkName(match.select("div.line-align").get(0).text()))
 	        	.append(" vs ")
-	        	.append(match.select("div.line-align").get(1).text())
+	        	.append(unlinkName(match.select("div.line-align").get(1).text()))
 	        	.append(" (")
 	        	.append(match.select("div.map-text").text())
-	        	.append("), ")
+	        	.append(") \u25AB ")
 	        	.append(match.select("td.event").text())
 	        	.append("\n");
 	        	}
@@ -220,4 +218,75 @@ public final class MessageHelper {
 	       return sendMessage;
 
 	    }
+	
+	
+	public static SendMessage results() {
+		HttpClient client = new HttpClient();
+		GetMethod get = new GetMethod(HLTV + "/results");
+		get.setFollowRedirects(true);
+		get.setRequestHeader(HttpHeaders.USER_AGENT, USER_AGENT_NAME);
+		SendMessage sendMessage = new SendMessage();
+		sendMessage.setParseMode(HTML);
+		try {
+			client.executeMethod(get);
+			String response = get.getResponseBodyAsString();
+			get.releaseConnection();
+			Document doc = Jsoup.parse(response);
+			StringBuilder textMessage = new StringBuilder();
+			Elements subLists = doc.select("div.results-sublist");
+			int i = 0;
+			for (Element resultList : subLists) {
+				if(i > 1) break;
+				String headerText = resultList.select("span.standard-headline").text();
+				if (headerText.isEmpty()) {
+					headerText = "Featured Results";
+				}
+
+				textMessage.append("\uD83C\uDFC6 <b>").append(headerText).append("</b>\n");
+
+				for (Element resultCon : resultList.select("div.result-con")) {
+					Element team1 = resultCon.select("div.team").get(0);
+					Element team2 = resultCon.select("div.team").get(1);
+					String team1String = unlinkName(resultCon.select("div.team").get(0).text());
+					String team2String = unlinkName(resultCon.select("div.team").get(1).text());
+
+					if (team1.hasClass("team-won")) {
+						textMessage.append("<b>").append(team1String).append("</b>");
+					} else {
+						textMessage.append(team1String);
+					}
+
+					textMessage.append(" [").append(resultCon.select("td.result-score").text()).append("] ");
+
+					if (team2.hasClass("team-won")) {
+						textMessage.append("<b>").append(team2String).append("</b>");
+					} else {
+						textMessage.append(team2String);
+					}
+
+					textMessage.append(" (").append(resultCon.select("div.map-text").text()).append(") \u25AB ")
+							.append(resultCon.select("td.event").text());
+
+					textMessage.append("\n");
+
+				}
+				textMessage.append("\n");
+				i++;
+			}
+
+			sendMessage.setText(textMessage.toString());
+
+		} catch (IOException e) {
+
+		}
+		return sendMessage;
+	}
+	
+	
+	private static String unlinkName(String name) {
+		if (name.contains(".")) {
+			name = name.replace('.', ',' );
+		}
+		return name;
+	}
 }

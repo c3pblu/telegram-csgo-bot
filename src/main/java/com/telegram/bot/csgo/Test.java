@@ -20,7 +20,7 @@ import java.util.Locale;
 public class Test {
     public static void main(String args[]) throws IOException {
         HttpClient client = new HttpClient();
-        GetMethod get = new GetMethod("https://www.hltv.org/matches");
+        GetMethod get = new GetMethod("https://www.hltv.org/results");
         get.setFollowRedirects(true);
         get.setRequestHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36");
         client.executeMethod(get);
@@ -29,84 +29,57 @@ public class Test {
         Document doc = Jsoup.parse(response);
         StringBuilder textMessage = new StringBuilder();
 
-        
-        if (doc.select("div.live-match").size() > 1) {
-            textMessage.append("Live matches!\n\n");
-        }
-        
-        for (Element match : doc.select("div.live-match")) {
-        	if (match.text().isEmpty()) {
-        		continue;
+        Elements subLists = doc.select("div.results-sublist");
+        int i = 0;
+        for (Element resultList : subLists) {
+        	if (i > 1) break;
+        	String headerText = resultList.select("span.standard-headline").text();
+        	if (headerText.isEmpty()) {
+        		textMessage.append("<b>Featured Results</b>");
         	}
         	
-			textMessage.append(match.select("div.event-name").text()).append("\n")
-					.append(match.select("span.team-name").get(0).text()).append(" vs ")
-					.append(match.select("span.team-name").get(1).text()).append(" (")
-					.append(match.select("tr.header").select("td.bestof").text()).append(")\n");
-        	
-        	Elements maps = match.select("tr.header").select("td.map");
-        	int numMaps = maps.size();
-        	
-        	for (int i = 0; i < numMaps; i++) {
-        		StringBuilder sb = new StringBuilder();
+        	textMessage.append("<b>")
+        	.append(headerText)
+        	.append("</b>\n");
+  
+        	for (Element resultCon : resultList.select("div.result-con")) {
+        		Element team1 = resultCon.select("div.team").get(0);
+        		Element team2 = resultCon.select("div.team").get(1);
+        		String team1String = resultCon.select("div.team").get(0).text();
+        		String team2String = resultCon.select("div.team").get(1).text();
         		
-        		String first = match.select("td.livescore").select("span[data-livescore-map=" + (i + 1) + "]").get(0).text();
-        		String second = match.select("td.livescore").select("span[data-livescore-map=" + (i + 1) + "]").get(1).text();
-        		
-        		
-        		if (!first.equals("16") && !first.equals("0") && !first.equals("-") && !second.equals("16") && !second.equals("0") && !second.equals("-")) {
-        			second = second.concat(" Live!");
-        		}
-        		else if (second.equals("16")) {
-        			second = "<b>16</b>";
+        		if (team1.hasClass("team-won")) {
+        			textMessage.append("<b>")
+        			.append(team1String)
+        			.append("</b>");
+        		} else {
+        			textMessage.append(team1String);
         		}
         		
-        		else if (first.equals("16")) {
-        			first = "<b>16</b>";
+        		textMessage.append(" ")
+        		.append(resultCon.select("td.result-score").text())
+        		.append(" ");
+        		
+        		if (team2.hasClass("team-won")) {
+        			textMessage.append("<b>")
+        			.append(team2String)
+        			.append("</b>");
+        		} else {
+        			textMessage.append(team2String);
         		}
         		
-        		sb.append(maps.get(i).text())
-        		.append(": ")
-        		.append(first)
-        		.append("-")
-        		.append(second)
-        		.append("\n");
-        		textMessage.append(sb);
+        		textMessage.append(" (")
+        		.append(resultCon.select("div.map-text").text())
+        		.append(") \uD83C\uDFC6 ")
+        		.append(resultCon.select("td.event").text());
+        		
+        		textMessage.append("\n");
 
         	}
-        	
         	textMessage.append("\n");
-
+        	i++;
         }
-        
-        textMessage.append("<b>Upcoming CS:GO matches</b>\n");
-        
-        Element matchDay = doc.select("div.match-day").first();
-        textMessage.append(matchDay.select("span.standard-headline").text()).append("\n");
-        
-        for (Element match : matchDay.select("table.table")) {
-        	
-        	long unixTime = Long.parseLong(match.select("div.time").attr("data-unix"));
-        	LocalDateTime localTime = LocalDateTime.ofEpochSecond((unixTime/1000)+10800, 0, ZoneOffset.UTC);
-        	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH);
-        	String formattedTime = localTime.format(formatter);
-        	
-        	
-        	textMessage.append(formattedTime)
-        	.append("  ");
-        	textMessage.append(match.select("div.time").attr("data-unix"))
-        	.append(" - ")
-        	.append(match.select("div.line-align").get(0).text())
-        	.append(" vs ")
-        	.append(match.select("div.line-align").get(1).text())
-        	.append(" (")
-        	.append(match.select("div.map-text").text())
-        	.append("), ")
-        	.append(match.select("td.event").text())
-        	.append("\n");
-        	}
 
         System.out.println(textMessage);
-
     }
 }
