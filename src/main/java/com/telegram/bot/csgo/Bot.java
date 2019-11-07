@@ -88,8 +88,8 @@ public class Bot extends TelegramLongPollingBot {
 		// Check call back from Menu
 		if (update.getCallbackQuery() != null) {
 			Long chatId = update.getCallbackQuery().getMessage().getChatId();
-			deleteMessage(chatId, update.getCallbackQuery().getMessage().getMessageId());
 			sendMessage(chatId, checkCallBack(update.getCallbackQuery()));
+			deleteMessage(chatId, update.getCallbackQuery().getMessage().getMessageId());
 			
 		}
 	}
