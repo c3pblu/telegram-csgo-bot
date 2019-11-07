@@ -6,9 +6,10 @@ Get data from [HLTV.org](https://HLTV.org/) about CS:GO events, teams, players e
 - Matches
 - Results
 - Menu
-- Randomize private bot response
+- Randomize private bot response (w/o repeating last 3 messages)
 - Skip messages after 5 minutes gone
 
 ### To-Do:
 
 - Flags
+- Cache for "Top" requests

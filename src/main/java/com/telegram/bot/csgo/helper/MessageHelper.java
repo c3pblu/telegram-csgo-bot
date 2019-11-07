@@ -179,11 +179,17 @@ public final class MessageHelper {
 				LocalDateTime localTime = LocalDateTime.ofEpochSecond((unixTime / 1000) + 10800, 0, ZoneOffset.UTC);
 				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH);
 				String formattedTime = localTime.format(formatter);
-				textMessage.append(formattedTime).append(" - ")
-						.append(unlinkName(match.select("div.line-align").get(0).text())).append(" vs ")
-						.append(unlinkName(match.select("div.line-align").get(1).text())).append(" (")
-						.append(match.select("div.map-text").text()).append(") \u25AB ")
-						.append(match.select("td.event").text()).append("\n");
+				textMessage.append(formattedTime).append(" - ");
+
+				if (!match.select("div.line-align").isEmpty()) {
+					textMessage.append(unlinkName(match.select("div.line-align").get(0).text())).append(" vs ")
+							.append(unlinkName(match.select("div.line-align").get(1).text())).append(" (")
+							.append(match.select("div.map-text").text()).append(") \u25AB ")
+							.append(match.select("td.event").text()).append("\n");
+
+				} else {
+					textMessage.append(match.select("td.placeholder-text-cell").text()).append("\n");
+				}
 			}
 
 			sendMessage.setText(textMessage.toString());
