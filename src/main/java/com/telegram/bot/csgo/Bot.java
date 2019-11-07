@@ -20,6 +20,7 @@ public class Bot extends TelegramLongPollingBot {
 	
 	private static final String HELP = ".хелп";
 	private static final String MENU = ".меню";
+	private static final String MATCHES = ".матчи";
 	private static final String TOP_10 = ".топ10";
 	private static final String TOP_20 = ".топ20";
 	private static final String TOP_30 = ".топ30";
@@ -57,6 +58,10 @@ public class Bot extends TelegramLongPollingBot {
 			// Menu
 			if (text.equalsIgnoreCase(MENU)) {
 				sendMessage(chatId, new MenuMessage());
+			}
+			// Matches
+			if (text.equalsIgnoreCase(MATCHES)) {
+				sendMessage(chatId, MessageHelper.matches());
 			}
 			// Top Players
 			if (text.equalsIgnoreCase(TOP_10_PLAYERS) || text.equalsIgnoreCase(TOP_20_PLAYERS)
@@ -116,7 +121,7 @@ public class Bot extends TelegramLongPollingBot {
 			return new SendMessage().setText("Comming Soon...");
 		}
 		if (data.equals(Constants.MATCHES)) {
-			return new SendMessage().setText("Comming Soon...");
+			return MessageHelper.matches();
 		}
 		return new SendMessage();
 	}
