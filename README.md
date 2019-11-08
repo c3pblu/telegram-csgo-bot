@@ -13,3 +13,4 @@ Get data from [HLTV.org](https://HLTV.org/) about CS:GO events, teams, players e
 
 - Flags
 - Cache for "Top" requests
+- Favorite teams control
