@@ -10,7 +10,7 @@
 		<file>/opt/telegram-bot/bot.log</file>
 		<rollingPolicy
 			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>bot-%d{yyyy-MM-dd}.log</fileNamePattern>
+			<fileNamePattern>/opt/telegram-bot/bot-%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
 		<encoder>
