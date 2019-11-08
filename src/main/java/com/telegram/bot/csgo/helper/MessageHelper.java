@@ -185,10 +185,15 @@ public final class MessageHelper {
 				textMessage.append(formattedTime).append(" - ");
 
 				if (!match.select("div.line-align").isEmpty()) {
-					textMessage.append(favoriteTeam(match.select("div.line-align").get(0).text(), false)).append(" vs ")
-							.append(favoriteTeam(match.select("div.line-align").get(1).text(), false)).append(" (")
-							.append(match.select("div.map-text").text()).append(") \u25AB ")
-							.append(match.select("td.event").text()).append("\n");
+					textMessage.append(favoriteTeam(match.select("td.team-cell").get(0).text(), false)).append(" vs ")
+							.append(favoriteTeam(match.select("td.team-cell").get(1).text(), false)).append(" (")
+							.append(match.select("div.map-text").text()).append(") ");
+
+					for (int i = 0; i < match.select("div.stars").select("i").size(); i++) {
+						textMessage.append(EmojiParser.parseToUnicode(":star:"));
+					}
+
+					textMessage.append(" \u25AB ").append(match.select("td.event").text()).append("\n");
 
 				} else {
 					textMessage.append(match.select("td.placeholder-text-cell").text()).append("\n");
@@ -273,10 +278,10 @@ public final class MessageHelper {
 		if (name.contains(".")) {
 			name = name.replace('.', ',');
 		}
-		
+
 		return name;
 	}
-	
+
 	private static String favoriteTeam(String name, boolean isResult) {
 		name = unlinkName(name);
 		if (FavoriteTeams.isFavorite(name)) {
