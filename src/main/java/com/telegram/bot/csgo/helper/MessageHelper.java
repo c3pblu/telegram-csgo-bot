@@ -116,7 +116,7 @@ public final class MessageHelper {
 				String second = match.select("td.livescore").select("span[data-livescore-map=" + (i + 1) + "]").get(1)
 						.text();
 
-				if (!(first.equals("-") && second.equals("-"))) {
+				if (!(first.equals("-") || second.equals("-"))) {
 					if (Integer.parseInt(first) > Integer.parseInt(second)) {
 						first = "<b>" + first + "</b>";
 					} else if (Integer.parseInt(first) < Integer.parseInt(second)) {
