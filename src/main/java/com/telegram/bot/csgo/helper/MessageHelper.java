@@ -104,7 +104,8 @@ public final class MessageHelper {
 			textMessage.append("\uD83C\uDFC6 <b>").append(match.select("div.event-name").text()).append("\n")
 					.append("</b>").append(unlinkName(match.select("span.team-name").get(0).text()))
 					.append(" \uD83C\uDD9A ").append(unlinkName(match.select("span.team-name").get(1).text()))
-					.append(" (").append(match.select("tr.header").select("td.bestof").text()).append(")\n");
+					.append(" (").append(match.select("tr.header").select("td.bestof").text()).append(") ")
+					.append(getStars(match)).append("\n");
 
 			Elements maps = match.select("tr.header").select("td.map");
 			int numMaps = maps.size();
@@ -125,8 +126,7 @@ public final class MessageHelper {
 				}
 
 				mapsString.append("<b>").append(maps.get(i).text()).append("</b>: ").append(first).append("-")
-						.append(second).append("\n");
-				textMessage.append(mapsString);
+						.append(second).append("\n").append(mapsString);
 			}
 
 			textMessage.append("\n");
@@ -199,15 +199,9 @@ public final class MessageHelper {
 					textMessage.append(team2String);
 				}
 
-				textMessage.append(" (").append(resultCon.select("div.map-text").text()).append(") ");
-
-				for (int j = 0; j < resultCon.select("div.stars").select("i").size(); j++) {
-					textMessage.append(EmojiParser.parseToUnicode(":star:"));
-				}
-
-				textMessage.append(" \u25AB ").append(resultCon.select("td.event").text());
-
-				textMessage.append("\n");
+				textMessage.append(" (").append(resultCon.select("div.map-text").text()).append(") ")
+						.append(getStars(resultCon)).append(" \u25AB ").append(resultCon.select("td.event").text())
+						.append("\n");
 
 			}
 			textMessage.append("\n");
@@ -215,6 +209,15 @@ public final class MessageHelper {
 		}
 
 		return new SendMessage().setParseMode(HTML).setText(textMessage.toString());
+	}
+
+	private static StringBuilder getStars(Element match) {
+		StringBuilder stars = new StringBuilder();
+		for (int j = 0; j < match.select("div.stars").select("i").size(); j++) {
+			stars.append(EmojiParser.parseToUnicode(":star:"));
+		}
+		return stars;
+
 	}
 
 	private static Document getDocument(String uri) {
