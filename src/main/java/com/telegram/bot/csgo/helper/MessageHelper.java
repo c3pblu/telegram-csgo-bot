@@ -126,7 +126,8 @@ public final class MessageHelper {
 				}
 
 				mapsString.append("<b>").append(maps.get(i).text()).append("</b>: ").append(first).append("-")
-						.append(second).append("\n").append(mapsString);
+						.append(second).append("\n");
+				textMessage.append(mapsString);
 			}
 
 			textMessage.append("\n");
