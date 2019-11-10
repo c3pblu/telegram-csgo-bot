@@ -19,7 +19,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import com.telegram.bot.csgo.model.Constants;
 import com.telegram.bot.csgo.model.FavoriteTeams;
-import com.vdurmont.emoji.EmojiParser;
 
 public final class MessageHelper {
 
@@ -212,7 +211,7 @@ public final class MessageHelper {
 	private static StringBuilder getStars(Element match) {
 		StringBuilder stars = new StringBuilder();
 		for (int j = 0; j < match.select("div.stars").select("i").size(); j++) {
-			stars.append(EmojiParser.parseToUnicode(":star:"));
+			stars.append(Constants.EMOJI_STAR);
 		}
 		return stars;
 

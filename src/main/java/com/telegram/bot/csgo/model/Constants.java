@@ -29,6 +29,7 @@ public final class Constants {
 	public final static String EMOJI_FIRE = "\uD83D\uDD25";
 	public final static String EMOJI_MIL_MEDAL = EmojiParser.parseToUnicode(":military_medal:");
 	public final static String EMOJI_SPORT_MEDAL = EmojiParser.parseToUnicode(":sports_medal:");
+	public final static String EMOJI_STAR = EmojiParser.parseToUnicode(":star:");
 	
 	private Constants() {
 	}

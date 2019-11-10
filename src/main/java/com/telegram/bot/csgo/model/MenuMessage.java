@@ -7,8 +7,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
-import com.vdurmont.emoji.EmojiParser;
-
 public class MenuMessage extends SendMessage {
 	
 	private static final InlineKeyboardMarkup MARK_UP_IN_LINE = new InlineKeyboardMarkup();
