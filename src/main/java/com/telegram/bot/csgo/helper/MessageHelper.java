@@ -17,16 +17,13 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
+import com.telegram.bot.csgo.model.Constants;
 import com.telegram.bot.csgo.model.FavoriteTeams;
 import com.vdurmont.emoji.EmojiParser;
 
 public final class MessageHelper {
 
-	private final static String USER_AGENT_NAME = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
-	private final static String HLTV = "https://www.hltv.org";
-	private final static String HTML = "html";
-	private final static String EXCEPTION_MSG = "Can't get data from site";
-	private static HttpClient client = new HttpClient();
+	private static final HttpClient client = new HttpClient();
 
 	private MessageHelper() {
 
@@ -57,7 +54,7 @@ public final class MessageHelper {
 			textMessage.append(row);
 		}
 
-		return new SendMessage().setParseMode(HTML).setText(textMessage.toString());
+		return new SendMessage().setParseMode(Constants.HTML).setText(textMessage.toString());
 	}
 
 	public static SendMessage topPlayers(Integer count) {
@@ -85,14 +82,14 @@ public final class MessageHelper {
 					.append(value.select("td.ratingCol").text()).append("\n");
 			number++;
 		}
-		return new SendMessage().setParseMode(HTML).setText(textMessage.toString());
+		return new SendMessage().setParseMode(Constants.HTML).setText(textMessage.toString());
 	}
 
 	public static SendMessage matches() {
 		Document doc = getDocument("/matches");
 		StringBuilder textMessage = new StringBuilder();
 		if (doc.select("div.live-match").size() > 1) {
-			textMessage.append("<b>Live matches</b>\u2757\n");
+			textMessage.append("<b>Live matches</b>").append(Constants.EMOJI_EXCL_MARK).append("\n");
 		}
 
 		for (Element match : doc.select("div.live-match")) {
@@ -100,11 +97,12 @@ public final class MessageHelper {
 				continue;
 			}
 
-			textMessage.append("\uD83C\uDFC6 <b>").append(match.select("div.event-name").text()).append("\n")
-					.append("</b>").append(unlinkName(match.select("span.team-name").get(0).text()))
-					.append(" \uD83C\uDD9A ").append(unlinkName(match.select("span.team-name").get(1).text()))
-					.append(" (").append(match.select("tr.header").select("td.bestof").text()).append(") ")
-					.append(getStars(match)).append("\n");
+			textMessage.append(Constants.EMOJI_CUP).append(" <b>").append(match.select("div.event-name").text())
+					.append("\n").append("</b>").append(unlinkName(match.select("span.team-name").get(0).text()))
+					.append(" ").append(Constants.EMOJI_VS).append(" ")
+					.append(unlinkName(match.select("span.team-name").get(1).text())).append(" (")
+					.append(match.select("tr.header").select("td.bestof").text()).append(") ").append(getStars(match))
+					.append("\n");
 
 			Elements maps = match.select("tr.header").select("td.map");
 			int numMaps = maps.size();
@@ -147,20 +145,16 @@ public final class MessageHelper {
 			if (!match.select("div.line-align").isEmpty()) {
 				textMessage.append(favoriteTeam(match.select("td.team-cell").get(0).text(), false)).append(" vs ")
 						.append(favoriteTeam(match.select("td.team-cell").get(1).text(), false)).append(" (")
-						.append(match.select("div.map-text").text()).append(") ");
-
-				for (int i = 0; i < match.select("div.stars").select("i").size(); i++) {
-					textMessage.append(EmojiParser.parseToUnicode(":star:"));
-				}
-
-				textMessage.append(" \u25AB ").append(match.select("td.event").text()).append("\n");
+						.append(match.select("div.map-text").text()).append(") ").append(getStars(match))
+						.append(Constants.EMOJI_SQUARE).append(" ").append(match.select("td.event").text())
+						.append("\n");
 
 			} else {
 				textMessage.append(match.select("td.placeholder-text-cell").text()).append("\n");
 			}
 		}
 
-		return new SendMessage().setParseMode(HTML).setText(textMessage.toString());
+		return new SendMessage().setParseMode(Constants.HTML).setText(textMessage.toString());
 
 	}
 
@@ -177,7 +171,7 @@ public final class MessageHelper {
 				headerText = "Featured Results";
 			}
 
-			textMessage.append("\uD83C\uDFC6 <b>").append(headerText).append("</b>\n");
+			textMessage.append(Constants.EMOJI_CUP).append(" <b>").append(headerText).append("</b>\n");
 
 			for (Element resultCon : resultList.select("div.result-con")) {
 				Element team1 = resultCon.select("div.team").get(0);
@@ -200,19 +194,19 @@ public final class MessageHelper {
 				}
 
 				textMessage.append(" (").append(resultCon.select("div.map-text").text()).append(") ")
-						.append(getStars(resultCon)).append(" \u25AB ").append(resultCon.select("td.event").text())
-						.append("\n");
+						.append(getStars(resultCon)).append(Constants.EMOJI_SQUARE).append(" ")
+						.append(resultCon.select("td.event").text()).append("\n");
 
 			}
 			textMessage.append("\n");
 			i++;
 		}
 
-		return new SendMessage().setParseMode(HTML).setText(textMessage.toString());
+		return new SendMessage().setParseMode(Constants.HTML).setText(textMessage.toString());
 	}
 
 	public static SendMessage matchesForToday() {
-		return new SendMessage().setText("Matches for Today!");
+		return new SendMessage().setText(Constants.MATCHES_FOR_TODAY);
 	}
 
 	private static StringBuilder getStars(Element match) {
@@ -226,9 +220,9 @@ public final class MessageHelper {
 
 	private static Document getDocument(String uri) {
 		try {
-			GetMethod get = new GetMethod(HLTV + uri);
+			GetMethod get = new GetMethod(Constants.HLTV + uri);
 			get.setFollowRedirects(true);
-			get.setRequestHeader(HttpHeaders.USER_AGENT, USER_AGENT_NAME);
+			get.setRequestHeader(HttpHeaders.USER_AGENT, Constants.USER_AGENT_NAME);
 			client.executeMethod(get);
 			String response = get.getResponseBodyAsString();
 			get.releaseConnection();
@@ -236,7 +230,7 @@ public final class MessageHelper {
 			return doc;
 		} catch (IOException e) {
 			e.printStackTrace();
-			throw new Error(EXCEPTION_MSG);
+			throw new Error(Constants.EXCEPTION_MSG);
 		}
 	}
 

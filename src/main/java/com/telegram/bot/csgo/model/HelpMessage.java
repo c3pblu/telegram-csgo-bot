@@ -6,18 +6,18 @@ public class HelpMessage extends SendMessage {
 	
 	public HelpMessage() {
 		this.setParseMode("markdown");
-		this.setText("\u2139 Могу посмотреть, что там нового на HLTV.org\n" 
+		this.setText(Constants.EMOJI_INFO + " Могу посмотреть, что там нового на HLTV.org\n" 
 				+ "Спрашивай, не стесняйся:\n"
-				+ "\u2705 *.хелп* - Эта информация\n" 
-				+ "\u2705 *.меню* - Меню\n"
-				+ "\u2705 *.матчи* - Текущие/ближайшие матчи\n"
-				+ "\u2705 *.результаты* - Результаты матчей \n"
-				+ "\u2705 *.топ10* - Top 10 Команд\n"
-				+ "\u2705 *.топ20* - Top 20 Команд\n" 
-				+ "\u2705 *.топ30* - Top 30 Команд\n"
-				+ "\u2705 *.топ10игроков* - Top 10 Игроков\n" 
-				+ "\u2705 *.топ20игроков* - Top 20 Игроков\n"
-				+ "\u2705 *.топ30игроков* - Top 30 Игроков");
+				+ Constants.EMOJI_DONE + " *.хелп* - Эта информация\n" 
+				+ Constants.EMOJI_DONE + " *.меню* - Меню\n"
+				+ Constants.EMOJI_DONE + " *.матчи* - Текущие/ближайшие матчи\n"
+				+ Constants.EMOJI_DONE + " *.результаты* - Результаты матчей \n"
+				+ Constants.EMOJI_DONE + " *.топ10* - Top 10 Команд\n"
+				+ Constants.EMOJI_DONE + " *.топ20* - Top 20 Команд\n" 
+				+ Constants.EMOJI_DONE + " *.топ30* - Top 30 Команд\n"
+				+ Constants.EMOJI_DONE + " *.топ10игроков* - Top 10 Игроков\n" 
+				+ Constants.EMOJI_DONE + " *.топ20игроков* - Top 20 Игроков\n"
+				+ Constants.EMOJI_DONE + " *.топ30игроков* - Top 30 Игроков");
 	}
 
 }
