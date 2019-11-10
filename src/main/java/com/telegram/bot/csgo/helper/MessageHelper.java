@@ -26,7 +26,6 @@ public final class MessageHelper {
 	private final static String HLTV = "https://www.hltv.org";
 	private final static String HTML = "html";
 	private final static String EXCEPTION_MSG = "Can't get data from site";
-
 	private static HttpClient client = new HttpClient();
 
 	private MessageHelper() {
@@ -210,6 +209,10 @@ public final class MessageHelper {
 		}
 
 		return new SendMessage().setParseMode(HTML).setText(textMessage.toString());
+	}
+
+	public static SendMessage matchesForToday() {
+		return new SendMessage().setText("Matches for Today!");
 	}
 
 	private static StringBuilder getStars(Element match) {

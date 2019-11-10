@@ -6,7 +6,7 @@
 
 	<groupId>com.telegram.bot.csgo</groupId>
 	<artifactId>telegram-csgo-bot</artifactId>
-	<version>1.0.5</version>
+	<version>1.1.0</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -44,6 +44,12 @@
 					<artifactId>commons-logging</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.telegram</groupId>
+			<artifactId>telegrambots-spring-boot-starter</artifactId>
+			<version>4.1.2</version>
 		</dependency>
 
 		<dependency>

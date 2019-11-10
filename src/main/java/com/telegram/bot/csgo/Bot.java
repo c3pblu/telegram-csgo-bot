@@ -3,6 +3,9 @@ package com.telegram.bot.csgo;
 import java.time.Instant;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
@@ -16,8 +19,18 @@ import com.telegram.bot.csgo.model.Constants;
 import com.telegram.bot.csgo.model.HelpMessage;
 import com.telegram.bot.csgo.model.MenuMessage;
 
+@Component
 public class Bot extends TelegramLongPollingBot {
-	
+
+	@Value(value = "${bot.name}")
+	private String botName;
+	@Value(value = "${bot.token}")
+	private String botToken;
+	@Value(value = "${bot.scheduler.chat.id}")
+	private Long schedulerChatId;
+	@Value(value = "${bot.message.timeout}")
+	private Long messageTimeout;
+
 	private static final String HELP = ".хелп";
 	private static final String MENU = ".меню";
 	private static final String MATCHES = ".матчи";
@@ -31,27 +44,26 @@ public class Bot extends TelegramLongPollingBot {
 
 	@Override
 	public String getBotUsername() {
-		return Constants.BOT_NAME;
+		return botName;
 	}
 
 	@Override
 	public String getBotToken() {
-		return Constants.BOT_TOKEN;
+		return botToken;
 	}
 
 	@Override
 	public void onUpdateReceived(Update update) {
 		// We check if the update has a message and the message has text
 		if (update.hasMessage() && update.getMessage().hasText()) {
-			// If message was more than 5 minutes before - skip message
-			long responseTime = Instant.now().getEpochSecond() - update.getMessage().getDate();
-			if (responseTime > 300) {
+			// If message timeout - skip message
+			if (isTimeout(update)) {
 				return;
 			}
-			
+
 			Long chatId = update.getMessage().getChatId();
 			String text = update.getMessage().getText();
-			
+
 			// Help
 			if (text.equalsIgnoreCase(HELP)) {
 				sendMessage(chatId, new HelpMessage());
@@ -80,7 +92,7 @@ public class Bot extends TelegramLongPollingBot {
 				sendMessage(chatId, MessageHelper.topTeams(count));
 			}
 			// Private message
-			if (StringUtils.startsWith(update.getMessage().getText(), "@" + Constants.BOT_NAME)) {
+			if (StringUtils.startsWith(update.getMessage().getText(), "@" + botName)) {
 				sendMessage(chatId, new BotMessage());
 			}
 		}
@@ -90,20 +102,18 @@ public class Bot extends TelegramLongPollingBot {
 			Long chatId = update.getCallbackQuery().getMessage().getChatId();
 			sendMessage(chatId, checkCallBack(update.getCallbackQuery()));
 			deleteMessage(chatId, update.getCallbackQuery().getMessage().getMessageId());
-			
+
 		}
 	}
-	
-	
+
 	private SendMessage checkCallBack(CallbackQuery callBack) {
-		long responseTime = Instant.now().getEpochSecond() - callBack.getMessage().getDate();
-		// If message was more than 5 minutes before - return only message
-		if (responseTime > 300) {
-			return new SendMessage().setText("Упс, ты слишком долго думал парень!");
+		// If message timeout - return only message
+		if (isTimeout(callBack)) {
+			return new SendMessage().setText(Constants.OOPS);
 		}
-		
+
 		String data = callBack.getData();
-		
+
 		if (data.equals(Constants.TOP_10)) {
 			return MessageHelper.topTeams(10);
 		}
@@ -130,7 +140,6 @@ public class Bot extends TelegramLongPollingBot {
 		}
 		return new SendMessage();
 	}
-	
 
 	private void sendMessage(Long chatId, SendMessage msg) {
 		msg.setChatId(chatId);
@@ -147,6 +156,40 @@ public class Bot extends TelegramLongPollingBot {
 		} catch (TelegramApiException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private boolean isTimeout(Object obj) {
+		Update update = null;
+		CallbackQuery callBack = null;
+
+		if (obj instanceof Update) {
+			update = (Update) obj;
+		}
+
+		if (obj instanceof CallbackQuery) {
+			callBack = (CallbackQuery) obj;
+		}
+
+		if (update != null) {
+			long responseTime = Instant.now().getEpochSecond() - update.getMessage().getDate();
+			if (responseTime > messageTimeout) {
+				return true;
+			}
+		}
+
+		if (callBack != null) {
+			long responseTime = Instant.now().getEpochSecond() - callBack.getMessage().getDate();
+			if (responseTime > messageTimeout) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Scheduled(cron = "${bot.scheduler.cron}")
+	private void todayMatchesScheduler() {
+		sendMessage(schedulerChatId, MessageHelper.matchesForToday());
+		sendMessage(schedulerChatId, MessageHelper.matches());
 	}
 
 }
