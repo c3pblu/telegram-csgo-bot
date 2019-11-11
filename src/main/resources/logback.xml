@@ -7,10 +7,10 @@
 	</appender>
 	<appender name="FILE"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>/opt/telegram-bot/bot.log</file>
+		<file>/opt/telegram-bot/logs/bot.log</file>
 		<rollingPolicy
 			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>/opt/telegram-bot/bot-%d{yyyy-MM-dd}.log</fileNamePattern>
+			<fileNamePattern>/opt/telegram-bot/logs/bot-%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
 		<encoder>

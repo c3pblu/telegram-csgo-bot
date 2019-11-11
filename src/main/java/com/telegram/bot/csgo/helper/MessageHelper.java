@@ -107,7 +107,6 @@ public final class MessageHelper {
 			int numMaps = maps.size();
 
 			for (int i = 0; i < numMaps; i++) {
-				StringBuilder mapsString = new StringBuilder();
 				String first = match.select("td.livescore").select("span[data-livescore-map=" + (i + 1) + "]").get(0)
 						.text();
 				String second = match.select("td.livescore").select("span[data-livescore-map=" + (i + 1) + "]").get(1)
@@ -120,12 +119,9 @@ public final class MessageHelper {
 						second = "<b>" + second + "</b>";
 					}
 				}
-
-				mapsString.append("<b>").append(maps.get(i).text()).append("</b>: ").append(first).append("-")
+				textMessage.append("<b>").append(maps.get(i).text()).append("</b>: ").append(first).append("-")
 						.append(second).append("\n");
-				textMessage.append(mapsString);
 			}
-
 			textMessage.append("\n");
 
 		}
@@ -210,9 +206,7 @@ public final class MessageHelper {
 
 	private static StringBuilder getStars(Element match) {
 		StringBuilder stars = new StringBuilder();
-		for (int j = 0; j < match.select("div.stars").select("i").size(); j++) {
-			stars.append(Constants.EMOJI_STAR);
-		}
+		match.select("div.stars").select("i").stream().forEach(star -> stars.append(Constants.EMOJI_STAR));
 		return stars;
 
 	}
