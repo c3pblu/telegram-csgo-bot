@@ -104,28 +104,28 @@ public class Bot extends TelegramLongPollingBot {
 
 		String data = callBack.getData();
 
-		if (data.equals(Constants.TOP_10)) {
+		if (data.equals(Constants.DATA_TOP_10)) {
 			return MessageHelper.topTeams(10);
 		}
-		if (data.equals(Constants.TOP_20)) {
+		if (data.equals(Constants.DATA_TOP_20)) {
 			return MessageHelper.topTeams(20);
 		}
-		if (data.equals(Constants.TOP_30)) {
+		if (data.equals(Constants.DATA_TOP_30)) {
 			return MessageHelper.topTeams(30);
 		}
-		if (data.equals(Constants.TOP_10_PLAYERS)) {
+		if (data.equals(Constants.DATA_TOP_10_PLAYERS)) {
 			return MessageHelper.topPlayers(10);
 		}
-		if (data.equals(Constants.TOP_20_PLAYERS)) {
+		if (data.equals(Constants.DATA_TOP_20_PLAYERS)) {
 			return MessageHelper.topPlayers(20);
 		}
-		if (data.equals(Constants.TOP_30_PLAYERS)) {
+		if (data.equals(Constants.DATA_TOP_30_PLAYERS)) {
 			return MessageHelper.topPlayers(30);
 		}
-		if (data.equals(Constants.MATCHES)) {
+		if (data.equals(Constants.DATA_MATCHES)) {
 			return MessageHelper.matches();
 		}
-		if (data.equals(Constants.RESULTS)) {
+		if (data.equals(Constants.DATA_RESULTS)) {
 			return MessageHelper.results();
 		}
 		return new SendMessage();
