@@ -203,6 +203,10 @@ public final class MessageHelper {
 	public static SendMessage matchesForToday() {
 		return new SendMessage().setText(Constants.MATCHES_FOR_TODAY);
 	}
+	
+	public static SendMessage resultsForToday() {
+		return new SendMessage().setText(Constants.RESULTS_FOR_TODAY);
+	}
 
 	private static StringBuilder getStars(Element match) {
 		StringBuilder stars = new StringBuilder();

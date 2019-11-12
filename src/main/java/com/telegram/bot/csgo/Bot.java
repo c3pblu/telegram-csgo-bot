@@ -186,10 +186,16 @@ public class Bot extends TelegramLongPollingBot {
 		return false;
 	}
 
-	@Scheduled(cron = "${bot.scheduler.cron}")
+	@Scheduled(cron = "${bot.scheduler.matches.cron}")
 	private void todayMatchesScheduler() {
 		sendMessage(schedulerChatId, MessageHelper.matchesForToday());
 		sendMessage(schedulerChatId, MessageHelper.matches());
+	}
+	
+	@Scheduled(cron = "${bot.scheduler.results.cron}")
+	private void todayResultsScheduler() {
+		sendMessage(schedulerChatId, MessageHelper.resultsForToday());
+		sendMessage(schedulerChatId, MessageHelper.results());
 	}
 
 }

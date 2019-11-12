@@ -14,6 +14,7 @@ public final class Constants {
 	public static final String RESULTS = "results";
 	public static final String OOPS = "Упс, ты слишком долго думал парень!";
 	public static final String MATCHES_FOR_TODAY = "Матчи на сегодня:";
+	public static final String RESULTS_FOR_TODAY = "Результаты за сегодня:";
 	public final static String USER_AGENT_NAME = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
 	public final static String HLTV = "https://www.hltv.org";
 	public final static String HTML = "html";
@@ -30,6 +31,7 @@ public final class Constants {
 	public final static String EMOJI_MIL_MEDAL = EmojiParser.parseToUnicode(":military_medal:");
 	public final static String EMOJI_SPORT_MEDAL = EmojiParser.parseToUnicode(":sports_medal:");
 	public final static String EMOJI_STAR = EmojiParser.parseToUnicode(":star:");
+	public final static String EMOJI_HEAVY_CHECK_MARK = EmojiParser.parseToUnicode(":heavy_check_mark:");
 	
 	private Constants() {
 	}
