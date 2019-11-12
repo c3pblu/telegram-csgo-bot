@@ -16,14 +16,14 @@ public class MenuMessage extends SendMessage {
 	private static final List<InlineKeyboardButton> ROW_3 = new ArrayList<>();
 	
 	static {
-		ROW_1.add(new InlineKeyboardButton().setText(Constants.EMOJI_FIRE + " Матчи").setCallbackData(Constants.MATCHES));
-		ROW_1.add(new InlineKeyboardButton().setText(Constants.EMOJI_CUP + " Результаты").setCallbackData(Constants.RESULTS));
-		ROW_2.add(new InlineKeyboardButton().setText(Constants.EMOJI_MIL_MEDAL + "Топ 10").setCallbackData(Constants.TOP_10));
-		ROW_2.add(new InlineKeyboardButton().setText(Constants.EMOJI_MIL_MEDAL + "Топ 20").setCallbackData(Constants.TOP_20));
-		ROW_2.add(new InlineKeyboardButton().setText(Constants.EMOJI_MIL_MEDAL + "Топ 30").setCallbackData(Constants.TOP_30));
-		ROW_3.add(new InlineKeyboardButton().setText(Constants.EMOJI_SPORT_MEDAL + "Топ 10 Игроков").setCallbackData(Constants.TOP_10_PLAYERS));
-		ROW_3.add(new InlineKeyboardButton().setText(Constants.EMOJI_SPORT_MEDAL + "Топ 20 Игроков").setCallbackData(Constants.TOP_20_PLAYERS));
-		ROW_3.add(new InlineKeyboardButton().setText(Constants.EMOJI_SPORT_MEDAL + "Топ 30 Игроков").setCallbackData(Constants.TOP_30_PLAYERS));
+		ROW_1.add(new InlineKeyboardButton().setText(Constants.EMOJI_FIRE + " Матчи").setCallbackData(Constants.DATA_MATCHES));
+		ROW_1.add(new InlineKeyboardButton().setText(Constants.EMOJI_CUP + " Результаты").setCallbackData(Constants.DATA_RESULTS));
+		ROW_2.add(new InlineKeyboardButton().setText(Constants.EMOJI_MIL_MEDAL + "Топ 10").setCallbackData(Constants.DATA_TOP_10));
+		ROW_2.add(new InlineKeyboardButton().setText(Constants.EMOJI_MIL_MEDAL + "Топ 20").setCallbackData(Constants.DATA_TOP_20));
+		ROW_2.add(new InlineKeyboardButton().setText(Constants.EMOJI_MIL_MEDAL + "Топ 30").setCallbackData(Constants.DATA_TOP_30));
+		ROW_3.add(new InlineKeyboardButton().setText(Constants.EMOJI_SPORT_MEDAL + "Топ 10 Игроков").setCallbackData(Constants.DATA_TOP_10_PLAYERS));
+		ROW_3.add(new InlineKeyboardButton().setText(Constants.EMOJI_SPORT_MEDAL + "Топ 20 Игроков").setCallbackData(Constants.DATA_TOP_20_PLAYERS));
+		ROW_3.add(new InlineKeyboardButton().setText(Constants.EMOJI_SPORT_MEDAL + "Топ 30 Игроков").setCallbackData(Constants.DATA_TOP_30_PLAYERS));
 		ROWS_IN_LINE.add(ROW_1);
 		ROWS_IN_LINE.add(ROW_2);
 		ROWS_IN_LINE.add(ROW_3);

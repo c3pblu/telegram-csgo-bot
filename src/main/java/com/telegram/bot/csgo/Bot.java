@@ -31,17 +31,6 @@ public class Bot extends TelegramLongPollingBot {
 	@Value(value = "${bot.message.timeout}")
 	private Long messageTimeout;
 
-	private static final String HELP = ".хелп";
-	private static final String MENU = ".меню";
-	private static final String MATCHES = ".матчи";
-	private static final String RESULTS = ".результаты";
-	private static final String TOP_10 = ".топ10";
-	private static final String TOP_20 = ".топ20";
-	private static final String TOP_30 = ".топ30";
-	private static final String TOP_10_PLAYERS = ".топ10игроков";
-	private static final String TOP_20_PLAYERS = ".топ20игроков";
-	private static final String TOP_30_PLAYERS = ".топ30игроков";
-
 	@Override
 	public String getBotUsername() {
 		return botName;
@@ -65,29 +54,30 @@ public class Bot extends TelegramLongPollingBot {
 			String text = update.getMessage().getText();
 
 			// Help
-			if (text.equalsIgnoreCase(HELP)) {
+			if (text.equalsIgnoreCase(Constants.HELP)) {
 				sendMessage(chatId, new HelpMessage());
 			}
 			// Menu
-			if (text.equalsIgnoreCase(MENU)) {
+			if (text.equalsIgnoreCase(Constants.MENU)) {
 				sendMessage(chatId, new MenuMessage());
 			}
 			// Matches
-			if (text.equalsIgnoreCase(MATCHES)) {
+			if (text.equalsIgnoreCase(Constants.MATCHES)) {
 				sendMessage(chatId, MessageHelper.matches());
 			}
 			// Results
-			if (text.equalsIgnoreCase(RESULTS)) {
+			if (text.equalsIgnoreCase(Constants.RESULTS)) {
 				sendMessage(chatId, MessageHelper.results());
 			}
 			// Top Players
-			if (text.equalsIgnoreCase(TOP_10_PLAYERS) || text.equalsIgnoreCase(TOP_20_PLAYERS)
-					|| text.equalsIgnoreCase(TOP_30_PLAYERS)) {
+			if (text.equalsIgnoreCase(Constants.TOP_10_PLAYERS) || text.equalsIgnoreCase(Constants.TOP_20_PLAYERS)
+					|| text.equalsIgnoreCase(Constants.TOP_30_PLAYERS)) {
 				Integer count = Integer.parseInt(text.substring(4, 6));
 				sendMessage(chatId, MessageHelper.topPlayers(count));
 			}
 			// Top Teams
-			if (text.equalsIgnoreCase(TOP_10) || text.equalsIgnoreCase(TOP_20) || text.equalsIgnoreCase(TOP_30)) {
+			if (text.equalsIgnoreCase(Constants.TOP_10) || text.equalsIgnoreCase(Constants.TOP_20)
+					|| text.equalsIgnoreCase(Constants.TOP_30)) {
 				Integer count = Integer.parseInt(update.getMessage().getText().substring(4));
 				sendMessage(chatId, MessageHelper.topTeams(count));
 			}
@@ -191,7 +181,7 @@ public class Bot extends TelegramLongPollingBot {
 		sendMessage(schedulerChatId, MessageHelper.matchesForToday());
 		sendMessage(schedulerChatId, MessageHelper.matches());
 	}
-	
+
 	@Scheduled(cron = "${bot.scheduler.results.cron}")
 	private void todayResultsScheduler() {
 		sendMessage(schedulerChatId, MessageHelper.resultsForToday());
