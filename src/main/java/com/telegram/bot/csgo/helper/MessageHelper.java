@@ -97,9 +97,10 @@ public final class MessageHelper {
 			}
 
 			textMessage.append(Constants.EMOJI_CUP).append(" <b>").append(match.select("div.event-name").text())
-					.append("\n").append("</b>").append(unlinkName(match.select("span.team-name").get(0).text()))
-					.append(" ").append(Constants.EMOJI_VS).append(" ")
-					.append(unlinkName(match.select("span.team-name").get(1).text())).append(" (")
+					.append("\n").append("</b>")
+					.append(favoriteTeam(match.select("span.team-name").get(0).text(), false)).append(" ")
+					.append(Constants.EMOJI_VS).append(" ")
+					.append(favoriteTeam(match.select("span.team-name").get(1).text(), false)).append(" (")
 					.append(match.select("tr.header").select("td.bestof").text()).append(") ").append(getStars(match))
 					.append("\n");
 
@@ -135,11 +136,12 @@ public final class MessageHelper {
 			LocalDateTime localTime = LocalDateTime.ofEpochSecond((unixTime / 1000) + 10800, 0, ZoneOffset.UTC);
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH);
 			String formattedTime = localTime.format(formatter);
-			textMessage.append(formattedTime).append(" - ");
+			textMessage.append("<b>").append(formattedTime).append("</b> - ");
 
 			if (!match.select("div.line-align").isEmpty()) {
-				textMessage.append(favoriteTeam(match.select("td.team-cell").get(0).text(), false)).append(" vs ")
-						.append(favoriteTeam(match.select("td.team-cell").get(1).text(), false)).append(" (")
+				textMessage.append(favoriteTeam(match.select("td.team-cell").get(0).text(), true)).append(" ")
+						.append(Constants.EMOJI_VS).append(" ")
+						.append(favoriteTeam(match.select("td.team-cell").get(1).text(), true)).append(" (")
 						.append(match.select("div.map-text").text()).append(") ").append(getStars(match))
 						.append(Constants.EMOJI_SQUARE).append(" ").append(match.select("td.event").text())
 						.append("\n");
@@ -171,8 +173,8 @@ public final class MessageHelper {
 			for (Element resultCon : resultList.select("div.result-con")) {
 				Element team1 = resultCon.select("div.team").get(0);
 				Element team2 = resultCon.select("div.team").get(1);
-				String team1String = favoriteTeam(resultCon.select("div.team").get(0).text(), true);
-				String team2String = favoriteTeam(resultCon.select("div.team").get(1).text(), true);
+				String team1String = favoriteTeam(resultCon.select("div.team").get(0).text(), false);
+				String team2String = favoriteTeam(resultCon.select("div.team").get(1).text(), false);
 
 				if (team1.hasClass("team-won")) {
 					textMessage.append("<b>").append(team1String).append("</b>");
@@ -203,7 +205,7 @@ public final class MessageHelper {
 	public static SendMessage matchesForToday() {
 		return new SendMessage().setText(Constants.MATCHES_FOR_TODAY);
 	}
-	
+
 	public static SendMessage resultsForToday() {
 		return new SendMessage().setText(Constants.RESULTS_FOR_TODAY);
 	}
@@ -239,10 +241,10 @@ public final class MessageHelper {
 		return name;
 	}
 
-	private static String favoriteTeam(String name, boolean isResult) {
+	private static String favoriteTeam(String name, boolean isBold) {
 		name = unlinkName(name);
 		if (FavoriteTeams.isFavorite(name)) {
-			if (isResult == true) {
+			if (!isBold) {
 				name = FavoriteTeams.getFlag(name) + name;
 			} else {
 				name = FavoriteTeams.getFlag(name) + "<b>" + name + "</b>";

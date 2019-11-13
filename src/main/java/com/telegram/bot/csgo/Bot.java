@@ -3,6 +3,7 @@ package com.telegram.bot.csgo;
 import java.time.Instant;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,9 @@ import com.telegram.bot.csgo.model.MenuMessage;
 
 @Component
 public class Bot extends TelegramLongPollingBot {
+	
+	@Autowired
+	private BotMessage botMessage;
 
 	@Value(value = "${bot.name}")
 	private String botName;
@@ -83,7 +87,7 @@ public class Bot extends TelegramLongPollingBot {
 			}
 			// Private message
 			if (StringUtils.startsWith(update.getMessage().getText(), "@" + botName)) {
-				sendMessage(chatId, new BotMessage());
+				sendMessage(chatId, botMessage.sendBotMessage());
 			}
 		}
 
