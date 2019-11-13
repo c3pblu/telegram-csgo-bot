@@ -25,7 +25,7 @@ public final class Constants {
 	public static final String TOP_30_PLAYERS = ".топ30игроков";
 	
 	public static final String OOPS = "Упс, ты слишком долго думал парень!";
-	public static final String MATCHES_FOR_TODAY = "Ближайште матчи:";
+	public static final String MATCHES_FOR_TODAY = "Ближайшие матчи:";
 	public static final String RESULTS_FOR_TODAY = "Последние результаты:";
 	public final static String USER_AGENT_NAME = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
 	public final static String HLTV = "https://www.hltv.org";
