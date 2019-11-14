@@ -89,7 +89,7 @@ public class Bot extends TelegramLongPollingBot {
 			}
 			// Private message
 			if (StringUtils.startsWith(update.getMessage().getText(), "@" + botName)) {
-				sendMessage(chatId, botMessages.sendBotMessage());
+				sendMessage(chatId, messages.cite());
 			}
 		}
 

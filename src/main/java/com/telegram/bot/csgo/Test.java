@@ -20,7 +20,7 @@ import java.util.Locale;
 public class Test {
     public static void main(String args[]) throws IOException {
         HttpClient client = new HttpClient();
-        GetMethod get = new GetMethod("https://www.hltv.org/matches");
+        GetMethod get = new GetMethod("https://api.forismatic.com/api/1.0/?method=getQuote&format=html&lang=ru");
         get.setFollowRedirects(true);
         get.setRequestHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36");
         client.executeMethod(get);
@@ -29,12 +29,8 @@ public class Test {
         Document doc = Jsoup.parse(response);
         StringBuilder textMessage = new StringBuilder();
 
-        Element matchDay = doc.select("div.match-day").first();
-        
-        for (Element a : matchDay.select("a")) {
-        	System.out.println(a.attr("href"));
-        }
-        
+        System.out.println(doc.select("cite").text());
+        System.out.println(doc.select("small").text());
 
     }
 }

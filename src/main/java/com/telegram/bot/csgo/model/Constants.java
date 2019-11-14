@@ -29,6 +29,7 @@ public final class Constants {
 	public static final String RESULTS_FOR_TODAY = "Последние результаты:";
 	public final static String USER_AGENT_NAME = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
 	public final static String HLTV = "https://www.hltv.org";
+	public final static String CITES = "https://api.forismatic.com/api/1.0/?method=getQuote&format=html&lang=ru";
 	public final static String HTML = "html";
 	public final static String EXCEPTION_MSG = "Can't get data from site";
 	

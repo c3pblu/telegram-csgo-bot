@@ -10,6 +10,7 @@ import java.util.Locale;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -27,7 +28,7 @@ public class MessageBuilder {
 	private static final HttpClient client = new HttpClient();
 
 	public SendMessage topTeams(Integer count) {
-		Document doc = getDocument("/ranking/teams");
+		Document doc = getDocument(Constants.HLTV + "/ranking/teams");
 		Elements header = doc.select("div.regional-ranking-header");
 		Elements rankedTeams = doc.select("div.ranked-team");
 		StringBuilder textMessage = new StringBuilder();
@@ -56,7 +57,7 @@ public class MessageBuilder {
 
 	public SendMessage topPlayers(Integer count) {
 		String year = String.valueOf(LocalDate.now().getYear());
-		Document doc = getDocument("/stats/players?startDate=" + year + "-01-01&endDate=" + year + "-12-31");
+		Document doc = getDocument(Constants.HLTV + "/stats/players?startDate=" + year + "-01-01&endDate=" + year + "-12-31");
 		Elements rows = doc.select("tr");
 		StringBuilder textMessage = new StringBuilder();
 		textMessage.append("<b>CS:GO World Top Players ").append(year).append("</b>\n\n").append("<b>")
@@ -83,7 +84,7 @@ public class MessageBuilder {
 	}
 
 	public SendMessage matches() {
-		Document doc = getDocument("/matches");
+		Document doc = getDocument(Constants.HLTV + "/matches");
 		StringBuilder textMessage = new StringBuilder();
 		if (doc.select("div.live-match").size() > 1) {
 			textMessage.append("<b>Live matches</b>").append(Constants.EMOJI_EXCL_MARK).append("\n");
@@ -155,7 +156,7 @@ public class MessageBuilder {
 	}
 
 	public SendMessage results() {
-		Document doc = getDocument("/results");
+		Document doc = getDocument(Constants.HLTV + "/results");
 		StringBuilder textMessage = new StringBuilder();
 		Elements subLists = doc.select("div.results-sublist");
 		for (Element resultList : subLists) {
@@ -200,6 +201,18 @@ public class MessageBuilder {
 
 		return new TextMessage(textMessage.toString());
 	}
+	
+	public SendMessage cite() {
+		Document doc = getDocument(Constants.CITES);
+		StringBuilder text = new StringBuilder();
+		text.append(doc.select("cite").text());
+		String athor = doc.select("small").text();
+		if (!StringUtils.isEmpty(athor)) {
+			text.append("\n<b>").append(athor).append("</b>");
+		}
+		
+		return new TextMessage(text.toString());
+	}
 
 	public SendMessage matchesForToday() {
 		return new SendMessage().setText(Constants.MATCHES_FOR_TODAY);
@@ -218,7 +231,7 @@ public class MessageBuilder {
 
 	private Document getDocument(String uri) {
 		try {
-			GetMethod get = new GetMethod(Constants.HLTV + uri);
+			GetMethod get = new GetMethod(uri);
 			get.setFollowRedirects(true);
 			get.setRequestHeader(HttpHeaders.USER_AGENT, Constants.USER_AGENT_NAME);
 			client.executeMethod(get);
