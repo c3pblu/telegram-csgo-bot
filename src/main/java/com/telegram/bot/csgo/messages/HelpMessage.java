@@ -1,6 +1,8 @@
-package com.telegram.bot.csgo.model;
+package com.telegram.bot.csgo.messages;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+
+import com.telegram.bot.csgo.model.Constants;
 
 public class HelpMessage extends SendMessage {
 	

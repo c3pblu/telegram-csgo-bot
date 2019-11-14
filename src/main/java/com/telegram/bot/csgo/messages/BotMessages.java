@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.model;
+package com.telegram.bot.csgo.messages;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 @Component
-public class BotMessage {
+public class BotMessages {
 
 	private ArrayList<String> messages = new ArrayList<>();
 	private ArrayList<String> lastMessage = new ArrayList<>();

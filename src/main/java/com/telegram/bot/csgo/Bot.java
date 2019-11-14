@@ -14,17 +14,19 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import com.telegram.bot.csgo.helper.MessageHelper;
-import com.telegram.bot.csgo.model.BotMessage;
+import com.telegram.bot.csgo.messages.BotMessages;
+import com.telegram.bot.csgo.messages.HelpMessage;
+import com.telegram.bot.csgo.messages.MenuMessage;
+import com.telegram.bot.csgo.messages.MessageBuilder;
 import com.telegram.bot.csgo.model.Constants;
-import com.telegram.bot.csgo.model.HelpMessage;
-import com.telegram.bot.csgo.model.MenuMessage;
 
 @Component
 public class Bot extends TelegramLongPollingBot {
 	
 	@Autowired
-	private BotMessage botMessage;
+	private BotMessages botMessages;
+	@Autowired
+	private MessageBuilder messages;
 
 	@Value(value = "${bot.name}")
 	private String botName;
@@ -67,27 +69,27 @@ public class Bot extends TelegramLongPollingBot {
 			}
 			// Matches
 			if (text.equalsIgnoreCase(Constants.MATCHES)) {
-				sendMessage(chatId, MessageHelper.matches());
+				sendMessage(chatId, messages.matches());
 			}
 			// Results
 			if (text.equalsIgnoreCase(Constants.RESULTS)) {
-				sendMessage(chatId, MessageHelper.results());
+				sendMessage(chatId, messages.results());
 			}
 			// Top Players
 			if (text.equalsIgnoreCase(Constants.TOP_10_PLAYERS) || text.equalsIgnoreCase(Constants.TOP_20_PLAYERS)
 					|| text.equalsIgnoreCase(Constants.TOP_30_PLAYERS)) {
 				Integer count = Integer.parseInt(text.substring(4, 6));
-				sendMessage(chatId, MessageHelper.topPlayers(count));
+				sendMessage(chatId, messages.topPlayers(count));
 			}
 			// Top Teams
 			if (text.equalsIgnoreCase(Constants.TOP_10) || text.equalsIgnoreCase(Constants.TOP_20)
 					|| text.equalsIgnoreCase(Constants.TOP_30)) {
 				Integer count = Integer.parseInt(update.getMessage().getText().substring(4));
-				sendMessage(chatId, MessageHelper.topTeams(count));
+				sendMessage(chatId, messages.topTeams(count));
 			}
 			// Private message
 			if (StringUtils.startsWith(update.getMessage().getText(), "@" + botName)) {
-				sendMessage(chatId, botMessage.sendBotMessage());
+				sendMessage(chatId, botMessages.sendBotMessage());
 			}
 		}
 
@@ -109,28 +111,28 @@ public class Bot extends TelegramLongPollingBot {
 		String data = callBack.getData();
 
 		if (data.equals(Constants.DATA_TOP_10)) {
-			return MessageHelper.topTeams(10);
+			return messages.topTeams(10);
 		}
 		if (data.equals(Constants.DATA_TOP_20)) {
-			return MessageHelper.topTeams(20);
+			return messages.topTeams(20);
 		}
 		if (data.equals(Constants.DATA_TOP_30)) {
-			return MessageHelper.topTeams(30);
+			return messages.topTeams(30);
 		}
 		if (data.equals(Constants.DATA_TOP_10_PLAYERS)) {
-			return MessageHelper.topPlayers(10);
+			return messages.topPlayers(10);
 		}
 		if (data.equals(Constants.DATA_TOP_20_PLAYERS)) {
-			return MessageHelper.topPlayers(20);
+			return messages.topPlayers(20);
 		}
 		if (data.equals(Constants.DATA_TOP_30_PLAYERS)) {
-			return MessageHelper.topPlayers(30);
+			return messages.topPlayers(30);
 		}
 		if (data.equals(Constants.DATA_MATCHES)) {
-			return MessageHelper.matches();
+			return messages.matches();
 		}
 		if (data.equals(Constants.DATA_RESULTS)) {
-			return MessageHelper.results();
+			return messages.results();
 		}
 		return new SendMessage();
 	}
@@ -182,14 +184,14 @@ public class Bot extends TelegramLongPollingBot {
 
 	@Scheduled(cron = "${bot.scheduler.matches.cron}")
 	private void todayMatchesScheduler() {
-		sendMessage(schedulerChatId, MessageHelper.matchesForToday());
-		sendMessage(schedulerChatId, MessageHelper.matches());
+		sendMessage(schedulerChatId, messages.matchesForToday());
+		sendMessage(schedulerChatId, messages.matches());
 	}
 
 	@Scheduled(cron = "${bot.scheduler.results.cron}")
 	private void todayResultsScheduler() {
-		sendMessage(schedulerChatId, MessageHelper.resultsForToday());
-		sendMessage(schedulerChatId, MessageHelper.results());
+		sendMessage(schedulerChatId, messages.resultsForToday());
+		sendMessage(schedulerChatId, messages.results());
 	}
 
 }
