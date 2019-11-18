@@ -18,6 +18,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -29,295 +31,307 @@ import com.telegram.bot.csgo.twitch.Streams;
 @Component
 public class MessageBuilder {
 
-    private static final HttpClient client = new HttpClient();
-    @Value("${twitch.client.id}")
-    private String clientId;
+	private static final Logger LOGGER = LoggerFactory.getLogger(MessageBuilder.class);
 
-    public SendMessage topTeams(Integer count) {
-        Document doc = getDocument(Constants.HLTV + "/ranking/teams");
-        Elements header = doc.select("div.regional-ranking-header");
-        Elements rankedTeams = doc.select("div.ranked-team");
-        StringBuilder textMessage = new StringBuilder();
-        textMessage.append("<b>").append(header.text()).append("</b>\n\n");
-        for (Element team : rankedTeams) {
-            if (team.select("span.position").text().equals("#" + (count + 1))) {
-                break;
-            }
-            StringBuilder row = new StringBuilder();
-            row.append("<a href=\'").append(team.select("div.ranking-header").select("img").attr("src"))
-                    .append("\'></a>").append("<b>").append(team.select("span.position").text()).append("</b> (")
-                    .append(team.select("div.change").text()).append(") ").append("<a href=\'https://hltv.org")
-                    .append(team.select("div.more").select("a[class=details moreLink]").attr("href")).append("\'>")
-                    .append(team.select("span.name").text()).append("</a> ").append(team.select("span.points").text())
-                    .append(" [");
-            ArrayList<String> listPlayers = new ArrayList<>();
-            for (Element player : team.select("div.rankingNicknames")) {
-                listPlayers.add(player.text());
-            }
-            row.append(String.join(", ", listPlayers)).append("]\n");
-            textMessage.append(row);
-        }
+	private static final HttpClient CLIENT = new HttpClient();
+	@Value("${twitch.client.id}")
+	private String clientId;
 
-        return new TextMessage(textMessage);
-    }
+	public SendMessage topTeams(Integer count) {
+		Document doc = getDocument(Constants.HLTV + "/ranking/teams");
+		Elements header = doc.select("div.regional-ranking-header");
+		Elements rankedTeams = doc.select("div.ranked-team");
+		StringBuilder textMessage = new StringBuilder();
+		textMessage.append(Constants.EMOJI_MIL_MEDAL).append("<b>").append(header.text()).append("</b>\n");
+		for (Element team : rankedTeams) {
+			if (team.select("span.position").text().equals("#" + (count + 1))) {
+				break;
+			}
+			StringBuilder row = new StringBuilder();
+			row.append("<a href=\'").append(team.select("div.ranking-header").select("img").attr("src"))
+					.append("\'></a>").append("<b>").append(team.select("span.position").text()).append("</b> (")
+					.append(team.select("div.change").text()).append(") ").append("<a href=\'https://hltv.org")
+					.append(team.select("div.more").select("a[class=details moreLink]").attr("href")).append("\'>")
+					.append(team.select("span.name").text()).append("</a> ").append(team.select("span.points").text())
+					.append(" [");
+			ArrayList<String> listPlayers = new ArrayList<>();
+			for (Element player : team.select("div.rankingNicknames")) {
+				listPlayers.add(player.text());
+			}
+			row.append(String.join(", ", listPlayers)).append("]\n");
+			textMessage.append(row);
+		}
 
-    public SendMessage topPlayers(Integer count) {
-        String year = String.valueOf(LocalDate.now().getYear());
-        Document doc = getDocument(Constants.HLTV + "/stats/players?startDate=" + year + "-01-01&endDate=" + year + "-12-31");
-        Elements rows = doc.select("tr");
-        StringBuilder textMessage = new StringBuilder();
-        textMessage.append("<b>CS:GO World Top Players ").append(year).append("</b>\n\n").append("<b>")
-                .append(doc.select("tr.stats-table-row").text()).append("</b>\n");
-        int number = 1;
-        for (Element value : rows) {
-            if (value.select("td.statsDetail").first() == null) {
-                continue;
-            }
-            if (number > count) {
-                break;
-            }
-            textMessage.append("<b>#").append(number).append("</b> <a href=\'https://hltv.org")
-                    .append(value.select("td.playerCol").select("a").attr("href")).append("\'>")
-                    .append(value.select("td.playerCol").text()).append("</a>, ")
-                    .append(value.select("td.teamCol").select("img").attr("title")).append(", ")
-                    .append(value.select("td.statsDetail").get(0).text()).append(", ")
-                    .append(value.select("td.kdDiffCol").text()).append(", ")
-                    .append(value.select("td.statsDetail").get(1).text()).append(", ")
-                    .append(value.select("td.ratingCol").text()).append("\n");
-            number++;
-        }
-        return new TextMessage(textMessage);
-    }
+		LOGGER.debug("TopTeams final message:\n{}", textMessage.toString());
 
-    public SendMessage matches() {
-        Document doc = getDocument(Constants.HLTV + "/matches");
-        StringBuilder textMessage = new StringBuilder();
-        if (doc.select("div.live-match").size() > 1) {
-            textMessage.append("<b>Live matches</b>").append(Constants.EMOJI_EXCL_MARK).append("\n");
-        }
+		return new TextMessage(textMessage);
+	}
 
-        for (Element match : doc.select("div.live-match")) {
-            if (match.text().isEmpty()) {
-                continue;
-            }
+	public SendMessage topPlayers(Integer count) {
+		String year = String.valueOf(LocalDate.now().getYear());
+		Document doc = getDocument(
+				Constants.HLTV + "/stats/players?startDate=" + year + "-01-01&endDate=" + year + "-12-31");
+		Elements rows = doc.select("tr");
+		StringBuilder textMessage = new StringBuilder();
+		textMessage.append(Constants.EMOJI_SPORT_MEDAL).append("<b>CS:GO World Top Players ").append(year).append("</b>\n").append("<b>");
+		Elements stat = doc.select("tr.stats-table-row").select("th");
+		for (int i = 0; i < stat.size(); i++) {
+			if (i != stat.size() - 1) {
+				textMessage.append(stat.get(i).text().replace("Teams", "Team")).append(", ");
+			} else {
+				textMessage.append(stat.get(i).text());
+			}
+		}
+		textMessage.append("</b>\n");
+		int number = 1;
+		for (Element value : rows) {
+			if (value.select("td.statsDetail").first() == null) {
+				continue;
+			}
+			if (number > count) {
+				break;
+			}
+			textMessage.append("<b>#").append(number).append("</b> <a href=\'https://hltv.org")
+					.append(value.select("td.playerCol").select("a").attr("href")).append("\'>")
+					.append(value.select("td.playerCol").text()).append("</a>, ")
+					.append(value.select("td.teamCol").select("img").attr("title")).append(", ")
+					.append(value.select("td.statsDetail").get(0).text()).append(", ")
+					.append(value.select("td.kdDiffCol").text()).append(", ")
+					.append(value.select("td.statsDetail").get(1).text()).append(", ")
+					.append(value.select("td.ratingCol").text()).append("\n");
+			number++;
+		}
+		LOGGER.debug("TopPlayers final message:\n{}", textMessage.toString());
+		return new TextMessage(textMessage);
+	}
 
-            textMessage.append(Constants.EMOJI_CUP).append("<a href=\'https://hltv.org")
-                    .append(match.select("a").attr("href")).append("\'>").append(match.select("div.event-name").text())
-                    .append("</a>\n").append(favoriteTeam(match.select("span.team-name").get(0).text(), false))
-                    .append(" ").append(Constants.EMOJI_VS).append(" ")
-                    .append(favoriteTeam(match.select("span.team-name").get(1).text(), false)).append(" (")
-                    .append(match.select("tr.header").select("td.bestof").text()).append(") ").append(getStars(match))
-                    .append("\n");
+	public SendMessage matches() {
+		Document doc = getDocument(Constants.HLTV + "/matches");
+		StringBuilder textMessage = new StringBuilder();
+		if (doc.select("div.live-match").size() > 1) {
+			textMessage.append("<b>Live matches</b>").append(Constants.EMOJI_EXCL_MARK).append("\n");
+		}
 
-            Elements maps = match.select("tr.header").select("td.map");
-            int numMaps = maps.size();
+		for (Element match : doc.select("div.live-match")) {
+			if (match.text().isEmpty()) {
+				continue;
+			}
 
-            for (int i = 0; i < numMaps; i++) {
-                String first = match.select("td.livescore").select("span[data-livescore-map=" + (i + 1) + "]").get(0)
-                        .text();
-                String second = match.select("td.livescore").select("span[data-livescore-map=" + (i + 1) + "]").get(1)
-                        .text();
+			textMessage.append(Constants.EMOJI_CUP).append("<a href=\'https://hltv.org")
+					.append(match.select("a").attr("href")).append("\'>").append(match.select("div.event-name").text())
+					.append("</a>\n").append(favoriteTeam(match.select("span.team-name").get(0).text(), false))
+					.append(" ").append(Constants.EMOJI_VS).append(" ")
+					.append(favoriteTeam(match.select("span.team-name").get(1).text(), false)).append(" (")
+					.append(match.select("tr.header").select("td.bestof").text()).append(") ").append(getStars(match))
+					.append("\n");
 
-                if (!(first.equals("-") || second.equals("-"))) {
-                    if (Integer.parseInt(first) > Integer.parseInt(second)) {
-                        first = "<b>" + first + "</b>";
-                    } else if (Integer.parseInt(first) < Integer.parseInt(second)) {
-                        second = "<b>" + second + "</b>";
-                    }
-                }
-                textMessage.append("<b>").append(maps.get(i).text()).append("</b>: ").append(first).append("-")
-                        .append(second).append("\n");
-            }
-            textMessage.append("\n");
+			Elements maps = match.select("tr.header").select("td.map");
+			int numMaps = maps.size();
 
-        }
+			for (int i = 0; i < numMaps; i++) {
+				String first = match.select("td.livescore").select("span[data-livescore-map=" + (i + 1) + "]").get(0)
+						.text();
+				String second = match.select("td.livescore").select("span[data-livescore-map=" + (i + 1) + "]").get(1)
+						.text();
 
-        textMessage.append("<b>Upcoming CS:GO matches\n");
-        Element matchDay = doc.select("div.match-day").first();
-        textMessage.append(matchDay.select("span.standard-headline").text()).append("</b>\n");
+				if (!(first.equals("-") || second.equals("-"))) {
+					if (Integer.parseInt(first) > Integer.parseInt(second)) {
+						first = "<b>" + first + "</b>";
+					} else if (Integer.parseInt(first) < Integer.parseInt(second)) {
+						second = "<b>" + second + "</b>";
+					}
+				}
+				textMessage.append("<b>").append(maps.get(i).text()).append("</b>: ").append(first).append("-")
+						.append(second).append("\n");
+			}
+			textMessage.append("\n");
 
-        for (Element match : matchDay.select("a")) {
-            long unixTime = Long.parseLong(match.select("div.time").attr("data-unix"));
-            LocalDateTime localTime = LocalDateTime.ofEpochSecond((unixTime / 1000) + 10800, 0, ZoneOffset.UTC);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH);
-            String formattedTime = localTime.format(formatter);
-            textMessage.append("<b>").append(formattedTime).append("</b> - ");
+		}
 
-            if (!match.select("div.line-align").isEmpty()) {
-                textMessage.append(favoriteTeam(match.select("td.team-cell").get(0).text(), true)).append(" ")
-                        .append(Constants.EMOJI_VS).append(" ")
-                        .append(favoriteTeam(match.select("td.team-cell").get(1).text(), true)).append(" (")
-                        .append(match.select("div.map-text").text()).append(") ").append(getStars(match))
-                        .append(Constants.EMOJI_SQUARE).append(" ").append("<a href=\'https://hltv.org")
-                        .append(match.select("a").attr("href")).append("\'>").append(match.select("td.event").text())
-                        .append("</a>\n");
+		textMessage.append("<b>Upcoming CS:GO matches\n");
+		Element matchDay = doc.select("div.match-day").first();
+		textMessage.append(matchDay.select("span.standard-headline").text()).append("</b>\n");
 
-            } else {
-                textMessage.append(match.select("td.placeholder-text-cell").text()).append("\n");
-            }
-        }
+		for (Element match : matchDay.select("a")) {
+			long unixTime = Long.parseLong(match.select("div.time").attr("data-unix"));
+			LocalDateTime localTime = LocalDateTime.ofEpochSecond((unixTime / 1000) + 10800, 0, ZoneOffset.UTC);
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH);
+			String formattedTime = localTime.format(formatter);
+			textMessage.append("<b>").append(formattedTime).append("</b> - ");
 
-        return new TextMessage(textMessage);
+			if (!match.select("div.line-align").isEmpty()) {
+				textMessage.append(favoriteTeam(match.select("td.team-cell").get(0).text(), true)).append(" ")
+						.append(Constants.EMOJI_VS).append(" ")
+						.append(favoriteTeam(match.select("td.team-cell").get(1).text(), true)).append(" (")
+						.append(match.select("div.map-text").text()).append(") ").append(getStars(match))
+						.append(Constants.EMOJI_SQUARE).append(" ").append("<a href=\'https://hltv.org")
+						.append(match.select("a").attr("href")).append("\'>").append(match.select("td.event").text())
+						.append("</a>\n");
 
-    }
+			} else {
+				textMessage.append(match.select("td.placeholder-text-cell").text()).append("\n");
+			}
+		}
 
-    public SendMessage results() {
-        Document doc = getDocument(Constants.HLTV + "/results");
-        StringBuilder textMessage = new StringBuilder();
-        Elements subLists = doc.select("div.results-sublist");
-        for (Element resultList : subLists) {
-            String headerText = resultList.select("span.standard-headline").text();
-            if (headerText.isEmpty()) {
-                headerText = "Featured Results";
-            }
+		LOGGER.debug("Matches final message:\n{}", textMessage.toString());
+		return new TextMessage(textMessage);
 
-            textMessage.append(Constants.EMOJI_CUP).append(" <b>").append(headerText).append("</b>\n");
+	}
 
-            for (Element resultCon : resultList.select("div.result-con")) {
-                Element team1 = resultCon.select("div.team").get(0);
-                Element team2 = resultCon.select("div.team").get(1);
-                String team1String = favoriteTeam(resultCon.select("div.team").get(0).text(), false);
-                String team2String = favoriteTeam(resultCon.select("div.team").get(1).text(), false);
+	public SendMessage results() {
+		Document doc = getDocument(Constants.HLTV + "/results");
+		StringBuilder textMessage = new StringBuilder();
+		Elements subLists = doc.select("div.results-sublist");
+		for (Element resultList : subLists) {
+			String headerText = resultList.select("span.standard-headline").text();
+			if (headerText.isEmpty()) {
+				headerText = "Featured Results";
+			}
 
-                if (team1.hasClass("team-won")) {
-                    textMessage.append("<b>").append(team1String).append("</b>");
-                } else {
-                    textMessage.append(team1String);
-                }
+			textMessage.append(Constants.EMOJI_CUP).append(" <b>").append(headerText).append("</b>\n");
 
-                textMessage.append(" [").append(resultCon.select("td.result-score").text()).append("] ");
+			for (Element resultCon : resultList.select("div.result-con")) {
+				Element team1 = resultCon.select("div.team").get(0);
+				Element team2 = resultCon.select("div.team").get(1);
+				String team1String = favoriteTeam(resultCon.select("div.team").get(0).text(), false);
+				String team2String = favoriteTeam(resultCon.select("div.team").get(1).text(), false);
 
-                if (team2.hasClass("team-won")) {
-                    textMessage.append("<b>").append(team2String).append("</b>");
-                } else {
-                    textMessage.append(team2String);
-                }
+				if (team1.hasClass("team-won")) {
+					textMessage.append("<b>").append(team1String).append("</b>");
+				} else {
+					textMessage.append(team1String);
+				}
 
-                textMessage.append(" (").append(resultCon.select("div.map-text").text()).append(") ")
-                        .append(getStars(resultCon)).append(Constants.EMOJI_SQUARE).append(" ")
-                        .append("<a href=\'https://hltv.org").append(resultCon.select("a").attr("href")).append("\'>")
-                        .append(resultCon.select("td.event").text()).append("</a> \n");
+				textMessage.append(" [").append(resultCon.select("td.result-score").text()).append("] ");
 
-            }
-            textMessage.append("\n");
+				if (team2.hasClass("team-won")) {
+					textMessage.append("<b>").append(team2String).append("</b>");
+				} else {
+					textMessage.append(team2String);
+				}
 
-            if (headerText.startsWith("Results"))
-                break;
-        }
+				textMessage.append(" (").append(resultCon.select("div.map-text").text()).append(") ")
+						.append(getStars(resultCon)).append(Constants.EMOJI_SQUARE).append(" ")
+						.append("<a href=\'https://hltv.org").append(resultCon.select("a").attr("href")).append("\'>")
+						.append(resultCon.select("td.event").text()).append("</a> \n");
 
-        return new TextMessage(textMessage);
-    }
+			}
+			textMessage.append("\n");
 
-    public Streams twitch(String uri) {
-        String newUri = "https://api.twitch.tv/helix/streams?game_id=32399&language=en&language=ru";
-        if (!StringUtils.isBlank(uri)) {
-            newUri = newUri.concat("&after=" + uri);
-        }
-        JSONObject json = getJson(newUri);
-        Streams streams = new Streams();
-        String nextPageId = json.getJSONObject("pagination").getString("cursor");
-        streams.setNextPageId(nextPageId);
-        StringBuilder textMessage = new StringBuilder();
-        textMessage.append("<b>Live</b>").append(Constants.EMOJI_EXCL_MARK).append("<b>Streams on Twitch:</b>\n");
-        JSONArray arr = json.getJSONArray("data");
-        for (int i = 0; i < arr.length(); i++) {
-            JSONObject data = arr.getJSONObject(i);
-            textMessage
-                    // .append("<b>#").append(i + 1).append("</b> ")
-                    .append("<b>(").append(data.getNumber("viewer_count")).append(")</b> ")
-                    .append("<a href=\'https://www.twitch.tv/")
-                    .append(data.getString("user_name")).append("\'>")
-                    .append(data.getString("user_name"))
-                    .append("</a> ")
-                    .append(getFlag(data.getString("language")))
-                    .append(" ")
-                    .append(data.getString("title").replace("<", "").replace(">", "")).append("\n");
-        }
-        streams.setMessage(textMessage);
-        return streams;
+			if (headerText.startsWith("Results"))
+				break;
+		}
 
-    }
+		LOGGER.debug("Results final message:\n{}", textMessage.toString());
+		return new TextMessage(textMessage);
+	}
 
-    public SendMessage cite() {
-        Document doc = getDocument(Constants.CITES);
-        StringBuilder text = new StringBuilder();
-        text.append(doc.select("cite").text());
-        String athor = doc.select("small").text();
-        if (!StringUtils.isEmpty(athor)) {
-            text.append("\n<b>").append(athor).append("</b>");
-        }
+	public Streams twitch(String uri) {
+		String newUri = "https://api.twitch.tv/helix/streams?game_id=32399&language=en&language=ru";
+		if (!StringUtils.isBlank(uri)) {
+			newUri = newUri.concat("&after=" + uri);
+		}
+		JSONObject json = getJson(newUri);
+		Streams streams = new Streams();
+		String nextPageId = json.getJSONObject("pagination").getString("cursor");
+		streams.setNextPageId(nextPageId);
+		LOGGER.debug("Streams nextPageId: {}", nextPageId);
+		StringBuilder textMessage = new StringBuilder();
+		textMessage.append("<b>Live</b>").append(Constants.EMOJI_EXCL_MARK).append("<b>Streams on Twitch:</b>\n");
+		JSONArray arr = json.getJSONArray("data");
+		for (int i = 0; i < arr.length(); i++) {
+			JSONObject data = arr.getJSONObject(i);
+			textMessage.append("<b>(").append(data.getNumber("viewer_count")).append(")</b> ")
+					.append("<a href=\'https://www.twitch.tv/").append(data.getString("user_name")).append("\'>")
+					.append(data.getString("user_name")).append("</a> ").append(getFlag(data.getString("language")))
+					.append(" ").append(data.getString("title").replace("<", "").replace(">", "")).append("\n");
+		}
+		streams.setMessage(textMessage);
+		LOGGER.debug("Streams final message:\n{}", textMessage.toString());
+		return streams;
 
-        return new TextMessage(text);
-    }
+	}
 
-    public SendMessage matchesForToday() {
-        return new SendMessage().setText(Constants.MATCHES_FOR_TODAY);
-    }
+	public SendMessage cite() {
+		Document doc = getDocument(Constants.CITES);
+		StringBuilder text = new StringBuilder();
+		text.append(doc.select("cite").text());
+		String athor = doc.select("small").text();
+		if (!StringUtils.isEmpty(athor)) {
+			text.append("\n<b>").append(athor).append("</b>");
+		}
 
-    public SendMessage resultsForToday() {
-        return new SendMessage().setText(Constants.RESULTS_FOR_TODAY);
-    }
+		return new TextMessage(text);
+	}
 
-    private StringBuilder getStars(Element match) {
-        StringBuilder stars = new StringBuilder();
-        match.select("div.stars").select("i").stream().forEach(star -> stars.append(Constants.EMOJI_STAR));
-        return stars;
+	public SendMessage matchesForToday() {
+		return new SendMessage().setText(Constants.MATCHES_FOR_TODAY);
+	}
 
-    }
+	public SendMessage resultsForToday() {
+		return new SendMessage().setText(Constants.RESULTS_FOR_TODAY);
+	}
 
-    private String getHttpResponse(String uri, boolean isTwitch) {
-        try {
-            GetMethod get = new GetMethod(uri);
-            get.setFollowRedirects(true);
-            get.setRequestHeader(HttpHeaders.USER_AGENT, Constants.USER_AGENT_NAME);
-            if (isTwitch)
-                get.setRequestHeader(Constants.CLIENT_ID, clientId);
-            client.executeMethod(get);
-            String response = get.getResponseBodyAsString();
-            get.releaseConnection();
-            return response;
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new Error(Constants.EXCEPTION_MSG);
-        }
-    }
+	private StringBuilder getStars(Element match) {
+		StringBuilder stars = new StringBuilder();
+		match.select("div.stars").select("i").stream().forEach(star -> stars.append(Constants.EMOJI_STAR));
+		return stars;
 
-    private Document getDocument(String uri) {
-        return Jsoup.parse(getHttpResponse(uri, false));
-    }
+	}
 
-    private JSONObject getJson(String uri) {
-        return new JSONObject(getHttpResponse(uri, true));
-    }
+	private String getHttpResponse(String uri, boolean isTwitch) {
+		try {
+			GetMethod get = new GetMethod(uri);
+			get.setFollowRedirects(true);
+			get.setRequestHeader(HttpHeaders.USER_AGENT, Constants.USER_AGENT_NAME);
+			if (isTwitch)
+				get.setRequestHeader(Constants.CLIENT_ID, clientId);
+			CLIENT.executeMethod(get);
+			String response = get.getResponseBodyAsString();
+			get.releaseConnection();
+			return response;
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new Error(Constants.EXCEPTION_MSG);
+		}
+	}
 
-    private String unlinkName(String name) {
-        if (name.contains(".")) {
-            name = name.replace('.', ',');
-        }
+	private Document getDocument(String uri) {
+		return Jsoup.parse(getHttpResponse(uri, false));
+	}
 
-        return name;
-    }
+	private JSONObject getJson(String uri) {
+		return new JSONObject(getHttpResponse(uri, true));
+	}
 
-    private String favoriteTeam(String name, boolean isBold) {
-        name = unlinkName(name);
-        if (FavoriteTeams.isFavorite(name)) {
-            if (!isBold) {
-                name = FavoriteTeams.getFlag(name) + name;
-            } else {
-                name = FavoriteTeams.getFlag(name) + "<b>" + name + "</b>";
-            }
-        }
-        return name;
-    }
+	private String unlinkName(String name) {
+		if (name.contains(".")) {
+			name = name.replace('.', ',');
+		}
 
-    private String getFlag(String lang) {
-        if (lang.equals("ru")) {
-            return Constants.EMOJI_RU;
-        }
-        if (lang.equals("en")) {
-            return Constants.EMOJI_EN;
-        }
-        return null;
-    }
+		return name;
+	}
+
+	private String favoriteTeam(String name, boolean isBold) {
+		name = unlinkName(name);
+		if (FavoriteTeams.isFavorite(name)) {
+			if (!isBold) {
+				name = FavoriteTeams.getFlag(name) + name;
+			} else {
+				name = FavoriteTeams.getFlag(name) + "<b>" + name + "</b>";
+			}
+		}
+		return name;
+	}
+
+	private String getFlag(String lang) {
+		if (lang.equals("ru")) {
+			return Constants.EMOJI_RU;
+		}
+		if (lang.equals("en")) {
+			return Constants.EMOJI_EN;
+		}
+		return null;
+	}
 
 }
