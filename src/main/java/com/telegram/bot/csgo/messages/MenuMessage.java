@@ -19,6 +19,7 @@ public class MenuMessage extends SendMessage {
 	
 	static {
 		ROW_1.add(new InlineKeyboardButton().setText(Constants.EMOJI_FIRE + " Матчи").setCallbackData(Constants.DATA_MATCHES));
+	      ROW_1.add(new InlineKeyboardButton().setText(Constants.EMOJI_TV + " Стримы").setCallbackData(Constants.DATA_STREAMS));
 		ROW_1.add(new InlineKeyboardButton().setText(Constants.EMOJI_CUP + " Результаты").setCallbackData(Constants.DATA_RESULTS));
 		ROW_2.add(new InlineKeyboardButton().setText(Constants.EMOJI_MIL_MEDAL + "Топ 10").setCallbackData(Constants.DATA_TOP_10));
 		ROW_2.add(new InlineKeyboardButton().setText(Constants.EMOJI_MIL_MEDAL + "Топ 20").setCallbackData(Constants.DATA_TOP_20));

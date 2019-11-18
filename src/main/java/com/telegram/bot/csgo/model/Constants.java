@@ -12,6 +12,7 @@ public final class Constants {
 	public static final String DATA_TOP_30_PLAYERS = "top30players";
 	public static final String DATA_MATCHES = "matches";
 	public static final String DATA_RESULTS = "results";
+	public static final String DATA_STREAMS = "streams";
 	
 	public static final String HELP = ".хелп";
 	public static final String MENU = ".меню";
@@ -23,12 +24,14 @@ public final class Constants {
 	public static final String TOP_10_PLAYERS = ".топ10игроков";
 	public static final String TOP_20_PLAYERS = ".топ20игроков";
 	public static final String TOP_30_PLAYERS = ".топ30игроков";
+	public static final String STREAMS = ".стримы";
 	
 	public static final String OOPS = "Упс, ты слишком долго думал парень!";
 	public static final String MATCHES_FOR_TODAY = "Ближайшие матчи:";
 	public static final String RESULTS_FOR_TODAY = "Последние результаты:";
 	public final static String USER_AGENT_NAME = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
 	public final static String HLTV = "https://www.hltv.org";
+	public final static String CLIENT_ID = "Client-ID";
 	public final static String CITES = "https://api.forismatic.com/api/1.0/?method=getQuote&format=html&lang=ru";
 	public final static String HTML = "html";
 	public final static String EXCEPTION_MSG = "Can't get data from site";
@@ -42,9 +45,12 @@ public final class Constants {
 	public final static String EMOJI_SQUARE = "\u25AB";
 	public final static String EMOJI_FIRE = "\uD83D\uDD25";
 	public final static String EMOJI_MIL_MEDAL = EmojiParser.parseToUnicode(":military_medal:");
+	public final static String EMOJI_TV = "\ud83d\udcfa";
 	public final static String EMOJI_SPORT_MEDAL = EmojiParser.parseToUnicode(":sports_medal:");
 	public final static String EMOJI_STAR = EmojiParser.parseToUnicode(":star:");
 	public final static String EMOJI_HEAVY_CHECK_MARK = EmojiParser.parseToUnicode(":heavy_check_mark:");
+	public final static String EMOJI_RU = EmojiParser.parseToUnicode(":ru:");
+	public final static String EMOJI_EN = "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f";
 	
 	private Constants() {
 	}

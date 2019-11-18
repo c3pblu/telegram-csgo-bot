@@ -18,7 +18,10 @@ import com.telegram.bot.csgo.messages.BotMessages;
 import com.telegram.bot.csgo.messages.HelpMessage;
 import com.telegram.bot.csgo.messages.MenuMessage;
 import com.telegram.bot.csgo.messages.MessageBuilder;
+import com.telegram.bot.csgo.messages.NextPage;
+import com.telegram.bot.csgo.messages.TextMessage;
 import com.telegram.bot.csgo.model.Constants;
+import com.telegram.bot.csgo.twitch.Streams;
 
 @Component
 public class Bot extends TelegramLongPollingBot {
@@ -28,6 +31,8 @@ public class Bot extends TelegramLongPollingBot {
     @Autowired
     private MessageBuilder messages;
 
+    @Value(value = "${bot.callback.timeout}")
+    private Long callBackTimeout;
     @Value(value = "${bot.name}")
     private String botName;
     @Value(value = "${bot.token}")
@@ -92,50 +97,62 @@ public class Bot extends TelegramLongPollingBot {
                     || update.getMessage().getChat().isUserChat()) {
                 sendMessage(chatId, messages.cite());
             }
+            // Twitch streams
+            else if (text.equalsIgnoreCase(Constants.STREAMS)) {
+                Streams streams = messages.twitch("");
+                sendMessage(chatId, new TextMessage(streams.getMessage()));
+                sendMessage(chatId, new NextPage(streams.getNextPageId()));
+            }
         }
 
         // Check call back from Menu
         if (update.getCallbackQuery() != null) {
+
             Long chatId = update.getCallbackQuery().getMessage().getChatId();
-            sendMessage(chatId, checkCallBack(update.getCallbackQuery()));
+            CallbackQuery callBack = update.getCallbackQuery();
+
+            if (isTimeout(callBack)) {
+                sendMessage(chatId, new SendMessage().setText(Constants.OOPS));
+                deleteMessage(chatId, update.getCallbackQuery().getMessage().getMessageId());
+                return;
+            }
+
+            String data = callBack.getData();
+
+            if (data.equals(Constants.DATA_TOP_10)) {
+                sendMessage(chatId, messages.topTeams(10));
+            }
+            if (data.equals(Constants.DATA_TOP_20)) {
+                sendMessage(chatId, messages.topTeams(20));
+            }
+            if (data.equals(Constants.DATA_TOP_30)) {
+                sendMessage(chatId, messages.topTeams(30));
+            }
+            if (data.equals(Constants.DATA_TOP_10_PLAYERS)) {
+                sendMessage(chatId, messages.topPlayers(10));
+            }
+            if (data.equals(Constants.DATA_TOP_20_PLAYERS)) {
+                sendMessage(chatId, messages.topPlayers(20));
+            }
+            if (data.equals(Constants.DATA_TOP_30_PLAYERS)) {
+                sendMessage(chatId, messages.topPlayers(30));
+            }
+            if (data.equals(Constants.DATA_MATCHES)) {
+                sendMessage(chatId, messages.matches());
+            }
+            if (data.equals(Constants.DATA_RESULTS)) {
+                sendMessage(chatId, messages.results());
+            }
+            if (data.equals(Constants.DATA_STREAMS)
+                    || update.getCallbackQuery().getMessage().getText().equals("Go to next Page?")) {
+
+                Streams streams = messages.twitch(data.replace("streams", ""));
+                sendMessage(chatId, new TextMessage(streams.getMessage()));
+                sendMessage(chatId, new NextPage(streams.getNextPageId()));
+            }
+
             deleteMessage(chatId, update.getCallbackQuery().getMessage().getMessageId());
-
         }
-    }
-
-    private SendMessage checkCallBack(CallbackQuery callBack) {
-        // If message timeout - return only message
-        if (isTimeout(callBack)) {
-            return new SendMessage().setText(Constants.OOPS);
-        }
-
-        String data = callBack.getData();
-
-        if (data.equals(Constants.DATA_TOP_10)) {
-            return messages.topTeams(10);
-        }
-        if (data.equals(Constants.DATA_TOP_20)) {
-            return messages.topTeams(20);
-        }
-        if (data.equals(Constants.DATA_TOP_30)) {
-            return messages.topTeams(30);
-        }
-        if (data.equals(Constants.DATA_TOP_10_PLAYERS)) {
-            return messages.topPlayers(10);
-        }
-        if (data.equals(Constants.DATA_TOP_20_PLAYERS)) {
-            return messages.topPlayers(20);
-        }
-        if (data.equals(Constants.DATA_TOP_30_PLAYERS)) {
-            return messages.topPlayers(30);
-        }
-        if (data.equals(Constants.DATA_MATCHES)) {
-            return messages.matches();
-        }
-        if (data.equals(Constants.DATA_RESULTS)) {
-            return messages.results();
-        }
-        return new SendMessage();
     }
 
     private void sendMessage(Long chatId, SendMessage msg) {
@@ -176,7 +193,7 @@ public class Bot extends TelegramLongPollingBot {
 
         if (callBack != null) {
             long responseTime = Instant.now().getEpochSecond() - callBack.getMessage().getDate();
-            if (responseTime > messageTimeout) {
+            if (responseTime > callBackTimeout) {
                 return true;
             }
         }
