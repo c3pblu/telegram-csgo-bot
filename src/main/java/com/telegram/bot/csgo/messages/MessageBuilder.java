@@ -24,12 +24,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import com.telegram.bot.csgo.model.Constants;
-import com.telegram.bot.csgo.model.FavoriteTeams;
+import com.telegram.bot.csgo.teams.FavoriteTeams;
 import com.telegram.bot.csgo.twitch.Streams;
 
 @Component
 public class MessageBuilder {
+    
+    private static final String MATCHES_FOR_TODAY = "Ближайшие матчи:";
+    private static final String RESULTS_FOR_TODAY = "Последние результаты:";
+    private final static String USER_AGENT_NAME = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
+    private final static String HLTV = "https://www.hltv.org";
+    private final static String CLIENT_ID = "Client-ID";
+    private final static String CITES = "https://api.forismatic.com/api/1.0/?method=getQuote&format=html&lang=ru";
+    private final static String EXCEPTION_MSG = "Can't get data from site";
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MessageBuilder.class);
 
@@ -38,11 +45,11 @@ public class MessageBuilder {
 	private String clientId;
 
 	public SendMessage topTeams(Integer count) {
-		Document doc = getDocument(Constants.HLTV + "/ranking/teams");
+		Document doc = getDocument(HLTV + "/ranking/teams");
 		Elements header = doc.select("div.regional-ranking-header");
 		Elements rankedTeams = doc.select("div.ranked-team");
 		StringBuilder textMessage = new StringBuilder();
-		textMessage.append(Constants.EMOJI_MIL_MEDAL).append("<b>").append(header.text()).append("</b>\n");
+		textMessage.append(Emoji.MIL_MEDAL.getuCode()).append("<b>").append(header.text()).append("</b>\n");
 		for (Element team : rankedTeams) {
 			if (team.select("span.position").text().equals("#" + (count + 1))) {
 				break;
@@ -63,17 +70,16 @@ public class MessageBuilder {
 		}
 
 		LOGGER.debug("TopTeams final message:\n{}", textMessage.toString());
-
 		return new TextMessage(textMessage);
 	}
 
 	public SendMessage topPlayers(Integer count) {
 		String year = String.valueOf(LocalDate.now().getYear());
 		Document doc = getDocument(
-				Constants.HLTV + "/stats/players?startDate=" + year + "-01-01&endDate=" + year + "-12-31");
+				HLTV + "/stats/players?startDate=" + year + "-01-01&endDate=" + year + "-12-31");
 		Elements rows = doc.select("tr");
 		StringBuilder textMessage = new StringBuilder();
-		textMessage.append(Constants.EMOJI_SPORT_MEDAL).append("<b>CS:GO World Top Players ").append(year).append("</b>\n").append("<b>");
+		textMessage.append(Emoji.SPORT_MEDAL.getuCode()).append("<b>CS:GO World Top Players ").append(year).append("</b>\n").append("<b>");
 		Elements stat = doc.select("tr.stats-table-row").select("th");
 		for (int i = 0; i < stat.size(); i++) {
 			if (i != stat.size() - 1) {
@@ -106,10 +112,10 @@ public class MessageBuilder {
 	}
 
 	public SendMessage matches() {
-		Document doc = getDocument(Constants.HLTV + "/matches");
+		Document doc = getDocument(HLTV + "/matches");
 		StringBuilder textMessage = new StringBuilder();
 		if (doc.select("div.live-match").size() > 1) {
-			textMessage.append("<b>Live matches</b>").append(Constants.EMOJI_EXCL_MARK).append("\n");
+			textMessage.append("<b>Live matches</b>").append(Emoji.EXCL_MARK.getuCode()).append("\n");
 		}
 
 		for (Element match : doc.select("div.live-match")) {
@@ -117,10 +123,10 @@ public class MessageBuilder {
 				continue;
 			}
 
-			textMessage.append(Constants.EMOJI_CUP).append("<a href=\'https://hltv.org")
+			textMessage.append(Emoji.CUP.getuCode()).append("<a href=\'https://hltv.org")
 					.append(match.select("a").attr("href")).append("\'>").append(match.select("div.event-name").text())
 					.append("</a>\n").append(favoriteTeam(match.select("span.team-name").get(0).text(), false))
-					.append(" ").append(Constants.EMOJI_VS).append(" ")
+					.append(" ").append(Emoji.VS.getuCode()).append(" ")
 					.append(favoriteTeam(match.select("span.team-name").get(1).text(), false)).append(" (")
 					.append(match.select("tr.header").select("td.bestof").text()).append(") ").append(getStars(match))
 					.append("\n");
@@ -161,10 +167,10 @@ public class MessageBuilder {
 
 			if (!match.select("div.line-align").isEmpty()) {
 				textMessage.append(favoriteTeam(match.select("td.team-cell").get(0).text(), true)).append(" ")
-						.append(Constants.EMOJI_VS).append(" ")
+                        .append(Emoji.VS.getuCode()).append(" ")
 						.append(favoriteTeam(match.select("td.team-cell").get(1).text(), true)).append(" (")
 						.append(match.select("div.map-text").text()).append(") ").append(getStars(match))
-						.append(Constants.EMOJI_SQUARE).append(" ").append("<a href=\'https://hltv.org")
+						.append(Emoji.SQUARE.getuCode()).append(" ").append("<a href=\'https://hltv.org")
 						.append(match.select("a").attr("href")).append("\'>").append(match.select("td.event").text())
 						.append("</a>\n");
 
@@ -179,7 +185,7 @@ public class MessageBuilder {
 	}
 
 	public SendMessage results() {
-		Document doc = getDocument(Constants.HLTV + "/results");
+		Document doc = getDocument(HLTV + "/results");
 		StringBuilder textMessage = new StringBuilder();
 		Elements subLists = doc.select("div.results-sublist");
 		for (Element resultList : subLists) {
@@ -188,7 +194,7 @@ public class MessageBuilder {
 				headerText = "Featured Results";
 			}
 
-			textMessage.append(Constants.EMOJI_CUP).append(" <b>").append(headerText).append("</b>\n");
+			textMessage.append(Emoji.CUP.getuCode()).append(" <b>").append(headerText).append("</b>\n");
 
 			for (Element resultCon : resultList.select("div.result-con")) {
 				Element team1 = resultCon.select("div.team").get(0);
@@ -211,7 +217,7 @@ public class MessageBuilder {
 				}
 
 				textMessage.append(" (").append(resultCon.select("div.map-text").text()).append(") ")
-						.append(getStars(resultCon)).append(Constants.EMOJI_SQUARE).append(" ")
+						.append(getStars(resultCon)).append(Emoji.SQUARE.getuCode()).append(" ")
 						.append("<a href=\'https://hltv.org").append(resultCon.select("a").attr("href")).append("\'>")
 						.append(resultCon.select("td.event").text()).append("</a> \n");
 
@@ -237,7 +243,7 @@ public class MessageBuilder {
 		streams.setNextPageId(nextPageId);
 		LOGGER.debug("Streams nextPageId: {}", nextPageId);
 		StringBuilder textMessage = new StringBuilder();
-		textMessage.append("<b>Live</b>").append(Constants.EMOJI_EXCL_MARK).append("<b>Streams on Twitch:</b>\n");
+		textMessage.append("<b>Live</b>").append(Emoji.EXCL_MARK.getuCode()).append("<b>Streams on Twitch:</b>\n");
 		JSONArray arr = json.getJSONArray("data");
 		for (int i = 0; i < arr.length(); i++) {
 			JSONObject data = arr.getJSONObject(i);
@@ -253,7 +259,7 @@ public class MessageBuilder {
 	}
 
 	public SendMessage cite() {
-		Document doc = getDocument(Constants.CITES);
+		Document doc = getDocument(CITES);
 		StringBuilder text = new StringBuilder();
 		text.append(doc.select("cite").text());
 		String athor = doc.select("small").text();
@@ -265,16 +271,16 @@ public class MessageBuilder {
 	}
 
 	public SendMessage matchesForToday() {
-		return new SendMessage().setText(Constants.MATCHES_FOR_TODAY);
+		return new SendMessage().setText(MATCHES_FOR_TODAY);
 	}
 
 	public SendMessage resultsForToday() {
-		return new SendMessage().setText(Constants.RESULTS_FOR_TODAY);
+		return new SendMessage().setText(RESULTS_FOR_TODAY);
 	}
 
 	private StringBuilder getStars(Element match) {
 		StringBuilder stars = new StringBuilder();
-		match.select("div.stars").select("i").stream().forEach(star -> stars.append(Constants.EMOJI_STAR));
+		match.select("div.stars").select("i").stream().forEach(star -> stars.append(Emoji.STAR.getuCode()));
 		return stars;
 
 	}
@@ -283,16 +289,16 @@ public class MessageBuilder {
 		try {
 			GetMethod get = new GetMethod(uri);
 			get.setFollowRedirects(true);
-			get.setRequestHeader(HttpHeaders.USER_AGENT, Constants.USER_AGENT_NAME);
+			get.setRequestHeader(HttpHeaders.USER_AGENT, USER_AGENT_NAME);
 			if (isTwitch)
-				get.setRequestHeader(Constants.CLIENT_ID, clientId);
+				get.setRequestHeader(CLIENT_ID, clientId);
 			CLIENT.executeMethod(get);
 			String response = get.getResponseBodyAsString();
 			get.releaseConnection();
 			return response;
 		} catch (IOException e) {
 			e.printStackTrace();
-			throw new Error(Constants.EXCEPTION_MSG);
+			throw new Error(EXCEPTION_MSG);
 		}
 	}
 
@@ -326,10 +332,10 @@ public class MessageBuilder {
 
 	private String getFlag(String lang) {
 		if (lang.equals("ru")) {
-			return Constants.EMOJI_RU;
+			return Emoji.RU.getuCode();
 		}
 		if (lang.equals("en")) {
-			return Constants.EMOJI_EN;
+			return Emoji.EN.getuCode();
 		}
 		return null;
 	}

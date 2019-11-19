@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.model;
+package com.telegram.bot.csgo.teams;
 
 import java.util.HashMap;
 

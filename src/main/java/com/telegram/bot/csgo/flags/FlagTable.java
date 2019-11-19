@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.model;
+package com.telegram.bot.csgo.flags;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

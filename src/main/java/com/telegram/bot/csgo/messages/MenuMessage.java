@@ -7,8 +7,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
-import com.telegram.bot.csgo.model.Constants;
-
 public class MenuMessage extends SendMessage {
 	
 	private static final InlineKeyboardMarkup MARK_UP_IN_LINE = new InlineKeyboardMarkup();
@@ -18,15 +16,15 @@ public class MenuMessage extends SendMessage {
 	private static final List<InlineKeyboardButton> ROW_3 = new ArrayList<>();
 	
 	static {
-		ROW_1.add(new InlineKeyboardButton().setText(Constants.EMOJI_FIRE + " Матчи").setCallbackData(Constants.DATA_MATCHES));
-	      ROW_1.add(new InlineKeyboardButton().setText(Constants.EMOJI_TV + " Стримы").setCallbackData(Constants.DATA_STREAMS));
-		ROW_1.add(new InlineKeyboardButton().setText(Constants.EMOJI_CUP + " Результаты").setCallbackData(Constants.DATA_RESULTS));
-		ROW_2.add(new InlineKeyboardButton().setText(Constants.EMOJI_MIL_MEDAL + "Топ 10").setCallbackData(Constants.DATA_TOP_10));
-		ROW_2.add(new InlineKeyboardButton().setText(Constants.EMOJI_MIL_MEDAL + "Топ 20").setCallbackData(Constants.DATA_TOP_20));
-		ROW_2.add(new InlineKeyboardButton().setText(Constants.EMOJI_MIL_MEDAL + "Топ 30").setCallbackData(Constants.DATA_TOP_30));
-		ROW_3.add(new InlineKeyboardButton().setText(Constants.EMOJI_SPORT_MEDAL + "Топ 10 Игроков").setCallbackData(Constants.DATA_TOP_10_PLAYERS));
-		ROW_3.add(new InlineKeyboardButton().setText(Constants.EMOJI_SPORT_MEDAL + "Топ 20 Игроков").setCallbackData(Constants.DATA_TOP_20_PLAYERS));
-		ROW_3.add(new InlineKeyboardButton().setText(Constants.EMOJI_SPORT_MEDAL + "Топ 30 Игроков").setCallbackData(Constants.DATA_TOP_30_PLAYERS));
+		ROW_1.add(new InlineKeyboardButton().setText(Emoji.FIRE.getuCode() + " Матчи").setCallbackData(CallBackData.MATCHES.getName()));
+	      ROW_1.add(new InlineKeyboardButton().setText(Emoji.TV.getuCode() + " Стримы").setCallbackData(CallBackData.STREAMS.getName()));
+		ROW_1.add(new InlineKeyboardButton().setText(Emoji.CUP.getuCode() + " Результаты").setCallbackData(CallBackData.RESULTS.getName()));
+		ROW_2.add(new InlineKeyboardButton().setText(Emoji.MIL_MEDAL.getuCode() + "Топ 10").setCallbackData(CallBackData.TOP_10.getName()));
+		ROW_2.add(new InlineKeyboardButton().setText(Emoji.MIL_MEDAL.getuCode() + "Топ 20").setCallbackData(CallBackData.TOP_20.getName()));
+		ROW_2.add(new InlineKeyboardButton().setText(Emoji.MIL_MEDAL.getuCode() + "Топ 30").setCallbackData(CallBackData.TOP_30.getName()));
+		ROW_3.add(new InlineKeyboardButton().setText(Emoji.SPORT_MEDAL.getuCode() + "Топ 10 Игроков").setCallbackData(CallBackData.TOP_10_PLAYERS.getName()));
+		ROW_3.add(new InlineKeyboardButton().setText(Emoji.SPORT_MEDAL.getuCode() + "Топ 20 Игроков").setCallbackData(CallBackData.TOP_20_PLAYERS.getName()));
+		ROW_3.add(new InlineKeyboardButton().setText(Emoji.SPORT_MEDAL.getuCode() + "Топ 30 Игроков").setCallbackData(CallBackData.TOP_30_PLAYERS.getName()));
 		ROWS_IN_LINE.add(ROW_1);
 		ROWS_IN_LINE.add(ROW_2);
 		ROWS_IN_LINE.add(ROW_3);

@@ -1,25 +1,14 @@
 package com.telegram.bot.csgo;
 
+import java.io.IOException;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.HttpHeaders;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
-import com.telegram.bot.csgo.model.Constants;
-
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.Locale;
+import com.telegram.bot.csgo.messages.Emoji;
 
 public class Test {
     public static void main(String args[]) throws IOException {
@@ -37,7 +26,7 @@ public class Test {
 
         StringBuilder textMessage = new StringBuilder();
 
-        textMessage.append("<b>Live</b>").append(Constants.EMOJI_EXCL_MARK).append(" <b>Streams on Twitch:</b>\n");
+        textMessage.append("<b>Live</b>").append(Emoji.EXCL_MARK.getuCode()).append(" <b>Streams on Twitch:</b>\n");
 
         JSONArray arr = json.getJSONArray("data");
         for (int i = 0; i < arr.length(); i++) {
