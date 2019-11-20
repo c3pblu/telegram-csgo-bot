@@ -16,14 +16,14 @@ public enum Emoji {
     RU ("\ud83c\uddf7\ud83c\uddfa"),
     EN ("\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f");
     
-    private String uCode;
+    private String code;
 
-    private Emoji(String uCode) {
-        this.uCode = uCode;
+    private Emoji(String code) {
+        this.code = code;
     }
 
-    public String getuCode() {
-        return uCode;
+    public String getCode() {
+        return code;
     }
 
 }

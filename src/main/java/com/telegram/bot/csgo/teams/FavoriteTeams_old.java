@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import com.vdurmont.emoji.EmojiParser;
 
-public class FavoriteTeams {
+public class FavoriteTeams_old {
 	
 	private static HashMap<String, String> teams = new HashMap<>();
 

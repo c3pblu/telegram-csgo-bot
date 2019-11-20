@@ -29,6 +29,7 @@ public class Bot extends TelegramLongPollingBot {
     
 
     private static final String OOPS = "Упс, ты слишком долго думал парень!";
+    private static final String NEXT_PAGE = "Go to next Page?";
 
 	@Autowired
 	private BotMessages botMessages;
@@ -142,7 +143,7 @@ public class Bot extends TelegramLongPollingBot {
 				sendMessage(chatId, messages.results());
 			}
 			if (data.equals(CallBackData.STREAMS.getName())
-					|| update.getCallbackQuery().getMessage().getText().equals("Go to next Page?")) {
+					|| update.getCallbackQuery().getMessage().getText().equals(NEXT_PAGE)) {
 				Streams streams = messages.twitch(data.replace(CallBackData.STREAMS.getName(), ""));
 				sendMessage(chatId, new TextMessage(streams.getMessage()));
 				sendMessage(chatId, new NextPage(streams.getNextPageId()));

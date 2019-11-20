@@ -26,7 +26,7 @@ public class Test {
 
         StringBuilder textMessage = new StringBuilder();
 
-        textMessage.append("<b>Live</b>").append(Emoji.EXCL_MARK.getuCode()).append(" <b>Streams on Twitch:</b>\n");
+        textMessage.append("<b>Live</b>").append(Emoji.EXCL_MARK.getCode()).append(" <b>Streams on Twitch:</b>\n");
 
         JSONArray arr = json.getJSONArray("data");
         for (int i = 0; i < arr.length(); i++) {
