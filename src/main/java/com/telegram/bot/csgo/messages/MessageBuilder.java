@@ -46,8 +46,8 @@ public class MessageBuilder {
     @Value("${twitch.client.id}")
     private String clientId;
     
-//    @Autowired
-//    private FlagDao flags;
+    @Autowired
+    private FlagDao flags;
 
     public SendMessage topTeams(Integer count) {
         Document doc = getHtmlDocument(HLTV + "/ranking/teams");

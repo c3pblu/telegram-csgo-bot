@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import com.telegram.bot.csgo.teams.FavoriteTeam;
 import com.telegram.bot.csgo.utils.HibernateSessionFactoryUtil;
 
-//@Component
+@Component
 public class FlagDao {
 
     private static List<Flag> flags;
@@ -33,7 +33,7 @@ public class FlagDao {
         FlagDao.favoriteTeams = favoriteTeams;
     }
 
-//    @PostConstruct
+    @PostConstruct
     @SuppressWarnings("unchecked")
     public void init() {
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
