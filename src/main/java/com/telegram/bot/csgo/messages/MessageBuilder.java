@@ -164,7 +164,7 @@ public class MessageBuilder {
         Element matchDay = doc.select("div.match-day").first();
         textMessage.append(matchDay.select("span.standard-headline").text()).append("</b>\n");
 
-        for (Element match : matchDay.select("a")) {
+        for (Element match : matchDay.select("div.match")) {
             long unixTime = Long.parseLong(match.select("div.time").attr("data-unix"));
             LocalDateTime localTime = LocalDateTime.ofEpochSecond((unixTime / 1000) + 10800, 0, ZoneOffset.UTC);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH);
