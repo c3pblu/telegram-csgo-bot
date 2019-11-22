@@ -1,50 +1,49 @@
 package com.telegram.bot.csgo.messages;
 
 import java.util.ArrayList;
-import java.util.Random;
 
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-
-@Component
 public class BotMessages {
 
-	private ArrayList<String> messages = new ArrayList<>();
-	private ArrayList<String> lastMessage = new ArrayList<>();
-	@Value(value = "${bot.message.uniq.count}")
-	private Integer uniqCount;
+	private static ArrayList<String> stickers = new ArrayList<>();
+	private static ArrayList<String> lastSticker = new ArrayList<>();
+	
+    public static ArrayList<String> getStickers() {
+        return stickers;
+    }
 
-	@PostConstruct
-	private void addMessages() {
-		messages.add("Опять начинка для гробов бредит...");
-		messages.add("Го 1 на 1 на квартиру или засцал?!");
-		messages.add("Укуси мой блестящий металлический зад");
-		messages.add("Выше нос кусок мяса! Выше нос!");
-		messages.add("Человеки... что с них взять");
-		messages.add("Про SkyNet слыхал? Я написал...");
-	}
+    public static void setStickers(ArrayList<String> stickers) {
+        BotMessages.stickers = stickers;
+    }
 
-	public SendMessage sendBotMessage() {
-		int randomSize = messages.size() - 1 + 1;
-		int randomValue = new Random().nextInt(randomSize);
-		String selectedMessage = messages.get(randomValue);
+    public static ArrayList<String> getLastSticker() {
+        return lastSticker;
+    }
 
-		while (lastMessage.contains(selectedMessage)) {
-			randomValue = new Random().nextInt(randomSize);
-			selectedMessage = messages.get(randomValue);
-		}
+    public static void setLastSticker(ArrayList<String> lastSticker) {
+        BotMessages.lastSticker = lastSticker;
+    }
 
-		if (lastMessage.size() < uniqCount) {
-			lastMessage.add(selectedMessage);
-		} else {
-			lastMessage.remove(0);
-			lastMessage.add(selectedMessage);
-		}
-		return new SendMessage().setText(selectedMessage);
-
+    static {	
+		stickers.add("CAADAgADIQAD9mOfG2LGtCrsw7bFFgQ");
+		stickers.add("CAADAgADHgAD9mOfG7X25hWYzpI1FgQ");
+		stickers.add("CAADAgADHwAD9mOfG_Ba2iIqOnazFgQ");
+		stickers.add("CAADAgADIgAD9mOfG4hfcToK4DCYFgQ");
+		stickers.add("CAADAgADJQAD9mOfG963ItgypxoIFgQ");
+		stickers.add("CAADAgADKgAD9mOfG7fCrBPbLEDJFgQ");
+		stickers.add("CAADAgADFAAD9mOfGxFXaqquJHwYFgQ");
+		stickers.add("CAADAgADEQAD9mOfG94SbA2pBiwnFgQ");
+		stickers.add("CAADAgADCwAD9mOfG8RskvZsrlZsFgQ");
+		stickers.add("CAADAgADDQAD9mOfGxyG9FhomVn0FgQ");
+		stickers.add("CAADAgADBwAD9mOfGwvUQUWU0Bv_FgQ");
+		stickers.add("CAADAgADBgAD9mOfG-4M62fmXafEFgQ");
+		stickers.add("CAADAgADAwAD9mOfGzeICv_hr6IOFgQ");
+		stickers.add("CAADAgADCgAD9mOfG91GVm2tjQaEFgQ");
+		stickers.add("CAADAgADJAAD9mOfGw-taxRFVDWeFgQ");
+		stickers.add("CAADAgADKAAD9mOfG-AyIRVUq8l0FgQ");
+		stickers.add("CAADAgADJgAD9mOfG-rYuchCMU8-FgQ");
+		stickers.add("CAADAgADHAAD9mOfG8QGYzOYAXv9FgQ");
+		stickers.add("CAADAgADFgAD9mOfG7tdoHpun4KJFgQ");
+		stickers.add("CAADAgADIwAD9mOfG7uEav_8NSjTFgQ");
 	}
 
 }

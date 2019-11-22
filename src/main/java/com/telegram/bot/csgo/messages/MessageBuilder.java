@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -27,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 
 import com.telegram.bot.csgo.db.DaoImpl;
 import com.telegram.bot.csgo.db.DbResult;
@@ -267,13 +269,32 @@ public class MessageBuilder {
             textMessage.append("<b>(").append(data.getNumber("viewer_count")).append(")</b> ")
                     .append("<a href=\'https://www.twitch.tv/").append(data.getString("user_name")).append("\'>")
                     .append(data.getString("user_name")).append("</a> ")
-                    .append(flagUnicodeFromCountry(data.getString("language")))
+                    .append(flagUnicodeFromCountry(data.getString("language").toUpperCase()))
                     .append(" ").append(data.getString("title").replace("<", "").replace(">", "")).append("\n");
         }
         streams.setMessage(textMessage);
         LOGGER.debug("Streams final message:\n{}", textMessage.toString());
         return streams;
 
+    }
+    
+    public SendSticker createBotMessage(Integer uniqCount) {
+        int randomSize = BotMessages.getStickers().size() - 1 + 1;
+        int randomValue = new Random().nextInt(randomSize);
+        String selectedMessage = BotMessages.getStickers().get(randomValue);
+
+        while (BotMessages.getLastSticker().contains(selectedMessage)) {
+            randomValue = new Random().nextInt(randomSize);
+            selectedMessage = BotMessages.getStickers().get(randomValue);
+        }
+
+        if (BotMessages.getLastSticker().size() < uniqCount) {
+            BotMessages.getLastSticker().add(selectedMessage);
+        } else {
+            BotMessages.getLastSticker().remove(0);
+            BotMessages.getLastSticker().add(selectedMessage);
+        }
+        return new SendSticker().setSticker(selectedMessage);
     }
 
     public SendMessage cite() {
@@ -399,6 +420,7 @@ public class MessageBuilder {
     }
 
     private String flagUnicodeFromCountry(String country) {
+        LOGGER.debug("Country code is: {}", country);
         String text = null;
         Flag ourFlag = new Flag();
         List<Flag> flags = dao.getFlags();
