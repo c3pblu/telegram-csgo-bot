@@ -14,6 +14,7 @@ public class MenuMessage extends SendMessage {
 	private static final List<InlineKeyboardButton> ROW_1 = new ArrayList<>();
 	private static final List<InlineKeyboardButton> ROW_2 = new ArrayList<>();
 	private static final List<InlineKeyboardButton> ROW_3 = new ArrayList<>();
+	private static final List<InlineKeyboardButton> ROW_4 = new ArrayList<>();
 	
 	static {
 		ROW_1.add(new InlineKeyboardButton().setText(Emoji.FIRE.getCode() + " Матчи").setCallbackData(CallBackData.MATCHES.getName()));
@@ -25,9 +26,11 @@ public class MenuMessage extends SendMessage {
 		ROW_3.add(new InlineKeyboardButton().setText(Emoji.SPORT_MEDAL.getCode() + "Топ 10 Игроков").setCallbackData(CallBackData.TOP_10_PLAYERS.getName()));
 		ROW_3.add(new InlineKeyboardButton().setText(Emoji.SPORT_MEDAL.getCode() + "Топ 20 Игроков").setCallbackData(CallBackData.TOP_20_PLAYERS.getName()));
 		ROW_3.add(new InlineKeyboardButton().setText(Emoji.SPORT_MEDAL.getCode() + "Топ 30 Игроков").setCallbackData(CallBackData.TOP_30_PLAYERS.getName()));
+		ROW_4.add(new InlineKeyboardButton().setText(Emoji.SUNGLASSES.getCode() + "Любимые команды").setCallbackData(CallBackData.TEAMS.getName()));
 		ROWS_IN_LINE.add(ROW_1);
 		ROWS_IN_LINE.add(ROW_2);
 		ROWS_IN_LINE.add(ROW_3);
+		ROWS_IN_LINE.add(ROW_4);
 		MARK_UP_IN_LINE.setKeyboard(ROWS_IN_LINE);
 	}
 	

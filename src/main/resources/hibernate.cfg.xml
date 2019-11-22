@@ -9,6 +9,11 @@
 		<property name="connection.url">jdbc:mysql://34.65.223.113:8764/botdb</property>
 		<property name="connection.username">dbuser</property>
 		<property name="connection.password">botpass</property>
+
+		<property name="mysql.min_size">5</property>
+		<property name="mysql.max_size">10</property>
+		<property name="mysql.timeout">1800</property>
+
 		<property name="show_sql">true</property>
 	</session-factory>
 </hibernate-configuration>

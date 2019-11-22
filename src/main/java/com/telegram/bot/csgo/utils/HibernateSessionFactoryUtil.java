@@ -4,8 +4,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
-import com.telegram.bot.csgo.flags.Flag;
-import com.telegram.bot.csgo.teams.FavoriteTeam;
+import com.telegram.bot.csgo.db.FavoriteTeam;
+import com.telegram.bot.csgo.db.Flag;
 
 public class HibernateSessionFactoryUtil {
     private static SessionFactory sessionFactory;

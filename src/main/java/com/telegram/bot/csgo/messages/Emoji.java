@@ -13,8 +13,8 @@ public enum Emoji {
     SPORT_MEDAL ("\ud83c\udfc5"),
     TV ("\ud83d\udcfa"),
     FIRE ("\uD83D\uDD25"),
-    RU ("\ud83c\uddf7\ud83c\uddfa"),
-    EN ("\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f");
+    SAD ("\u2639\ufe0f"),
+    SUNGLASSES ("\ud83d\ude0e");
     
     private String code;
 

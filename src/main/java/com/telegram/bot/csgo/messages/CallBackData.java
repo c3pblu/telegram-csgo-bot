@@ -10,7 +10,9 @@ public enum CallBackData {
     TOP_30_PLAYERS ("top30players"),
     MATCHES ("matches"),
     RESULTS ("results"),
-    STREAMS ("streams");
+    STREAMS ("streams"),
+    TEAMS ("teams");
+    
     
     private String name;
 

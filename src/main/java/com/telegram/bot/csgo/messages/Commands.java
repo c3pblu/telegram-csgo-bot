@@ -12,7 +12,8 @@ public enum Commands {
     TOP_10_PLAYERS (".топ10игроков"),
     TOP_20_PLAYERS (".топ20игроков"),
     TOP_30_PLAYERS (".топ30игроков"),
-    STREAMS (".стримы");
+    STREAMS (".стримы"),
+    TEAMS (".команды");
     
     private String name;
 

@@ -1,28 +1,17 @@
-package com.telegram.bot.csgo.flags;
+package com.telegram.bot.csgo.db;
 
 import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
-import com.telegram.bot.csgo.teams.FavoriteTeam;
 
 @Entity
 @Table(name = "flags")
-@NamedQueries(value = {
-        @NamedQuery(name = "byNameAllFileds", query = "select p from Flag p where p.name = :name"),
-        @NamedQuery(name = "byNameOneField", query = "select p.name from Flag p where p.name = :name"),
-        @NamedQuery(name = "byCode", query = "from Flag where code = :code"),
-        @NamedQuery(name = "byEmojiCode", query = "from Flag where emojiCode = :emojiCode"),
-})
 public class Flag implements Serializable {
 
-    private static final long serialVersionUID = -1592519970849703869L;
+    private static final long serialVersionUID = 2L;
 
     @Column(name = "name")
     private String name;
@@ -41,10 +30,11 @@ public class Flag implements Serializable {
 
     }
 
-    public Flag(String name, String code, String eCode) {
+    public Flag(String name, String code, String eCode, String unicode) {
         this.name = name;
         this.code = code;
         this.emojiCode = eCode;
+        this.unicode = unicode;
     }
 
     public String getName() {
@@ -81,7 +71,7 @@ public class Flag implements Serializable {
 
     @Override
     public String toString() {
-        return "[" + this.name + "] [" + this.code + "] [" + this.emojiCode + "]";
+        return "[" + this.name + "] [" + this.code + "] [" + this.emojiCode + "] [" + this.unicode + "]";
     }
 
     @Override
@@ -91,9 +81,7 @@ public class Flag implements Serializable {
         if (!(obj instanceof Flag))
             return false;
         final Flag flag = (Flag) obj;
-        if (flag.getCode().equals(this.getCode())
-                && flag.getEmojiCode().equals(this.getEmojiCode())
-                && flag.getName().equals(this.getName()))
+        if (flag.getCode().equals(this.getCode()))
             return true;
         return false;
     }
@@ -101,8 +89,7 @@ public class Flag implements Serializable {
     @Override
     public int hashCode() {
         int result;
-        result = this.getCode().hashCode();
-        result = 29 * result + this.getEmojiCode().hashCode();
+        result = 29 * this.getCode().hashCode();
         return result;
     }
 
