@@ -9,12 +9,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import com.telegram.bot.csgo.messages.BotMessages;
 import com.telegram.bot.csgo.messages.CallBackData;
 import com.telegram.bot.csgo.messages.Commands;
 import com.telegram.bot.csgo.messages.HelpMessage;
@@ -34,8 +34,6 @@ public class Bot extends TelegramLongPollingBot {
     private static final String CONTRY_REGEXP = "\\[[A-Z][A-Z]\\]";
 
     @Autowired
-    private BotMessages botMessages;
-    @Autowired
     private MessageBuilder messages;
 
     @Value(value = "${bot.callback.timeout}")
@@ -48,6 +46,8 @@ public class Bot extends TelegramLongPollingBot {
     private Long schedulerChatId;
     @Value(value = "${bot.message.timeout}")
     private Long messageTimeout;
+    @Value(value = "${bot.message.uniq.count}")
+    private Integer uniqCount;
 
     @Override
     public String getBotUsername() {
@@ -101,7 +101,7 @@ public class Bot extends TelegramLongPollingBot {
             // Private and mentioned message
             else if (StringUtils.startsWith(update.getMessage().getText(), "@" + botName)
                     || update.getMessage().getChat().isUserChat()) {
-                sendMessage(chatId, messages.cite());
+                sendMessage(chatId, messages.createBotMessage(uniqCount));
             }
             // Twitch streams
             else if (text.equalsIgnoreCase(Commands.STREAMS.getName())) {
@@ -183,6 +183,15 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     private void sendMessage(Long chatId, SendMessage msg) {
+        msg.setChatId(chatId);
+        try {
+            execute(msg); // Call method to send the message
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void sendMessage(Long chatId, SendSticker msg) {
         msg.setChatId(chatId);
         try {
             execute(msg); // Call method to send the message
