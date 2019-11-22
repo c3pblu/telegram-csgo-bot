@@ -112,7 +112,9 @@ public class MessageBuilder {
             if (number > count) {
                 break;
             }
-            textMessage.append("<b>#").append(number).append("</b> <a href=\'https://hltv.org")
+            textMessage.append("<b>#").append(number)
+                    .append(flagUnicodeFromCountry(value.select("td.playerCol").select("img").attr("title")))
+                    .append("</b> <a href=\'https://hltv.org")
                     .append(value.select("td.playerCol").select("a").attr("href")).append("\'>")
                     .append(value.select("td.playerCol").text()).append("</a>, ")
                     .append(value.select("td.teamCol").select("img").attr("title")).append(", ")
@@ -265,7 +267,7 @@ public class MessageBuilder {
             textMessage.append("<b>(").append(data.getNumber("viewer_count")).append(")</b> ")
                     .append("<a href=\'https://www.twitch.tv/").append(data.getString("user_name")).append("\'>")
                     .append(data.getString("user_name")).append("</a> ")
-                    .append(countryCodeToFlagUnicode(data.getString("language")))
+                    .append(flagUnicodeFromCountry(data.getString("language")))
                     .append(" ").append(data.getString("title").replace("<", "").replace(">", "")).append("\n");
         }
         streams.setMessage(textMessage);
@@ -320,12 +322,13 @@ public class MessageBuilder {
         List<FavoriteTeam> teams = dao.getTeams().stream().filter(team -> team.getChatId().equals(chatId))
                 .collect(Collectors.toList());
         if (teams.isEmpty())
-            return new TextMessage(TEAMS_DESCRIPTION + "\n\n<b>У вас пока нет любимых команд!</b> " + Emoji.SAD.getCode() + "\n\n" + TEAMS_COMMANDS);
+            return new TextMessage(TEAMS_DESCRIPTION + "\n\n<b>У вас пока нет любимых команд!</b> " + Emoji.SAD.getCode()
+                    + "\n\n" + TEAMS_COMMANDS);
         textMessage.append(TEAMS_DESCRIPTION).append("\nВаши любимые команды:\n\n");
         teams.stream().forEach(
                 team -> textMessage.append("<b>").append(team.getName()).append("</b> [")
                         .append(team.getCountryCode().getCode()).append("] ")
-                        .append(countryCodeToFlagUnicode(team.getCountryCode().getCode())).append("\n"));
+                        .append(flagUnicodeFromCountry(team.getCountryCode().getCode())).append("\n"));
         textMessage.append("\n").append(TEAMS_COMMANDS);
         return new TextMessage(textMessage);
     }
@@ -346,7 +349,6 @@ public class MessageBuilder {
         StringBuilder stars = new StringBuilder();
         match.select("div.stars").select("i").stream().forEach(star -> stars.append(Emoji.STAR.getCode()));
         return stars;
-
     }
 
     private String getHttpResponse(String uri) {
@@ -379,7 +381,7 @@ public class MessageBuilder {
                 .filter(team -> team.getChatId().equals(chatId) && team.getName().equals(name)).findFirst()
                 .orElse(null);
         if (fvTeam != null) {
-            String flag = countryCodeToFlagUnicode(fvTeam.getCountryCode().getCode());
+            String flag = flagUnicodeFromCountry(fvTeam.getCountryCode().getCode());
             if (!isBold) {
                 teamName = flag + teamName;
             } else {
@@ -396,11 +398,17 @@ public class MessageBuilder {
         return name;
     }
 
-    public String countryCodeToFlagUnicode(String countryCode) {
+    private String flagUnicodeFromCountry(String country) {
         String text = null;
+        Flag ourFlag = new Flag();
         List<Flag> flags = dao.getFlags();
-        Flag ourFlag = flags.parallelStream().filter(t -> t.getCode().equals(countryCode.toUpperCase())).findFirst()
-                .orElse(null);
+        if (country.matches("[A-Z][A-Z]")) {
+            ourFlag = flags.parallelStream().filter(t -> t.getCode().equals(country.toUpperCase())).findFirst()
+                    .orElse(null);
+        } else {
+            ourFlag = flags.parallelStream().filter(t -> t.getName().equals(country)).findFirst()
+                    .orElse(null);
+        }
         if (ourFlag != null) {
             if (!StringUtils.isBlank(ourFlag.getUnicode())) {
                 text = StringEscapeUtils.unescapeJava(ourFlag.getUnicode());
