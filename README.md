@@ -1,7 +1,7 @@
 ## telegram-csgo-bot
 Get data from [HLTV.org](https://HLTV.org/) about CS:GO events, teams, players etc. 
 
-### Done:
+### Features:
 - Top teams and players
 - Matches
 - Results
@@ -12,7 +12,7 @@ Get data from [HLTV.org](https://HLTV.org/) about CS:GO events, teams, players e
 - Randomize private bot response (w/o repeating last 3 messages)
 - Timeout for text and menu messages.
 
-### To-Do:
+### Backlog:
 
 - Flags for Top Teams / Players
 - Cache for "Top" requests

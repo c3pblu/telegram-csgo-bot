@@ -42,7 +42,7 @@ public class MessageBuilder {
 
     private static final String MATCHES_FOR_TODAY = "Ближайшие матчи:";
     private static final String RESULTS_FOR_TODAY = "Последние результаты:";
-    private static final String TEAMS_COMMANDS = "Добавить команду/изменить код страны:\n <b>.команда+Natus Vincere[RU]</b> \nУдалить команду: \n<b>.команда-Natus Vincere</b>";
+    private static final String TEAMS_COMMANDS = "Добавить команду/изменить код страны:\n <b>.команды+Natus Vincere[RU]</b> \nУдалить команду: \n<b>.команды-Natus Vincere</b>";
     private static final String TEAMS_DESCRIPTION = Emoji.INFO.getCode()
             + " Любимая команда выделяется флагом в результатах и матчах (+ толстый шрифт)";
     private final static String USER_AGENT_NAME = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
@@ -399,7 +399,7 @@ public class MessageBuilder {
     private String favoriteTeam(Long chatId, String name, boolean isBold) {
         String teamName = name;
         FavoriteTeam fvTeam = dao.getTeams().parallelStream()
-                .filter(team -> team.getChatId().equals(chatId) && team.getName().equals(name)).findFirst()
+                .filter(team -> team.getChatId().equals(chatId) && team.getName().equalsIgnoreCase(name)).findFirst()
                 .orElse(null);
         if (fvTeam != null) {
             String flag = flagUnicodeFromCountry(fvTeam.getCountryCode().getCode());
