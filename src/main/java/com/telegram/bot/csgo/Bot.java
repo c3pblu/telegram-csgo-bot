@@ -29,7 +29,7 @@ public class Bot extends TelegramLongPollingBot {
 
     private static final String OOPS = "Упс, ты слишком долго думал парень!";
     private static final String NEXT_PAGE = "Go to next Page?";
-    private static final String TEAM_REGEXP = "\\.[к][о][м][а][н][д][а]";
+    private static final String TEAM_REGEXP = "\\.[к][о][м][а][н][д][ы]";
     private static final String NAME_REGEXP = "([\\w]*\\s{0,}\\.{0,})*";
     private static final String CONTRY_REGEXP = "\\[[A-Z][A-Z]\\]";
 
