@@ -12,4 +12,5 @@ public class TextMessage extends SendMessage {
         this.setParseMode(HTML);
         this.setText(msg.toString());
     }
+
 }

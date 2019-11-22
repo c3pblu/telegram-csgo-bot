@@ -6,11 +6,13 @@ Get data from [HLTV.org](https://HLTV.org/) about CS:GO events, teams, players e
 - Matches
 - Results
 - Menu
+- Streams from Twitch.tv ([Twitch API](https://dev.twitch.tv/docs/v5))
+- Favorite teams and Flags control for each chat (Hibernate with MySQL) 
+- Scheduled messages for Results and Matches
 - Randomize private bot response (w/o repeating last 3 messages)
-- Skip messages after 5 minutes gone
+- Timeout for text and menu messages.
 
 ### To-Do:
 
-- Flags
+- Flags for Top Teams / Players
 - Cache for "Top" requests
-- Favorite teams control

@@ -6,11 +6,14 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.http.HttpHeaders;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -25,15 +28,21 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import com.telegram.bot.csgo.flags.FlagDao;
-import com.telegram.bot.csgo.teams.FavoriteTeams_old;
+import com.telegram.bot.csgo.db.DaoImpl;
+import com.telegram.bot.csgo.db.DbResult;
+import com.telegram.bot.csgo.db.FavoriteTeam;
+import com.telegram.bot.csgo.db.Flag;
 import com.telegram.bot.csgo.twitch.Streams;
+import com.vdurmont.emoji.EmojiParser;
 
 @Component
 public class MessageBuilder {
 
     private static final String MATCHES_FOR_TODAY = "Ближайшие матчи:";
     private static final String RESULTS_FOR_TODAY = "Последние результаты:";
+    private static final String TEAMS_COMMANDS = "Добавить команду/изменить код страны:\n <b>.команда+Natus Vincere[RU]</b> \nУдалить команду: \n<b>.команда-Natus Vincere</b>";
+    private static final String TEAMS_DESCRIPTION = Emoji.INFO.getCode()
+            + " Любимая команда выделяется флагом в результатах и матчах (+ толстый шрифт)";
     private final static String USER_AGENT_NAME = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
     private final static String HLTV = "https://www.hltv.org";
     private final static String CITES = "https://api.forismatic.com/api/1.0/?method=getQuote&format=html&lang=ru";
@@ -45,9 +54,15 @@ public class MessageBuilder {
     private static final HttpClient CLIENT = new HttpClient();
     @Value("${twitch.client.id}")
     private String clientId;
+<<<<<<< HEAD
     
 //    @Autowired
 //    private FlagDao flags;
+=======
+
+    @Autowired
+    private DaoImpl dao;
+>>>>>>> refs/remotes/origin/dev
 
     public SendMessage topTeams(Integer count) {
         Document doc = getHtmlDocument(HLTV + "/ranking/teams");
@@ -117,7 +132,7 @@ public class MessageBuilder {
         return new TextMessage(textMessage);
     }
 
-    public SendMessage matches() {
+    public SendMessage matches(Long chatId) {
         Document doc = getHtmlDocument(HLTV + "/matches");
         StringBuilder textMessage = new StringBuilder();
         if (doc.select("div.live-match").size() > 1) {
@@ -131,9 +146,9 @@ public class MessageBuilder {
 
             textMessage.append(Emoji.CUP.getCode()).append("<a href=\'https://hltv.org")
                     .append(match.select("a").attr("href")).append("\'>").append(match.select("div.event-name").text())
-                    .append("</a>\n").append(favoriteTeam(match.select("span.team-name").get(0).text(), false))
+                    .append("</a>\n").append(favoriteTeam(chatId, match.select("span.team-name").get(0).text(), false))
                     .append(" ").append(Emoji.VS.getCode()).append(" ")
-                    .append(favoriteTeam(match.select("span.team-name").get(1).text(), false)).append(" (")
+                    .append(favoriteTeam(chatId, match.select("span.team-name").get(1).text(), false)).append(" (")
                     .append(match.select("tr.header").select("td.bestof").text()).append(") ").append(getStars(match))
                     .append("\n");
 
@@ -172,9 +187,9 @@ public class MessageBuilder {
             textMessage.append("<b>").append(formattedTime).append("</b> - ");
 
             if (!match.select("div.line-align").isEmpty()) {
-                textMessage.append(favoriteTeam(match.select("td.team-cell").get(0).text(), true)).append(" ")
+                textMessage.append(favoriteTeam(chatId, match.select("td.team-cell").get(0).text(), true)).append(" ")
                         .append(Emoji.VS.getCode()).append(" ")
-                        .append(favoriteTeam(match.select("td.team-cell").get(1).text(), true)).append(" (")
+                        .append(favoriteTeam(chatId, match.select("td.team-cell").get(1).text(), true)).append(" (")
                         .append(match.select("div.map-text").text()).append(") ").append(getStars(match))
                         .append(Emoji.SQUARE.getCode()).append(" ").append("<a href=\'https://hltv.org")
                         .append(match.select("a").attr("href")).append("\'>").append(match.select("td.event").text())
@@ -190,7 +205,7 @@ public class MessageBuilder {
 
     }
 
-    public SendMessage results() {
+    public SendMessage results(Long chatId) {
         Document doc = getHtmlDocument(HLTV + "/results");
         StringBuilder textMessage = new StringBuilder();
         Elements subLists = doc.select("div.results-sublist");
@@ -205,8 +220,8 @@ public class MessageBuilder {
             for (Element resultCon : resultList.select("div.result-con")) {
                 Element team1 = resultCon.select("div.team").get(0);
                 Element team2 = resultCon.select("div.team").get(1);
-                String team1String = favoriteTeam(resultCon.select("div.team").get(0).text(), false);
-                String team2String = favoriteTeam(resultCon.select("div.team").get(1).text(), false);
+                String team1String = favoriteTeam(chatId, resultCon.select("div.team").get(0).text(), false);
+                String team2String = favoriteTeam(chatId, resultCon.select("div.team").get(1).text(), false);
 
                 if (team1.hasClass("team-won")) {
                     textMessage.append("<b>").append(team1String).append("</b>");
@@ -255,7 +270,8 @@ public class MessageBuilder {
             JSONObject data = arr.getJSONObject(i);
             textMessage.append("<b>(").append(data.getNumber("viewer_count")).append(")</b> ")
                     .append("<a href=\'https://www.twitch.tv/").append(data.getString("user_name")).append("\'>")
-                    .append(data.getString("user_name")).append("</a> ").append(getFlag(data.getString("language")))
+                    .append(data.getString("user_name")).append("</a> ")
+                    .append(countryCodeToFlagUnicode(data.getString("language")))
                     .append(" ").append(data.getString("title").replace("<", "").replace(">", "")).append("\n");
         }
         streams.setMessage(textMessage);
@@ -274,6 +290,54 @@ public class MessageBuilder {
         }
 
         return new TextMessage(text);
+    }
+
+    public SendMessage updateFavoriteTeam(Long chatId, String name, String countryCode) {
+        DbResult dbResult = dao.updateOrSaveTeam(chatId, name, countryCode);
+        switch (dbResult) {
+            case NOTHING_WAS_CHANGED:
+                return new TextMessage(DbResult.NOTHING_WAS_CHANGED.getText());
+            case UPDATED:
+                return new TextMessage("<b>" + name + "</b> " + DbResult.UPDATED.getText());
+            case ALREADY_EXIST:
+                return new TextMessage("<b>" + name + "</b> " + DbResult.ALREADY_EXIST.getText());
+            case INSERTED:
+                return new TextMessage("<b>" + name + "</b> " + DbResult.INSERTED.getText());
+            default:
+                return new TextMessage(DbResult.OOPS.getText());
+        }
+    }
+
+    public SendMessage deleteTeam(Long chatId, String name) {
+        DbResult dbResult = dao.deleteTeam(chatId, name);
+
+        switch (dbResult) {
+            case DELETED:
+                return new TextMessage("<b>" + name + "</b> " + DbResult.DELETED.getText());
+            case NOTHING_WAS_CHANGED:
+                return new TextMessage(DbResult.NOTHING_WAS_CHANGED.getText());
+            default:
+                return new TextMessage(DbResult.OOPS.getText());
+        }
+    }
+
+    public SendMessage getAllTeams(Long chatId) {
+        StringBuilder textMessage = new StringBuilder();
+        List<FavoriteTeam> teams = dao.getTeams().stream().filter(team -> team.getChatId().equals(chatId))
+                .collect(Collectors.toList());
+        if (teams.isEmpty())
+            return new TextMessage(TEAMS_DESCRIPTION + "\n\n<b>У вас пока нет любимых команд!</b> " + Emoji.SAD.getCode() + "\n\n" + TEAMS_COMMANDS);
+        textMessage.append(TEAMS_DESCRIPTION).append("\nВаши любимые команды:\n\n");
+        teams.stream().forEach(
+                team -> textMessage.append("<b>").append(team.getName()).append("</b> [")
+                        .append(team.getCountryCode().getCode()).append("] ")
+                        .append(countryCodeToFlagUnicode(team.getCountryCode().getCode())).append("\n"));
+        textMessage.append("\n").append(TEAMS_COMMANDS);
+        return new TextMessage(textMessage);
+    }
+
+    public SendMessage teamsFormat() {
+        return new TextMessage("Неверный формат!\nСмотрите примеры ниже!\n\n" + TEAMS_COMMANDS);
     }
 
     public SendMessage matchesForToday() {
@@ -315,34 +379,44 @@ public class MessageBuilder {
         return new JSONObject(getHttpResponse(uri));
     }
 
+    private String favoriteTeam(Long chatId, String name, boolean isBold) {
+        String teamName = name;
+        FavoriteTeam fvTeam = dao.getTeams().parallelStream()
+                .filter(team -> team.getChatId().equals(chatId) && team.getName().equals(name)).findFirst()
+                .orElse(null);
+        if (fvTeam != null) {
+            String flag = countryCodeToFlagUnicode(fvTeam.getCountryCode().getCode());
+            if (!isBold) {
+                teamName = flag + teamName;
+            } else {
+                teamName = flag + "<b>" + teamName + "</b>";
+            }
+        }
+        return unlinkName(teamName);
+    }
+
     private String unlinkName(String name) {
         if (name.contains(".")) {
             name = name.replace('.', ',');
         }
-
         return name;
     }
 
-    private String favoriteTeam(String name, boolean isBold) {
-        name = unlinkName(name);
-        if (FavoriteTeams_old.isFavorite(name)) {
-            if (!isBold) {
-                name = FavoriteTeams_old.getFlag(name) + name;
+    public String countryCodeToFlagUnicode(String countryCode) {
+        String text = null;
+        List<Flag> flags = dao.getFlags();
+        Flag ourFlag = flags.parallelStream().filter(t -> t.getCode().equals(countryCode.toUpperCase())).findFirst()
+                .orElse(null);
+        if (ourFlag != null) {
+            if (!StringUtils.isBlank(ourFlag.getUnicode())) {
+                text = StringEscapeUtils.unescapeJava(ourFlag.getUnicode());
             } else {
-                name = FavoriteTeams_old.getFlag(name) + "<b>" + name + "</b>";
+                text = EmojiParser.parseToUnicode(ourFlag.getEmojiCode());
             }
         }
-        return name;
-    }
-
-    private String getFlag(String lang) {
-        if (lang.equals("ru")) {
-            return Emoji.RU.getCode();
-        }
-        if (lang.equals("en")) {
-            return Emoji.EN.getCode();
-        }
-        return null;
+        if (text == null)
+            text = EmojiParser.parseToUnicode(":un:");
+        return text;
     }
 
 }
