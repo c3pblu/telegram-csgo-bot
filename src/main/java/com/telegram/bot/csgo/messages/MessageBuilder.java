@@ -54,15 +54,9 @@ public class MessageBuilder {
     private static final HttpClient CLIENT = new HttpClient();
     @Value("${twitch.client.id}")
     private String clientId;
-<<<<<<< HEAD
-    
-//    @Autowired
-//    private FlagDao flags;
-=======
 
     @Autowired
     private DaoImpl dao;
->>>>>>> refs/remotes/origin/dev
 
     public SendMessage topTeams(Integer count) {
         Document doc = getHtmlDocument(HLTV + "/ranking/teams");
