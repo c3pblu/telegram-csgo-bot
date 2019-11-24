@@ -7,13 +7,15 @@ import javax.persistence.Query;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.telegram.bot.csgo.utils.HibernateSessionFactoryUtil;
 
 @Component
 @SuppressWarnings("unchecked")
 public class DaoImpl {
+	
+	@Autowired
+	private HibernateSessionFactory hibernate;
 
     private static List<Flag> flags;
     private static List<FavoriteTeam> teams;
@@ -41,7 +43,7 @@ public class DaoImpl {
         boolean isSameTeam = newFt
                 .equals(teams.parallelStream().filter(team -> team.equals(newFt)).findFirst().orElse(null));
 
-        Session sessionTwo = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+        Session sessionTwo = hibernate.getSessionFactory().openSession();
         Transaction transaction = sessionTwo.beginTransaction();
 
         if (isSameTeam) {
@@ -73,7 +75,7 @@ public class DaoImpl {
     }
 
     public DbResult deleteTeam(Long chatId, String name) {
-        Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+        Session session = hibernate.getSessionFactory().openSession();
         Transaction transaction = session.beginTransaction();
         Query query = session.createNamedQuery("deleteFavoriteTeam")
                 .setParameter("name", name)
@@ -89,13 +91,13 @@ public class DaoImpl {
     }
 
     private void fillAllFlags() {
-        Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+        Session session = hibernate.getSessionFactory().openSession();
         flags = session.createQuery("select p from Flag p").list();
         session.close();
     }
 
     private void fillAllTeams() {
-        Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+        Session session = hibernate.getSessionFactory().openSession();
         teams = session.createQuery("select p from FavoriteTeam p").list();
         session.close();
     }
