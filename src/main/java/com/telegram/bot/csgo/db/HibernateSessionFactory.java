@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.utils;
+package com.telegram.bot.csgo.db;
 
 import javax.inject.Singleton;
 
@@ -8,12 +8,9 @@ import org.hibernate.cfg.Configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.telegram.bot.csgo.db.FavoriteTeam;
-import com.telegram.bot.csgo.db.Flag;
-
 @Component
 @Singleton
-public class HibernateSessionFactoryUtil {
+public class HibernateSessionFactory {
     private static SessionFactory sessionFactory;
 
     @Value(value = "${db.connection}")
@@ -29,7 +26,7 @@ public class HibernateSessionFactoryUtil {
     @Value(value = "${db.pool.timeout}")
     private String timeout;
     
-    private HibernateSessionFactoryUtil() {
+    private HibernateSessionFactory() {
     }
 
     public SessionFactory getSessionFactory() {

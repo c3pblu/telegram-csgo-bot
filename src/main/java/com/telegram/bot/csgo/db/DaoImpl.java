@@ -10,14 +10,12 @@ import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.telegram.bot.csgo.utils.HibernateSessionFactoryUtil;
-
 @Component
 @SuppressWarnings("unchecked")
 public class DaoImpl {
 	
 	@Autowired
-	private HibernateSessionFactoryUtil hibernate;
+	private HibernateSessionFactory hibernate;
 
     private static List<Flag> flags;
     private static List<FavoriteTeam> teams;
