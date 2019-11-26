@@ -8,10 +8,13 @@ import javax.persistence.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
 
 @Component
 @SuppressWarnings("unchecked")
+@ManagedResource
 public class DaoImpl {
 	
 	@Autowired
@@ -29,7 +32,7 @@ public class DaoImpl {
     }
 
     @PostConstruct
-    public void init() {
+    private void init() {
         fillAllFlags();
         fillAllTeams();
     }
@@ -90,13 +93,15 @@ public class DaoImpl {
             return DbResult.NOTHING_WAS_CHANGED;
     }
 
-    private void fillAllFlags() {
+    @ManagedOperation
+    public void fillAllFlags() {
         Session session = hibernate.getSessionFactory().openSession();
         flags = session.createQuery("select p from Flag p").list();
         session.close();
     }
 
-    private void fillAllTeams() {
+    @ManagedOperation
+    public void fillAllTeams() {
         Session session = hibernate.getSessionFactory().openSession();
         teams = session.createQuery("select p from FavoriteTeam p").list();
         session.close();
