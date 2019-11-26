@@ -239,13 +239,13 @@ public class Bot extends TelegramLongPollingBot {
     @Scheduled(cron = "${bot.scheduler.matches.cron}")
     private void todayMatchesScheduler() {
         sendMessage(schedulerChatId, messages.matchesForToday());
-        sendMessage(schedulerChatId, messages.matches(-307509318L));
+        sendMessage(schedulerChatId, messages.matches(schedulerChatId));
     }
 
     @Scheduled(cron = "${bot.scheduler.results.cron}")
     private void todayResultsScheduler() {
         sendMessage(schedulerChatId, messages.resultsForToday());
-        sendMessage(schedulerChatId, messages.results(-307509318L));
+        sendMessage(schedulerChatId, messages.results(schedulerChatId));
     }
 
 }
