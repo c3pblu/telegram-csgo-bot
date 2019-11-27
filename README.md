@@ -14,9 +14,5 @@ Get data from [HLTV.org](https://HLTV.org/) about CS:GO events, teams, players e
 
 ### Backlog:
 
-<<<<<<< HEAD
-- Flags for Top Teams / Players
-- Cache for "Top" requests
-=======
 - Cache for "Top" requests ? 
->>>>>>> refs/remotes/origin/dev
+
