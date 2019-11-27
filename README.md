@@ -9,9 +9,9 @@ Get data from [HLTV.org](https://HLTV.org/) about CS:GO events, teams, players e
 - Scheduled messages for Results and Matches (cron Scheduler, configured value)
 - Randomize private bot response, w/o repeating messages (configured value)
 - Timeout for text and menu messages (configured values)
-- MBean for refresh data from DB w/o application restart
+- MBean for refresh Teams/Flags data w/o application restart
+- Cache for teams Flags
 
 ### Backlog:
 
-- Flags for Players
-- Cache for "Top" requests
+- Cache for "Top" requests ? 
