@@ -331,7 +331,6 @@ public class MessageBuilder {
 
 	public SendMessage deleteTeam(Long chatId, String name) {
 		DbResult dbResult = dao.deleteTeam(chatId, name);
-
 		switch (dbResult) {
 		case DELETED:
 			return new TextMessage("<b>" + name + "</b> " + DbResult.DELETED.getText());
