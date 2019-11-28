@@ -13,9 +13,13 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
 
 @Component
-@SuppressWarnings("unchecked")
 @ManagedResource
+@SuppressWarnings("unchecked")
 public class DaoImpl {
+    
+    private static final String NAME = "name";
+    private static final String CHAT_ID = "chatId";
+    private static final String COUNTRY_CODE = "countryCode";
 	
 	@Autowired
 	private HibernateSessionFactory hibernate;
@@ -55,9 +59,9 @@ public class DaoImpl {
             if (isSameFlag)
                 return DbResult.ALREADY_EXIST;
             Query query = sessionTwo.createNamedQuery("updateFavoriteTeam")
-                    .setParameter("countryCode", newFt.getCountryCode())
-                    .setParameter("name", newFt.getName())
-                    .setParameter("chatId", newFt.getChatId());
+                    .setParameter(COUNTRY_CODE, newFt.getCountryCode())
+                    .setParameter(NAME, newFt.getName())
+                    .setParameter(CHAT_ID, newFt.getChatId());
             int count = query.executeUpdate();
             transaction.commit();
             sessionTwo.close();
@@ -81,8 +85,8 @@ public class DaoImpl {
         Session session = hibernate.getSessionFactory().openSession();
         Transaction transaction = session.beginTransaction();
         Query query = session.createNamedQuery("deleteFavoriteTeam")
-                .setParameter("name", name)
-                .setParameter("chatId", chatId);
+                .setParameter(NAME, name)
+                .setParameter(CHAT_ID, chatId);
         int count = query.executeUpdate();
         transaction.commit();
         session.close();

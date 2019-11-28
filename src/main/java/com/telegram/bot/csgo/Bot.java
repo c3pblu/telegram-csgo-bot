@@ -31,7 +31,9 @@ public class Bot extends TelegramLongPollingBot {
     private static final String NEXT_PAGE = "Go to next Page?";
     private static final String TEAM_REGEXP = "\\.[к][о][м][а][н][д][ы]";
     private static final String NAME_REGEXP = "([\\w]*\\s{0,}\\.{0,})*";
-    private static final String CONTRY_REGEXP = "\\[[A-Z][A-Z]\\]";
+    private static final String COUNTRY_REGEXP = "\\[[A-Z][A-Z]\\]";
+    private static final String PLUS_REGEXP = "\\+";
+    private static final String MINUS_REGEXP = "\\-";
 
     @Autowired
     private MessageBuilder messages;
@@ -115,17 +117,17 @@ public class Bot extends TelegramLongPollingBot {
             }
 
             else if (text.matches(TEAM_REGEXP + ".*")) {
-                // Insert/Update (.команда+)
-                if (text.matches(TEAM_REGEXP + "\\+" + NAME_REGEXP + CONTRY_REGEXP)) {
+                // Insert/Update (.команды+)
+                if (text.matches(TEAM_REGEXP + PLUS_REGEXP + NAME_REGEXP + COUNTRY_REGEXP)) {
                     String team = text.replaceAll("\\[..\\]", "")
-                            .replaceAll(TEAM_REGEXP + "\\+", "").trim();
-                    String countryCode = text.replaceAll(TEAM_REGEXP + "\\+" + NAME_REGEXP, "")
+                            .replaceAll(TEAM_REGEXP + PLUS_REGEXP, "").trim();
+                    String countryCode = text.replaceAll(TEAM_REGEXP + PLUS_REGEXP + NAME_REGEXP, "")
                             .replaceAll("\\[", "").replaceAll("\\]", "");
                     sendMessage(chatId, messages.updateFavoriteTeam(chatId, team, countryCode));
                 }
-                // Delete (.команда-)
-                else if (text.matches(TEAM_REGEXP + "\\-" + NAME_REGEXP)) {
-                    String team = text.replaceAll(TEAM_REGEXP + "\\-", "").trim();
+                // Delete (.команды-)
+                else if (text.matches(TEAM_REGEXP + MINUS_REGEXP + NAME_REGEXP)) {
+                    String team = text.replaceAll(TEAM_REGEXP + MINUS_REGEXP, "").trim();
                     sendMessage(chatId, messages.deleteTeam(chatId, team));
                 }
                 else {

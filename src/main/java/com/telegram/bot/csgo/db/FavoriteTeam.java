@@ -11,13 +11,8 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.SelectBeforeUpdate;
-
 @Entity
 @Table(name = "favorite_teams")
-@DynamicUpdate
-@SelectBeforeUpdate
 @NamedQueries(value = {
         @NamedQuery(name = "updateFavoriteTeam", query = "update FavoriteTeam p set p.countryCode = :countryCode where p.chatId = :chatId and p.name = :name"),
         @NamedQuery(name = "deleteFavoriteTeam", query = "delete from FavoriteTeam p where p.chatId = :chatId and p.name = :name")
