@@ -100,11 +100,6 @@ public class Bot extends TelegramLongPollingBot {
                 Integer count = Integer.parseInt(update.getMessage().getText().substring(4));
                 sendMessage(chatId, messages.topTeams(count));
             }
-            // Private and mentioned message
-            else if (StringUtils.startsWith(update.getMessage().getText(), "@" + botName)
-                    || update.getMessage().getChat().isUserChat()) {
-                sendMessage(chatId, messages.createBotMessage(uniqCount));
-            }
             // Twitch streams
             else if (text.equalsIgnoreCase(Commands.STREAMS.getName())) {
                 Streams streams = messages.twitch("");
@@ -133,6 +128,11 @@ public class Bot extends TelegramLongPollingBot {
                 else {
                     sendMessage(chatId, messages.teamsFormat());
                 }
+            }
+            // Private and mentioned message
+            else if (StringUtils.startsWith(update.getMessage().getText(), "@" + botName)
+                    || update.getMessage().getChat().isUserChat()) {
+                sendMessage(chatId, messages.createBotMessage(uniqCount));
             }
 
         }
