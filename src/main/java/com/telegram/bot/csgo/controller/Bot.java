@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo;
+package com.telegram.bot.csgo.controller;
 
 import java.time.Instant;
 
