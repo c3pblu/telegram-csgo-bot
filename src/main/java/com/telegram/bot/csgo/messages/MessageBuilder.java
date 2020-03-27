@@ -31,10 +31,10 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 
-import com.telegram.bot.csgo.db.DaoImpl;
-import com.telegram.bot.csgo.db.DbResult;
-import com.telegram.bot.csgo.db.FavoriteTeam;
-import com.telegram.bot.csgo.db.Flag;
+import com.telegram.bot.csgo.db.DaoMySQL;
+import com.telegram.bot.csgo.model.DbResult;
+import com.telegram.bot.csgo.model.FavoriteTeam;
+import com.telegram.bot.csgo.model.Flag;
 import com.telegram.bot.csgo.twitch.Streams;
 import com.vdurmont.emoji.EmojiParser;
 
@@ -61,7 +61,7 @@ public class MessageBuilder {
 	@Autowired
 	private TeamFlagBuilder teamFlagBuilder;
 	@Autowired
-	private DaoImpl dao;
+	private DaoMySQL dao;
 
 	public SendMessage topTeams(Integer count) {
 		Document doc = getHtmlDocument(HLTV + "/ranking/teams");
@@ -316,7 +316,7 @@ public class MessageBuilder {
 	public SendMessage updateFavoriteTeam(Long chatId, String name, String countryCode) {
 		DbResult dbResult = dao.updateOrSaveTeam(chatId, name, countryCode);
 		switch (dbResult) {
-		case NOTHING_WAS_CHANGED:
+		case FLAG_NOT_FOUND:
 			return new TextMessage(DbResult.NOTHING_WAS_CHANGED.getText());
 		case UPDATED:
 			return new TextMessage("<b>" + name + "</b> " + DbResult.UPDATED.getText());

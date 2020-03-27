@@ -8,6 +8,9 @@ import org.hibernate.cfg.Configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.telegram.bot.csgo.model.FavoriteTeam;
+import com.telegram.bot.csgo.model.Flag;
+
 @Component
 @Singleton
 public class HibernateSessionFactory {
