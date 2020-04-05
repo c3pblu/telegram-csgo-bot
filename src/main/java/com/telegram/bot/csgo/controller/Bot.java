@@ -15,14 +15,11 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import com.telegram.bot.csgo.messages.CallBackData;
-import com.telegram.bot.csgo.messages.Commands;
-import com.telegram.bot.csgo.messages.HelpMessage;
-import com.telegram.bot.csgo.messages.MenuMessage;
+import com.telegram.bot.csgo.messages.Message;
 import com.telegram.bot.csgo.messages.MessageBuilder;
-import com.telegram.bot.csgo.messages.NextPage;
-import com.telegram.bot.csgo.messages.TextMessage;
-import com.telegram.bot.csgo.twitch.Streams;
+import com.telegram.bot.csgo.model.CallBackData;
+import com.telegram.bot.csgo.model.Commands;
+import com.telegram.bot.csgo.model.Streams;
 
 @Component
 public class Bot extends TelegramLongPollingBot {
@@ -36,7 +33,9 @@ public class Bot extends TelegramLongPollingBot {
     private static final String MINUS_REGEXP = "\\-";
 
     @Autowired
-    private MessageBuilder messages;
+    private MessageBuilder messageBuilder;
+    @Autowired
+    private Message message;
 
     @Value(value = "${bot.callback.timeout}")
     private Long callBackTimeout;
@@ -73,42 +72,42 @@ public class Bot extends TelegramLongPollingBot {
             String text = update.getMessage().getText();
             // Help
             if (text.equalsIgnoreCase(Commands.HELP.getName())) {
-                sendMessage(chatId, new HelpMessage());
+                sendMessage(chatId, message.createHelpMessage());
             }
             // Menu
             else if (text.equalsIgnoreCase(Commands.MENU.getName())) {
-                sendMessage(chatId, new MenuMessage());
+                sendMessage(chatId, message.createMenuMessage());
             }
             // Matches
             else if (text.equalsIgnoreCase(Commands.MATCHES.getName())) {
-                sendMessage(chatId, messages.matches(chatId));
+                sendMessage(chatId, messageBuilder.matches(chatId));
             }
             // Results
             else if (text.equalsIgnoreCase(Commands.RESULTS.getName())) {
-                sendMessage(chatId, messages.results(chatId));
+                sendMessage(chatId, messageBuilder.results(chatId));
             }
             // Top Players
             else if (text.equalsIgnoreCase(Commands.TOP_10_PLAYERS.getName())
                     || text.equalsIgnoreCase(Commands.TOP_20_PLAYERS.getName())
                     || text.equalsIgnoreCase(Commands.TOP_30_PLAYERS.getName())) {
                 Integer count = Integer.parseInt(text.substring(4, 6));
-                sendMessage(chatId, messages.topPlayers(count));
+                sendMessage(chatId, messageBuilder.topPlayers(count));
             }
             // Top Teams
             else if (text.equalsIgnoreCase(Commands.TOP_10.getName()) || text.equalsIgnoreCase(Commands.TOP_20.getName())
                     || text.equalsIgnoreCase(Commands.TOP_30.getName())) {
                 Integer count = Integer.parseInt(update.getMessage().getText().substring(4));
-                sendMessage(chatId, messages.topTeams(count));
+                sendMessage(chatId, messageBuilder.topTeams(count));
             }
             // Twitch streams
             else if (text.equalsIgnoreCase(Commands.STREAMS.getName())) {
-                Streams streams = messages.twitch("");
-                sendMessage(chatId, new TextMessage(streams.getMessage()));
-                sendMessage(chatId, new NextPage(streams.getNextPageId()));
+                Streams streams = messageBuilder.twitch("");
+                sendMessage(chatId, message.createTextMessage(streams.getMessage()));
+                sendMessage(chatId, message.createNextPageMessage(streams.getNextPageId()));
             }
             // Favorite Teams
             else if (text.equalsIgnoreCase(Commands.TEAMS.getName())) {
-                sendMessage(chatId, messages.getAllTeams(chatId));
+                sendMessage(chatId, messageBuilder.getAllTeams(chatId));
             }
 
             else if (text.matches(TEAM_REGEXP + ".*")) {
@@ -118,21 +117,21 @@ public class Bot extends TelegramLongPollingBot {
                             .replaceAll(TEAM_REGEXP + PLUS_REGEXP, "").trim();
                     String countryCode = text.replaceAll(TEAM_REGEXP + PLUS_REGEXP + NAME_REGEXP, "")
                             .replaceAll("\\[", "").replaceAll("\\]", "");
-                    sendMessage(chatId, messages.updateFavoriteTeam(chatId, team, countryCode));
+                    sendMessage(chatId, messageBuilder.updateFavoriteTeam(chatId, team, countryCode));
                 }
                 // Delete (.команды-)
                 else if (text.matches(TEAM_REGEXP + MINUS_REGEXP + NAME_REGEXP)) {
                     String team = text.replaceAll(TEAM_REGEXP + MINUS_REGEXP, "").trim();
-                    sendMessage(chatId, messages.deleteTeam(chatId, team));
+                    sendMessage(chatId, messageBuilder.deleteTeam(chatId, team));
                 }
                 else {
-                    sendMessage(chatId, messages.teamsFormat());
+                    sendMessage(chatId, messageBuilder.teamsFormat());
                 }
             }
             // Private and mentioned message
             else if (StringUtils.startsWith(update.getMessage().getText(), "@" + botName)
                     || update.getMessage().getChat().isUserChat()) {
-                sendMessage(chatId, messages.createBotMessage(uniqCount));
+                sendMessage(chatId, message.createBotMessage(uniqCount));
             }
 
         }
@@ -148,37 +147,37 @@ public class Bot extends TelegramLongPollingBot {
             }
             String data = callBack.getData();
             if (data.equals(CallBackData.TOP_10.getName())) {
-                sendMessage(chatId, messages.topTeams(10));
+                sendMessage(chatId, messageBuilder.topTeams(10));
             }
             if (data.equals(CallBackData.TOP_20.getName())) {
-                sendMessage(chatId, messages.topTeams(20));
+                sendMessage(chatId, messageBuilder.topTeams(20));
             }
             if (data.equals(CallBackData.TOP_30.getName())) {
-                sendMessage(chatId, messages.topTeams(30));
+                sendMessage(chatId, messageBuilder.topTeams(30));
             }
             if (data.equals(CallBackData.TOP_10_PLAYERS.getName())) {
-                sendMessage(chatId, messages.topPlayers(10));
+                sendMessage(chatId, messageBuilder.topPlayers(10));
             }
             if (data.equals(CallBackData.TOP_20_PLAYERS.getName())) {
-                sendMessage(chatId, messages.topPlayers(20));
+                sendMessage(chatId, messageBuilder.topPlayers(20));
             }
             if (data.equals(CallBackData.TOP_30_PLAYERS.getName())) {
-                sendMessage(chatId, messages.topPlayers(30));
+                sendMessage(chatId, messageBuilder.topPlayers(30));
             }
             if (data.equals(CallBackData.MATCHES.getName())) {
-                sendMessage(chatId, messages.matches(chatId));
+                sendMessage(chatId, messageBuilder.matches(chatId));
             }
             if (data.equals(CallBackData.RESULTS.getName())) {
-                sendMessage(chatId, messages.results(chatId));
+                sendMessage(chatId, messageBuilder.results(chatId));
             }
             if (data.equals(CallBackData.TEAMS.getName())) {
-                sendMessage(chatId, messages.getAllTeams(chatId));
+                sendMessage(chatId, messageBuilder.getAllTeams(chatId));
             }
             if (data.equals(CallBackData.STREAMS.getName())
                     || update.getCallbackQuery().getMessage().getText().equals(NEXT_PAGE)) {
-                Streams streams = messages.twitch(data.replace(CallBackData.STREAMS.getName(), ""));
-                sendMessage(chatId, new TextMessage(streams.getMessage()));
-                sendMessage(chatId, new NextPage(streams.getNextPageId()));
+                Streams streams = messageBuilder.twitch(data.replace(CallBackData.STREAMS.getName(), ""));
+                sendMessage(chatId, message.createTextMessage(streams.getMessage()));
+                sendMessage(chatId, message.createNextPageMessage(streams.getNextPageId()));
             }
             deleteMessage(chatId, update.getCallbackQuery().getMessage().getMessageId());
         }
@@ -240,14 +239,14 @@ public class Bot extends TelegramLongPollingBot {
 
     @Scheduled(cron = "${bot.scheduler.matches.cron}")
     private void todayMatchesScheduler() {
-        sendMessage(schedulerChatId, messages.matchesForToday());
-        sendMessage(schedulerChatId, messages.matches(schedulerChatId));
+        sendMessage(schedulerChatId, messageBuilder.matchesForToday());
+        sendMessage(schedulerChatId, messageBuilder.matches(schedulerChatId));
     }
 
     @Scheduled(cron = "${bot.scheduler.results.cron}")
     private void todayResultsScheduler() {
-        sendMessage(schedulerChatId, messages.resultsForToday());
-        sendMessage(schedulerChatId, messages.results(schedulerChatId));
+        sendMessage(schedulerChatId, messageBuilder.resultsForToday());
+        sendMessage(schedulerChatId, messageBuilder.results(schedulerChatId));
     }
 
 }

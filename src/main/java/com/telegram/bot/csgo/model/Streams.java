@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.twitch;
+package com.telegram.bot.csgo.model;
 
 public class Streams {
 

@@ -8,7 +8,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -29,13 +28,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 
 import com.telegram.bot.csgo.db.DaoMySQL;
 import com.telegram.bot.csgo.model.DbResult;
+import com.telegram.bot.csgo.model.Emoji;
 import com.telegram.bot.csgo.model.FavoriteTeam;
 import com.telegram.bot.csgo.model.Flag;
-import com.telegram.bot.csgo.twitch.Streams;
+import com.telegram.bot.csgo.model.Streams;
 import com.vdurmont.emoji.EmojiParser;
 
 @Component
@@ -62,6 +61,8 @@ public class MessageBuilder {
 	private TeamFlagBuilder teamFlagBuilder;
 	@Autowired
 	private DaoMySQL dao;
+	@Autowired
+	private Message message;
 
 	public SendMessage topTeams(Integer count) {
 		Document doc = getHtmlDocument(HLTV + "/ranking/teams");
@@ -91,7 +92,7 @@ public class MessageBuilder {
 		}
 
 		LOGGER.debug("TopTeams final message:\n{}", textMessage.toString());
-		return new TextMessage(textMessage);
+		return message.createTextMessage(textMessage);
 	}
 
 	public SendMessage topPlayers(Integer count) {
@@ -131,7 +132,7 @@ public class MessageBuilder {
 			number++;
 		}
 		LOGGER.debug("TopPlayers final message:\n{}", textMessage.toString());
-		return new TextMessage(textMessage);
+		return message.createTextMessage(textMessage);
 	}
 
 	public SendMessage matches(Long chatId) {
@@ -203,7 +204,7 @@ public class MessageBuilder {
 		}
 
 		LOGGER.debug("Matches final message:\n{}", textMessage.toString());
-		return new TextMessage(textMessage);
+		return message.createTextMessage(textMessage);
 
 	}
 
@@ -252,7 +253,7 @@ public class MessageBuilder {
 		}
 
 		LOGGER.debug("Results final message:\n{}", textMessage.toString());
-		return new TextMessage(textMessage);
+		return message.createTextMessage(textMessage);
 	}
 
 	public Streams twitch(String uri) {
@@ -282,24 +283,24 @@ public class MessageBuilder {
 
 	}
 
-	public SendSticker createBotMessage(Integer uniqCount) {
-		int randomSize = BotMessages.getStickers().size() - 1 + 1;
-		int randomValue = new Random().nextInt(randomSize);
-		String selectedMessage = BotMessages.getStickers().get(randomValue);
-
-		while (BotMessages.getLastSticker().contains(selectedMessage)) {
-			randomValue = new Random().nextInt(randomSize);
-			selectedMessage = BotMessages.getStickers().get(randomValue);
-		}
-
-		if (BotMessages.getLastSticker().size() < uniqCount) {
-			BotMessages.getLastSticker().add(selectedMessage);
-		} else {
-			BotMessages.getLastSticker().remove(0);
-			BotMessages.getLastSticker().add(selectedMessage);
-		}
-		return new SendSticker().setSticker(selectedMessage);
-	}
+//	public SendSticker createBotMessage(Integer uniqCount) {
+//		int randomSize = BotMessages.getStickers().size() - 1 + 1;
+//		int randomValue = new Random().nextInt(randomSize);
+//		String selectedMessage = BotMessages.getStickers().get(randomValue);
+//
+//		while (BotMessages.getLastSticker().contains(selectedMessage)) {
+//			randomValue = new Random().nextInt(randomSize);
+//			selectedMessage = BotMessages.getStickers().get(randomValue);
+//		}
+//
+//		if (BotMessages.getLastSticker().size() < uniqCount) {
+//			BotMessages.getLastSticker().add(selectedMessage);
+//		} else {
+//			BotMessages.getLastSticker().remove(0);
+//			BotMessages.getLastSticker().add(selectedMessage);
+//		}
+//		return new SendSticker().setSticker(selectedMessage);
+//	}
 
 	public SendMessage cite() {
 		Document doc = getHtmlDocument(CITES);
@@ -310,22 +311,22 @@ public class MessageBuilder {
 			text.append("\n<b>").append(athor).append("</b>");
 		}
 
-		return new TextMessage(text);
+		return message.createTextMessage(text);
 	}
 
 	public SendMessage updateFavoriteTeam(Long chatId, String name, String countryCode) {
 		DbResult dbResult = dao.updateOrSaveTeam(chatId, name, countryCode);
 		switch (dbResult) {
 		case FLAG_NOT_FOUND:
-			return new TextMessage(DbResult.NOTHING_WAS_CHANGED.getText());
+			return message.createTextMessage(DbResult.NOTHING_WAS_CHANGED.getText());
 		case UPDATED:
-			return new TextMessage("<b>" + name + "</b> " + DbResult.UPDATED.getText());
+			return message.createTextMessage("<b>" + name + "</b> " + DbResult.UPDATED.getText());
 		case ALREADY_EXIST:
-			return new TextMessage("<b>" + name + "</b> " + DbResult.ALREADY_EXIST.getText());
+			return message.createTextMessage("<b>" + name + "</b> " + DbResult.ALREADY_EXIST.getText());
 		case INSERTED:
-			return new TextMessage("<b>" + name + "</b> " + DbResult.INSERTED.getText());
+			return message.createTextMessage("<b>" + name + "</b> " + DbResult.INSERTED.getText());
 		default:
-			return new TextMessage(DbResult.OOPS.getText());
+			return message.createTextMessage(DbResult.OOPS.getText());
 		}
 	}
 
@@ -333,11 +334,11 @@ public class MessageBuilder {
 		DbResult dbResult = dao.deleteTeam(chatId, name);
 		switch (dbResult) {
 		case DELETED:
-			return new TextMessage("<b>" + name + "</b> " + DbResult.DELETED.getText());
+			return message.createTextMessage("<b>" + name + "</b> " + DbResult.DELETED.getText());
 		case NOTHING_WAS_CHANGED:
-			return new TextMessage(DbResult.NOTHING_WAS_CHANGED.getText());
+			return message.createTextMessage(DbResult.NOTHING_WAS_CHANGED.getText());
 		default:
-			return new TextMessage(DbResult.OOPS.getText());
+			return message.createTextMessage(DbResult.OOPS.getText());
 		}
 	}
 
@@ -346,7 +347,7 @@ public class MessageBuilder {
 		List<FavoriteTeam> teams = dao.getTeams().stream().filter(team -> team.getChatId().equals(chatId))
 				.collect(Collectors.toList());
 		if (teams.isEmpty())
-			return new TextMessage(TEAMS_DESCRIPTION + "\n\n<b>У вас пока нет любимых команд!</b> "
+			return message.createTextMessage(TEAMS_DESCRIPTION + "\n\n<b>У вас пока нет любимых команд!</b> "
 					+ Emoji.SAD.getCode() + "\n\n" + TEAMS_COMMANDS);
 		textMessage.append(TEAMS_DESCRIPTION).append("\nВаши любимые команды:\n\n");
 		teams.stream()
@@ -354,11 +355,11 @@ public class MessageBuilder {
 						.append(team.getCountryCode().getCode()).append("] ")
 						.append(flagUnicodeFromCountry(team.getCountryCode().getCode())).append("\n"));
 		textMessage.append("\n").append(TEAMS_COMMANDS);
-		return new TextMessage(textMessage);
+		return message.createTextMessage(textMessage);
 	}
 
 	public SendMessage teamsFormat() {
-		return new TextMessage("Неверный формат!\nСмотрите примеры ниже!\n\n" + TEAMS_COMMANDS);
+		return message.createTextMessage("Неверный формат!\nСмотрите примеры ниже!\n\n" + TEAMS_COMMANDS);
 	}
 
 	public SendMessage matchesForToday() {
@@ -445,6 +446,5 @@ public class MessageBuilder {
 			text = EmojiParser.parseToUnicode(":un:");
 		return text;
 	}
-
-
+	
 }

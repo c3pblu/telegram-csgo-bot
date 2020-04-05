@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.messages;
+package com.telegram.bot.csgo.model;
 
 public enum Commands {
     
