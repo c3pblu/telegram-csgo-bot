@@ -1,6 +1,10 @@
-package com.telegram.bot.csgo.db;
+package com.telegram.bot.csgo.dao;
+
+import java.util.List;
 
 import com.telegram.bot.csgo.model.DbResult;
+import com.telegram.bot.csgo.model.FavoriteTeam;
+import com.telegram.bot.csgo.model.Flag;
 
 public interface Dao {
 
@@ -10,6 +14,10 @@ public interface Dao {
 
 	void fillAllFlags();
 
+	List<Flag> getFlags();
+
 	void fillAllTeams();
+
+	List<FavoriteTeam> getTeams();
 
 }

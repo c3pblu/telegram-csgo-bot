@@ -29,7 +29,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import com.telegram.bot.csgo.db.DaoMySQL;
+import com.telegram.bot.csgo.dao.Dao;
 import com.telegram.bot.csgo.model.DbResult;
 import com.telegram.bot.csgo.model.Emoji;
 import com.telegram.bot.csgo.model.FavoriteTeam;
@@ -60,7 +60,7 @@ public class MessageBuilder {
 	@Autowired
 	private TeamFlagBuilder teamFlagBuilder;
 	@Autowired
-	private DaoMySQL dao;
+	private Dao dao;
 	@Autowired
 	private Message message;
 
