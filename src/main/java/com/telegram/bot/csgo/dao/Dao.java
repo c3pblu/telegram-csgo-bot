@@ -5,6 +5,7 @@ import java.util.List;
 import com.telegram.bot.csgo.model.DbResult;
 import com.telegram.bot.csgo.model.FavoriteTeam;
 import com.telegram.bot.csgo.model.Flag;
+import com.telegram.bot.csgo.model.Sticker;
 
 public interface Dao {
 
@@ -12,12 +13,10 @@ public interface Dao {
 
 	DbResult deleteTeam(Long chatId, String name);
 
-	void fillAllFlags();
-
 	List<Flag> getFlags();
 
-	void fillAllTeams();
-
 	List<FavoriteTeam> getTeams();
+
+	List<Sticker> getStickers();
 
 }

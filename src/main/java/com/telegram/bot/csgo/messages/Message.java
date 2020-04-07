@@ -4,24 +4,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
+import com.telegram.bot.csgo.dao.Dao;
 import com.telegram.bot.csgo.model.CallBackData;
 import com.telegram.bot.csgo.model.Commands;
 import com.telegram.bot.csgo.model.Emoji;
+import com.telegram.bot.csgo.model.Sticker;
 
 @Component
 public class Message {
+	
+	@Autowired
+	private Dao dao;
 
 	private static final String PARSE_MODE_HTML = "html";
-	private static final ArrayList<String> STICKERS = initStickers();
-	private static ArrayList<String> lastSticker = new ArrayList<>();
+	private ArrayList<Sticker> lastSticker = new ArrayList<>();
 
-	public SendMessage createTextMessage(Object msg) {
+	public SendMessage text(Object msg) {
 		SendMessage sendMessage = new SendMessage();
 		sendMessage.disableNotification();
 		sendMessage.disableWebPagePreview();
@@ -30,7 +35,7 @@ public class Message {
 		return sendMessage;
 	}
 
-	public SendMessage createNextPageMessage(String nextPageId) {
+	public SendMessage nextPage(String nextPageId) {
 		SendMessage sendMessage = new SendMessage();
 		InlineKeyboardMarkup markUpInLine = new InlineKeyboardMarkup();
 		List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
@@ -43,36 +48,37 @@ public class Message {
 		return sendMessage;
 	}
 
-	public SendMessage createMenuMessage() {
+	public SendMessage menu() {
 		SendMessage sendMessage = new SendMessage();
 		sendMessage.setReplyMarkup(createMenu());
 		sendMessage.setText("Easy Peasy Lemon Squeezy!");
 		return sendMessage;
 	}
 
-	public SendMessage createHelpMessage() {
+	public SendMessage help() {
 		SendMessage sendMessage = new SendMessage();
 		sendMessage.setText(helpText());
 		return sendMessage;
 	}
 
-	public SendSticker createBotMessage(Integer uniqCount) {
-		int randomSize = STICKERS.size() - 1 + 1;
+	public SendSticker sticker(Integer uniqCount) {
+		List<Sticker> stickers = dao.getStickers();
+		int randomSize = stickers.size() - 1 + 1;
 		int randomValue = new Random().nextInt(randomSize);
-		String selectedMessage = STICKERS.get(randomValue);
+		Sticker selectedSticker = stickers.get(randomValue);
 
-		while (lastSticker.contains(selectedMessage)) {
+		while (lastSticker.contains(selectedSticker)) {
 			randomValue = new Random().nextInt(randomSize);
-			selectedMessage = STICKERS.get(randomValue);
+			selectedSticker = stickers.get(randomValue);
 		}
 
 		if (lastSticker.size() < uniqCount) {
-			lastSticker.add(selectedMessage);
+			lastSticker.add(selectedSticker);
 		} else {
 			lastSticker.remove(0);
-			lastSticker.add(selectedMessage);
+			lastSticker.add(selectedSticker);
 		}
-		return new SendSticker().setSticker(selectedMessage);
+		return new SendSticker().setSticker(selectedSticker.getSticker());
 	}
 
 	private InlineKeyboardMarkup createMenu() {
@@ -110,30 +116,6 @@ public class Message {
 		return markUpInLine;
 	}
 
-	private static ArrayList<String> initStickers() {
-		ArrayList<String> stickers = new ArrayList<>();
-		stickers.add("CAADAgADIQAD9mOfG2LGtCrsw7bFFgQ");
-		stickers.add("CAADAgADHgAD9mOfG7X25hWYzpI1FgQ");
-		stickers.add("CAADAgADHwAD9mOfG_Ba2iIqOnazFgQ");
-		stickers.add("CAADAgADIgAD9mOfG4hfcToK4DCYFgQ");
-		stickers.add("CAADAgADJQAD9mOfG963ItgypxoIFgQ");
-		stickers.add("CAADAgADKgAD9mOfG7fCrBPbLEDJFgQ");
-		stickers.add("CAADAgADFAAD9mOfGxFXaqquJHwYFgQ");
-		stickers.add("CAADAgADEQAD9mOfG94SbA2pBiwnFgQ");
-		stickers.add("CAADAgADCwAD9mOfG8RskvZsrlZsFgQ");
-		stickers.add("CAADAgADDQAD9mOfGxyG9FhomVn0FgQ");
-		stickers.add("CAADAgADBwAD9mOfGwvUQUWU0Bv_FgQ");
-		stickers.add("CAADAgADBgAD9mOfG-4M62fmXafEFgQ");
-		stickers.add("CAADAgADAwAD9mOfGzeICv_hr6IOFgQ");
-		stickers.add("CAADAgADCgAD9mOfG91GVm2tjQaEFgQ");
-		stickers.add("CAADAgADJAAD9mOfGw-taxRFVDWeFgQ");
-		stickers.add("CAADAgADKAAD9mOfG-AyIRVUq8l0FgQ");
-		stickers.add("CAADAgADJgAD9mOfG-rYuchCMU8-FgQ");
-		stickers.add("CAADAgADHAAD9mOfG8QGYzOYAXv9FgQ");
-		stickers.add("CAADAgADFgAD9mOfG7tdoHpun4KJFgQ");
-		stickers.add("CAADAgADIwAD9mOfG7uEav_8NSjTFgQ");
-		return stickers;
-	}
 
 	private String helpText() {
 		return Emoji.INFO.getCode() + " Могу посмотреть, что там нового на HLTV.org\n" 

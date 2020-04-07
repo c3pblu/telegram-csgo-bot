@@ -92,7 +92,7 @@ public class MessageBuilder {
 		}
 
 		LOGGER.debug("TopTeams final message:\n{}", textMessage.toString());
-		return message.createTextMessage(textMessage);
+		return message.text(textMessage);
 	}
 
 	public SendMessage topPlayers(Integer count) {
@@ -132,7 +132,7 @@ public class MessageBuilder {
 			number++;
 		}
 		LOGGER.debug("TopPlayers final message:\n{}", textMessage.toString());
-		return message.createTextMessage(textMessage);
+		return message.text(textMessage);
 	}
 
 	public SendMessage matches(Long chatId) {
@@ -204,7 +204,7 @@ public class MessageBuilder {
 		}
 
 		LOGGER.debug("Matches final message:\n{}", textMessage.toString());
-		return message.createTextMessage(textMessage);
+		return message.text(textMessage);
 
 	}
 
@@ -253,7 +253,7 @@ public class MessageBuilder {
 		}
 
 		LOGGER.debug("Results final message:\n{}", textMessage.toString());
-		return message.createTextMessage(textMessage);
+		return message.text(textMessage);
 	}
 
 	public Streams twitch(String uri) {
@@ -311,22 +311,22 @@ public class MessageBuilder {
 			text.append("\n<b>").append(athor).append("</b>");
 		}
 
-		return message.createTextMessage(text);
+		return message.text(text);
 	}
 
 	public SendMessage updateFavoriteTeam(Long chatId, String name, String countryCode) {
 		DbResult dbResult = dao.updateOrSaveTeam(chatId, name, countryCode);
 		switch (dbResult) {
 		case FLAG_NOT_FOUND:
-			return message.createTextMessage(DbResult.NOTHING_WAS_CHANGED.getText());
+			return message.text(DbResult.NOTHING_WAS_CHANGED.getText());
 		case UPDATED:
-			return message.createTextMessage("<b>" + name + "</b> " + DbResult.UPDATED.getText());
+			return message.text("<b>" + name + "</b> " + DbResult.UPDATED.getText());
 		case ALREADY_EXIST:
-			return message.createTextMessage("<b>" + name + "</b> " + DbResult.ALREADY_EXIST.getText());
+			return message.text("<b>" + name + "</b> " + DbResult.ALREADY_EXIST.getText());
 		case INSERTED:
-			return message.createTextMessage("<b>" + name + "</b> " + DbResult.INSERTED.getText());
+			return message.text("<b>" + name + "</b> " + DbResult.INSERTED.getText());
 		default:
-			return message.createTextMessage(DbResult.OOPS.getText());
+			return message.text(DbResult.OOPS.getText());
 		}
 	}
 
@@ -334,11 +334,11 @@ public class MessageBuilder {
 		DbResult dbResult = dao.deleteTeam(chatId, name);
 		switch (dbResult) {
 		case DELETED:
-			return message.createTextMessage("<b>" + name + "</b> " + DbResult.DELETED.getText());
+			return message.text("<b>" + name + "</b> " + DbResult.DELETED.getText());
 		case NOTHING_WAS_CHANGED:
-			return message.createTextMessage(DbResult.NOTHING_WAS_CHANGED.getText());
+			return message.text(DbResult.NOTHING_WAS_CHANGED.getText());
 		default:
-			return message.createTextMessage(DbResult.OOPS.getText());
+			return message.text(DbResult.OOPS.getText());
 		}
 	}
 
@@ -347,7 +347,7 @@ public class MessageBuilder {
 		List<FavoriteTeam> teams = dao.getTeams().stream().filter(team -> team.getChatId().equals(chatId))
 				.collect(Collectors.toList());
 		if (teams.isEmpty())
-			return message.createTextMessage(TEAMS_DESCRIPTION + "\n\n<b>У вас пока нет любимых команд!</b> "
+			return message.text(TEAMS_DESCRIPTION + "\n\n<b>У вас пока нет любимых команд!</b> "
 					+ Emoji.SAD.getCode() + "\n\n" + TEAMS_COMMANDS);
 		textMessage.append(TEAMS_DESCRIPTION).append("\nВаши любимые команды:\n\n");
 		teams.stream()
@@ -355,11 +355,11 @@ public class MessageBuilder {
 						.append(team.getCountryCode().getCode()).append("] ")
 						.append(flagUnicodeFromCountry(team.getCountryCode().getCode())).append("\n"));
 		textMessage.append("\n").append(TEAMS_COMMANDS);
-		return message.createTextMessage(textMessage);
+		return message.text(textMessage);
 	}
 
 	public SendMessage teamsFormat() {
-		return message.createTextMessage("Неверный формат!\nСмотрите примеры ниже!\n\n" + TEAMS_COMMANDS);
+		return message.text("Неверный формат!\nСмотрите примеры ниже!\n\n" + TEAMS_COMMANDS);
 	}
 
 	public SendMessage matchesForToday() {
