@@ -1,12 +1,14 @@
 package com.telegram.bot.csgo.controller;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
@@ -15,30 +17,35 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import com.telegram.bot.csgo.messages.Message;
-import com.telegram.bot.csgo.messages.MessageBuilder;
+import com.telegram.bot.csgo.dao.Dao;
 import com.telegram.bot.csgo.model.CallBackData;
 import com.telegram.bot.csgo.model.Commands;
-import com.telegram.bot.csgo.model.Streams;
+import com.telegram.bot.csgo.model.DbResult;
+import com.telegram.bot.csgo.service.HttpService;
+import com.telegram.bot.csgo.service.MessageService;
+import com.telegram.bot.csgo.service.TwitchService;
 
-@Component
-public class Bot extends TelegramLongPollingBot {
+@Service
+public class BotController extends TelegramLongPollingBot {
 
-	private static final String OOPS = "Упс, ты слишком долго думал парень!";
-	private static final String NEXT_PAGE = "Go to next Page?";
 	private static final String TEAM_REGEXP = "\\.[к][о][м][а][н][д][ы]";
 	private static final String NAME_REGEXP = "([\\w]*\\s{0,}\\.{0,})*";
 	private static final String COUNTRY_REGEXP = "\\[[A-Z][A-Z]\\]";
 	private static final String PLUS_REGEXP = "\\+";
 	private static final String MINUS_REGEXP = "\\-";
+	private final static String HLTV = "https://www.hltv.org";
 
-	private MessageBuilder messageBuilder;
-	private Message message;
+	private MessageService messageService;
+	private HttpService httpService;
+	private TwitchService twitchService;
+	private Dao dao;
 
 	@Autowired
-	Bot(MessageBuilder messageBuilder, Message message) {
-		this.messageBuilder = messageBuilder;
-		this.message = message;
+	BotController(MessageService message, HttpService httpService, TwitchService twitchService, Dao dao) {
+		this.messageService = message;
+		this.httpService = httpService;
+		this.twitchService = twitchService;
+		this.dao = dao;
 	}
 
 	@Value(value = "${bot.callback.timeout}")
@@ -76,43 +83,44 @@ public class Bot extends TelegramLongPollingBot {
 			String text = update.getMessage().getText();
 			// Help
 			if (text.equalsIgnoreCase(Commands.HELP.getName())) {
-				sendMessage(chatId, message.help());
+				sendMessage(chatId, messageService.help());
 			}
 			// Menu
 			else if (text.equalsIgnoreCase(Commands.MENU.getName())) {
-				sendMessage(chatId, message.menu());
+				sendMessage(chatId, messageService.menu());
 			}
 			// Matches
 			else if (text.equalsIgnoreCase(Commands.MATCHES.getName())) {
-				sendMessage(chatId, messageBuilder.matches(chatId));
+				Document doc = httpService.getDocument(HLTV + "/matches");
+				sendMessage(chatId, messageService.matches(doc, chatId));
 			}
 			// Results
 			else if (text.equalsIgnoreCase(Commands.RESULTS.getName())) {
-				sendMessage(chatId, messageBuilder.results(chatId));
+				Document doc = httpService.getDocument(HLTV + "/results");
+				sendMessage(chatId, messageService.results(doc, chatId));
 			}
 			// Top Players
 			else if (text.equalsIgnoreCase(Commands.TOP_10_PLAYERS.getName())
 					|| text.equalsIgnoreCase(Commands.TOP_20_PLAYERS.getName())
 					|| text.equalsIgnoreCase(Commands.TOP_30_PLAYERS.getName())) {
 				Integer count = Integer.parseInt(text.substring(4, 6));
-				sendMessage(chatId, messageBuilder.topPlayers(count));
+				topPlayers(chatId, count);
 			}
 			// Top Teams
 			else if (text.equalsIgnoreCase(Commands.TOP_10.getName())
 					|| text.equalsIgnoreCase(Commands.TOP_20.getName())
 					|| text.equalsIgnoreCase(Commands.TOP_30.getName())) {
 				Integer count = Integer.parseInt(update.getMessage().getText().substring(4));
-				sendMessage(chatId, messageBuilder.topTeams(count));
+				topTeams(chatId, count);
 			}
 			// Twitch streams
 			else if (text.equalsIgnoreCase(Commands.STREAMS.getName())) {
-				Streams streams = messageBuilder.twitch("");
-				sendMessage(chatId, message.text(streams.getMessage()));
-				sendMessage(chatId, message.nextPage(streams.getNextPageId()));
+				sendMessage(chatId, messageService.streams(twitchService.getStreams(chatId, false)));
+				sendMessage(chatId, messageService.nextPage());
 			}
 			// Favorite Teams
 			else if (text.equalsIgnoreCase(Commands.TEAMS.getName())) {
-				sendMessage(chatId, messageBuilder.getAllTeams(chatId));
+				sendMessage(chatId, messageService.favoriteTeams(dao.getTeams(), chatId));
 			}
 
 			else if (text.matches(TEAM_REGEXP + ".*")) {
@@ -121,20 +129,24 @@ public class Bot extends TelegramLongPollingBot {
 					String team = text.replaceAll("\\[..\\]", "").replaceAll(TEAM_REGEXP + PLUS_REGEXP, "").trim();
 					String countryCode = text.replaceAll(TEAM_REGEXP + PLUS_REGEXP + NAME_REGEXP, "")
 							.replaceAll("\\[", "").replaceAll("\\]", "");
-					sendMessage(chatId, messageBuilder.updateFavoriteTeam(chatId, team, countryCode));
+					DbResult dbResult = dao.updateOrSaveTeam(chatId, team, countryCode);
+					sendMessage(chatId, messageService.dbResult(dbResult, team));
 				}
 				// Delete (.команды-)
 				else if (text.matches(TEAM_REGEXP + MINUS_REGEXP + NAME_REGEXP)) {
 					String team = text.replaceAll(TEAM_REGEXP + MINUS_REGEXP, "").trim();
-					sendMessage(chatId, messageBuilder.deleteTeam(chatId, team));
+					DbResult dbResult = dao.deleteTeam(chatId, team);
+					sendMessage(chatId, messageService.dbResult(dbResult, team));
 				} else {
-					sendMessage(chatId, messageBuilder.teamsFormat());
+					sendMessage(chatId, messageService.teamsFormat());
 				}
 			}
 			// Private and mentioned message
 			else if (StringUtils.startsWith(update.getMessage().getText(), "@" + botName)
 					|| update.getMessage().getChat().isUserChat()) {
-				sendMessage(chatId, message.sticker(uniqCount));
+				sendMessage(chatId, messageService.sticker(chatId, uniqCount));
+				Document doc = httpService.getDocument("https://api.forismatic.com/api/1.0/?method=getQuote&format=html&lang=ru");
+				sendMessage(chatId, messageService.cite(doc));
 			}
 
 		}
@@ -144,46 +156,63 @@ public class Bot extends TelegramLongPollingBot {
 			Long chatId = update.getCallbackQuery().getMessage().getChatId();
 			CallbackQuery callBack = update.getCallbackQuery();
 			if (isTimeout(callBack)) {
-				sendMessage(chatId, new SendMessage().setText(OOPS));
+				sendMessage(chatId, messageService.oops());
 				deleteMessage(chatId, update.getCallbackQuery().getMessage().getMessageId());
 				return;
 			}
 			String data = callBack.getData();
 			if (data.equals(CallBackData.TOP_10.getName())) {
-				sendMessage(chatId, messageBuilder.topTeams(10));
+				topTeams(chatId, 10);
 			}
 			if (data.equals(CallBackData.TOP_20.getName())) {
-				sendMessage(chatId, messageBuilder.topTeams(20));
+				topTeams(chatId, 20);
 			}
 			if (data.equals(CallBackData.TOP_30.getName())) {
-				sendMessage(chatId, messageBuilder.topTeams(30));
+				topTeams(chatId, 30);
 			}
 			if (data.equals(CallBackData.TOP_10_PLAYERS.getName())) {
-				sendMessage(chatId, messageBuilder.topPlayers(10));
+				topPlayers(chatId, 10);
 			}
 			if (data.equals(CallBackData.TOP_20_PLAYERS.getName())) {
-				sendMessage(chatId, messageBuilder.topPlayers(20));
+				topPlayers(chatId, 20);
 			}
 			if (data.equals(CallBackData.TOP_30_PLAYERS.getName())) {
-				sendMessage(chatId, messageBuilder.topPlayers(30));
+				topPlayers(chatId, 30);
 			}
 			if (data.equals(CallBackData.MATCHES.getName())) {
-				sendMessage(chatId, messageBuilder.matches(chatId));
+				Document doc = httpService.getDocument(HLTV + "/matches");
+				sendMessage(chatId, messageService.matches(doc, chatId));
 			}
 			if (data.equals(CallBackData.RESULTS.getName())) {
-				sendMessage(chatId, messageBuilder.results(chatId));
+				Document doc = httpService.getDocument(HLTV + "/results");
+				sendMessage(chatId, messageService.results(doc, chatId));
 			}
 			if (data.equals(CallBackData.TEAMS.getName())) {
-				sendMessage(chatId, messageBuilder.getAllTeams(chatId));
+				sendMessage(chatId, messageService.favoriteTeams(dao.getTeams(), chatId));
 			}
-			if (data.equals(CallBackData.STREAMS.getName())
-					|| update.getCallbackQuery().getMessage().getText().equals(NEXT_PAGE)) {
-				Streams streams = messageBuilder.twitch(data.replace(CallBackData.STREAMS.getName(), ""));
-				sendMessage(chatId, message.text(streams.getMessage()));
-				sendMessage(chatId, message.nextPage(streams.getNextPageId()));
+			if (data.equals(CallBackData.STREAMS.getName())) {
+				sendMessage(chatId, messageService.streams(twitchService.getStreams(chatId, false)));
+				sendMessage(chatId, messageService.nextPage());
 			}
+			if (data.equals(CallBackData.NEXT_PAGE.getName())) {
+				sendMessage(chatId, messageService.streams(twitchService.getStreams(chatId, true)));
+				sendMessage(chatId, messageService.nextPage());
+			}
+
 			deleteMessage(chatId, update.getCallbackQuery().getMessage().getMessageId());
 		}
+	}
+
+	private void topPlayers(Long chatId, int count) {
+		String year = String.valueOf(LocalDate.now().getYear());
+		Document doc = httpService
+				.getDocument(HLTV + "/stats/players?startDate=" + year + "-01-01&endDate=" + year + "-12-31");
+		sendMessage(chatId, messageService.topPlayers(doc, 30));
+	}
+
+	private void topTeams(Long chatId, int count) {
+		Document doc = httpService.getDocument(HLTV + "/ranking/teams");
+		sendMessage(chatId, messageService.topTeams(doc, count));
 	}
 
 	private void sendMessage(Long chatId, SendMessage msg) {
@@ -242,14 +271,16 @@ public class Bot extends TelegramLongPollingBot {
 
 	@Scheduled(cron = "${bot.scheduler.matches.cron}")
 	private void todayMatchesScheduler() {
-		sendMessage(schedulerChatId, messageBuilder.matchesForToday());
-		sendMessage(schedulerChatId, messageBuilder.matches(schedulerChatId));
+		sendMessage(schedulerChatId, messageService.matchesForToday());
+		Document doc = httpService.getDocument(HLTV + "/matches");
+		sendMessage(schedulerChatId, messageService.matches(doc, schedulerChatId));
 	}
 
 	@Scheduled(cron = "${bot.scheduler.results.cron}")
 	private void todayResultsScheduler() {
-		sendMessage(schedulerChatId, messageBuilder.resultsForToday());
-		sendMessage(schedulerChatId, messageBuilder.results(schedulerChatId));
+		sendMessage(schedulerChatId, messageService.resultsForToday());
+		Document doc = httpService.getDocument(HLTV + "/results");
+		sendMessage(schedulerChatId, messageService.results(doc, schedulerChatId));
 	}
 
 }

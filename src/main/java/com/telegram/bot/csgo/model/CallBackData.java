@@ -11,7 +11,8 @@ public enum CallBackData {
     MATCHES ("matches"),
     RESULTS ("results"),
     STREAMS ("streams"),
-    TEAMS ("teams");
+    TEAMS ("teams"),
+	NEXT_PAGE ("nextPage");
     
     
     private String name;
