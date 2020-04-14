@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.db;
+package com.telegram.bot.csgo.model;
 
 public enum DbResult {
     ALREADY_EXIST("уже есть в списке"),
@@ -6,7 +6,7 @@ public enum DbResult {
     INSERTED ("добавлена"),
     DELETED ("удалена"),
     NOTHING_WAS_CHANGED ("Такая запись не найдена"),
-    NOT_FOUND ("Такая запись не найдена"),
+    FLAG_NOT_FOUND ("Такой флаг не найден"),
     OOPS ("Что-то пошло не так...");
     
     private String text;

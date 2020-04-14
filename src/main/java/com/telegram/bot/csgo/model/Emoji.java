@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.messages;
+package com.telegram.bot.csgo.model;
 
 public enum Emoji {
     
@@ -14,7 +14,11 @@ public enum Emoji {
     TV ("\ud83d\udcfa"),
     FIRE ("\uD83D\uDD25"),
     SAD ("\u2639\ufe0f"),
-    SUNGLASSES ("\ud83d\ude0e");
+    SUNGLASSES ("\ud83d\ude0e"),
+    DIMOND_ORANGE ("\ud83d\udd38"),
+    DIMOND_BLUE ("\ud83d\udd39"),
+    HELM ("\u26d1"),
+    BOMB ("\ud83d\udca3");
     
     private String code;
 
