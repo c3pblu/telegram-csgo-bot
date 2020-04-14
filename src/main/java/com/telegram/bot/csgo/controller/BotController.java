@@ -24,6 +24,7 @@ import com.telegram.bot.csgo.model.DbResult;
 import com.telegram.bot.csgo.service.HttpService;
 import com.telegram.bot.csgo.service.MessageService;
 import com.telegram.bot.csgo.service.TwitchService;
+import com.telegram.bot.csgo.service.WebSocketService;
 
 @Service
 public class BotController extends TelegramLongPollingBot {
@@ -33,18 +34,22 @@ public class BotController extends TelegramLongPollingBot {
 	private static final String COUNTRY_REGEXP = "\\[[A-Z][A-Z]\\]";
 	private static final String PLUS_REGEXP = "\\+";
 	private static final String MINUS_REGEXP = "\\-";
+	private static final String START_REGEXP = "\\.[с][т][а][р][т]\\-\\d*";
 	private final static String HLTV = "https://www.hltv.org";
 
 	private MessageService messageService;
 	private HttpService httpService;
 	private TwitchService twitchService;
+	private WebSocketService webSocketService;
 	private Dao dao;
+	
 
 	@Autowired
-	BotController(MessageService message, HttpService httpService, TwitchService twitchService, Dao dao) {
+	BotController(MessageService message, HttpService httpService, TwitchService twitchService, WebSocketService webSocketService, Dao dao) {
 		this.messageService = message;
 		this.httpService = httpService;
 		this.twitchService = twitchService;
+		this.webSocketService = webSocketService;
 		this.dao = dao;
 	}
 
@@ -141,6 +146,14 @@ public class BotController extends TelegramLongPollingBot {
 					sendMessage(chatId, messageService.teamsFormat());
 				}
 			}
+			// ScoreBot
+			else if (text.matches(START_REGEXP)) {
+				webSocketService.live(chatId, text.substring(7));
+			}
+			else if (text.equalsIgnoreCase(Commands.STOP.getName())) {
+				webSocketService.stop(chatId);
+				sendMessage(chatId, messageService.stoped());
+			}
 			// Private and mentioned message
 			else if (StringUtils.startsWith(update.getMessage().getText(), "@" + botName)
 					|| update.getMessage().getChat().isUserChat()) {
@@ -148,7 +161,6 @@ public class BotController extends TelegramLongPollingBot {
 				Document doc = httpService.getDocument("https://api.forismatic.com/api/1.0/?method=getQuote&format=html&lang=ru");
 				sendMessage(chatId, messageService.cite(doc));
 			}
-
 		}
 
 		// Check call back from Menu
@@ -215,7 +227,7 @@ public class BotController extends TelegramLongPollingBot {
 		sendMessage(chatId, messageService.topTeams(doc, count));
 	}
 
-	private void sendMessage(Long chatId, SendMessage msg) {
+	public void sendMessage(Long chatId, SendMessage msg) {
 		msg.setChatId(chatId);
 		try {
 			execute(msg); // Call method to send the message

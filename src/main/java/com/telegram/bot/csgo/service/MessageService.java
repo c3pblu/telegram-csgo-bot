@@ -46,13 +46,7 @@ public class MessageService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MessageService.class);
 	private Map<Long, List<Sticker>> chatLastStickers = new HashMap<>();
-	private static final String PARSE_MODE_HTML = "html";
-	private static final String PARSE_MODE_MARKDOWN = "markdown";
-	private static final String MATCHES_FOR_TODAY = "Ближайшие матчи:";
-	private static final String RESULTS_FOR_TODAY = "Последние результаты:";
 	private static final String TEAMS_COMMANDS = "Добавить команду/изменить код страны:\n <b>.команды+Natus Vincere[RU]</b> \nУдалить команду: \n<b>.команды-Natus Vincere</b>";
-	private static final String TEAMS_DESCRIPTION = Emoji.INFO.getCode();
-	private static final String OOPS = "Упс, ты слишком долго думал парень!";
 
 	@Value("${help.message.file:#{null}}")
 	private String helpFile;
@@ -70,7 +64,7 @@ public class MessageService {
 		SendMessage sendMessage = new SendMessage();
 		sendMessage.disableNotification();
 		sendMessage.disableWebPagePreview();
-		sendMessage.setParseMode(PARSE_MODE_HTML);
+		sendMessage.setParseMode("html");
 		sendMessage.setText(msg.toString());
 		return sendMessage;
 	}
@@ -98,7 +92,7 @@ public class MessageService {
 	public SendMessage help() {
 		SendMessage sendMessage = new SendMessage();
 		sendMessage.setText(helpText());
-		sendMessage.setParseMode(PARSE_MODE_MARKDOWN);
+		sendMessage.setParseMode("markdown");
 		return sendMessage;
 	}
 
@@ -213,8 +207,10 @@ public class MessageService {
 					.append(" ").append(Emoji.VS.getCode()).append(" ")
 					.append(favoriteTeam(chatId, match.select("span.team-name").get(1).text(), false)).append(" (")
 					.append(match.select("tr.header").select("td.bestof").text()).append(") ").append(getStars(match))
+					.append("\nMatch ID: ")
+					.append(match.select("table.table").attr("data-livescore-match"))
 					.append("\n");
-
+			
 			Elements maps = match.select("tr.header").select("td.map");
 			int numMaps = maps.size();
 
@@ -364,9 +360,9 @@ public class MessageService {
 	public SendMessage favoriteTeams(List<FavoriteTeam> teams, Long chatId) {
 		StringBuilder textMessage = new StringBuilder();
 		if (teams.isEmpty())
-			return text(TEAMS_DESCRIPTION + " Ваши любимые команды:\n\n<b>У вас пока нет любимых команд!</b> " + Emoji.SAD.getCode() + "\n\n"
-					+ TEAMS_COMMANDS);
-		textMessage.append(TEAMS_DESCRIPTION).append(" Ваши любимые команды:\n\n");
+			return text(Emoji.INFO.getCode() + " Ваши любимые команды:\n\n<b>У вас пока нет любимых команд!</b> "
+					+ Emoji.SAD.getCode() + "\n\n" + TEAMS_COMMANDS);
+		textMessage.append(Emoji.INFO.getCode()).append(" Ваши любимые команды:\n\n");
 		teams.stream()
 				.forEach(team -> textMessage.append("<b>").append(team.getName()).append("</b> [")
 						.append(team.getCountryCode().getCode()).append("] ")
@@ -375,20 +371,136 @@ public class MessageService {
 		return text(textMessage);
 	}
 
+	public SendMessage scorebot(JSONObject json) {
+		StringBuilder textMessage = new StringBuilder();
+		String logType = json.keys().next();
+		LOGGER.debug("LogType: {}", logType);
+		// Round Start
+		if (logType.equals("RoundStart")) {
+			textMessage.append("<b>Round Started</b>");
+		}
+		// Round End
+		if (logType.equals("RoundEnd")) {
+			String winner = json.query("/RoundEnd/winner").toString();
+			String winType = json.query("/RoundEnd/winType").toString();
+			String ctScore = json.query("/RoundEnd/counterTerroristScore").toString();
+			String tScore = json.query("/RoundEnd/terroristScore").toString();
+			textMessage.append("<b>Round Over: ");
+			if (winner.equals("TERRORIST")) {
+				textMessage.append(Emoji.DIMOND_ORANGE.getCode()).append("T");
+			} else {
+				textMessage.append(Emoji.DIMOND_BLUE.getCode()).append("CT");
+			}
+			textMessage.append(" Win (").append(Emoji.DIMOND_ORANGE.getCode()).append(tScore).append(" - ")
+					.append(Emoji.DIMOND_BLUE.getCode()).append(ctScore).append(") - ");
+			switch (winType) {
+			case "Target_Bombed":
+				textMessage.append("Target Bombed</b>");
+				break;
+			case "Bomb_Defused":
+				textMessage.append("Bomb Defused</b>");
+				break;
+			case "Target_Saved":
+				textMessage.append("Target Saved</b>");
+				break;
+			default:
+				textMessage.append("Enemy Eliminated</b>");
+				break;
+			}
+		}
+		// Kill
+		if (logType.equals("Kill")) {
+			String killerSide = json.query("/Kill/killerSide").toString();
+			String killerNick = json.query("/Kill/killerNick").toString();
+			String victimSide = json.query("/Kill/victimSide").toString();
+			String victimNick = json.query("/Kill/victimNick").toString();
+			String weapon = json.query("/Kill/weapon").toString();
+			boolean isHeadShot = (boolean) json.query("/Kill/headShot");
+			if (killerSide.equals("TERRORIST")) {
+				textMessage.append(Emoji.DIMOND_ORANGE.getCode());
+			} else {
+				textMessage.append(Emoji.DIMOND_BLUE.getCode());
+			}
+			textMessage.append("<b>").append(killerNick).append("</b> killed");
+			if (victimSide.equals("TERRORIST")) {
+				textMessage.append(Emoji.DIMOND_ORANGE.getCode());
+			} else {
+				textMessage.append(Emoji.DIMOND_BLUE.getCode());
+			}
+			textMessage.append("<b>").append(victimNick).append("</b> with ").append(weapon);
+			if (isHeadShot) {
+				textMessage.append(" ").append(Emoji.HELM.getCode());
+			}
+		}
+
+		// Bomb Planted
+		if (logType.equals("BombPlanted")) {
+			String playerNick = json.query("/BombPlanted/playerNick").toString();
+			String tPlayers = json.query("/BombPlanted/tPlayers").toString();
+			String ctPlayers = json.query("/BombPlanted/ctPlayers").toString();
+			textMessage.append(Emoji.DIMOND_ORANGE.getCode()).append("<b>").append(playerNick).append(" ")
+					.append(Emoji.BOMB.getCode()).append(" planted the bomb (").append(Emoji.DIMOND_ORANGE.getCode())
+					.append(tPlayers).append(" on").append(Emoji.DIMOND_BLUE.getCode()).append(ctPlayers).append(")</b>");
+		}
+		//Bomb Defused
+		if (logType.equals("BombDefused")) {
+			String playerNick = json.query("/BombDefused/playerNick").toString();
+			textMessage.append(Emoji.DIMOND_BLUE.getCode()).append("<b>").append(playerNick).append(" defused the bomb</b>");
+		}
+		// Suicide
+		if (logType.equals("Suicide")) {
+			String playerNick = json.query("/Suicide/playerNick").toString();
+			String side = json.query("/Suicide/side").toString();
+			if (side.equals("TERRORIST")) {
+				textMessage.append(Emoji.DIMOND_ORANGE.getCode());
+			} else {
+				textMessage.append(Emoji.DIMOND_BLUE.getCode());
+			}
+			textMessage.append("<b>").append(playerNick).append("</b> committed suicide");
+		}
+		// PlayerJoin
+		if (logType.equals("PlayerJoin")) {
+			String playerNick = json.query("/PlayerJoin/playerNick").toString();
+			textMessage.append("<b>").append(playerNick).append("</b> joined the game");
+		}
+		// PlayerQuit
+		if (logType.equals("PlayerQuit")) {
+			String playerNick = json.query("/PlayerQuit/playerNick").toString();
+			String playerSide = json.query("/PlayerQuit/playerSide").toString();
+			if (playerSide.equals("TERRORIST")) {
+				textMessage.append(Emoji.DIMOND_ORANGE.getCode());
+			}
+			if (playerSide.equals("CT")) {
+				textMessage.append(Emoji.DIMOND_BLUE.getCode());
+			}
+			textMessage.append("<b>").append(playerNick).append("</b> quit the game");
+		}
+		// MatchStarted
+		if (logType.equals("MatchStarted")) {
+			String map = json.query("/MatchStarted/map").toString();
+			textMessage.append("<b>Match Started: ").append(map).append("</b>");
+		}
+		LOGGER.debug("Log Message: {}", textMessage);
+		return text(textMessage.toString());
+	}
+
 	public SendMessage teamsFormat() {
 		return text("Неверный формат!\nСмотрите примеры ниже!\n\n" + TEAMS_COMMANDS);
 	}
 
 	public SendMessage matchesForToday() {
-		return new SendMessage().setText(MATCHES_FOR_TODAY);
+		return text("Ближайшие матчи:");
 	}
 
 	public SendMessage resultsForToday() {
-		return new SendMessage().setText(RESULTS_FOR_TODAY);
+		return text("Последние результаты:");
 	}
 
 	public SendMessage oops() {
-		return text(OOPS);
+		return text("Упс, ты слишком долго думал парень!");
+	}
+	public SendMessage stoped() {
+		return text("Трансляция остановлена");
 	}
 
 	private StringBuilder getStars(Element match) {
