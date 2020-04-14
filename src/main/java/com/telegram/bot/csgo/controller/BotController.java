@@ -219,7 +219,7 @@ public class BotController extends TelegramLongPollingBot {
 		String year = String.valueOf(LocalDate.now().getYear());
 		Document doc = httpService
 				.getDocument(HLTV + "/stats/players?startDate=" + year + "-01-01&endDate=" + year + "-12-31");
-		sendMessage(chatId, messageService.topPlayers(doc, 30));
+		sendMessage(chatId, messageService.topPlayers(doc, count));
 	}
 
 	private void topTeams(Long chatId, int count) {
