@@ -439,8 +439,8 @@ public class MessageService {
 			String tPlayers = json.query("/BombPlanted/tPlayers").toString();
 			String ctPlayers = json.query("/BombPlanted/ctPlayers").toString();
 			textMessage.append(Emoji.DIMOND_ORANGE.getCode()).append("<b>").append(playerNick).append(" ")
-					.append(Emoji.BOMB.getCode()).append(" planted the bomb (").append(Emoji.DIMOND_ORANGE.getCode())
-					.append(tPlayers).append(" on").append(Emoji.DIMOND_BLUE.getCode()).append(ctPlayers).append(")</b>");
+					.append(Emoji.BOMB.getCode()).append(" planted the bomb").append(Emoji.DIMOND_ORANGE.getCode())
+					.append(tPlayers).append(" on").append(Emoji.DIMOND_BLUE.getCode()).append(ctPlayers).append("</b>");
 		}
 		//Bomb Defused
 		if (logType.equals("BombDefused")) {
@@ -511,7 +511,7 @@ public class MessageService {
 
 	private String favoriteTeam(Long chatId, String name, boolean isBold) {
 		String teamName = name;
-		FavoriteTeam fvTeam = dao.getTeams().parallelStream()
+		FavoriteTeam fvTeam = dao.getTeams(chatId).parallelStream()
 				.filter(team -> team.getChatId().equals(chatId) && team.getName().equalsIgnoreCase(name)).findFirst()
 				.orElse(null);
 		if (fvTeam != null) {

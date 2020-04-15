@@ -15,7 +15,7 @@ public interface Dao {
 
 	List<Flag> getFlags();
 
-	List<FavoriteTeam> getTeams();
+	List<FavoriteTeam> getTeams(Long chatId);
 
 	List<Sticker> getStickers();
 

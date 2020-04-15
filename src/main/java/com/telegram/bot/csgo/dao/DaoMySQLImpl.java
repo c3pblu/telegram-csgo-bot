@@ -36,9 +36,9 @@ public class DaoMySQLImpl implements Dao {
 			return DbResult.FLAG_NOT_FOUND;
 		}
 		FavoriteTeam newFt = new FavoriteTeam(chatId, name, newFtFlag);
-		if (isTeamPresents(newFt)) {
+		if (isTeamPresents(chatId, newFt)) {
 			boolean isSameFlag = newFtFlag.equals(
-					getTeams().parallelStream().filter(team -> team.equals(newFt)).findFirst().get().getCountryCode());
+					getTeams(chatId).parallelStream().filter(team -> team.equals(newFt)).findFirst().get().getCountryCode());
 			if (isSameFlag) {
 				return DbResult.ALREADY_EXIST;
 			}
@@ -57,15 +57,15 @@ public class DaoMySQLImpl implements Dao {
 	@CacheEvict(value = "teams", allEntries = true)
 	public DbResult deleteTeam(Long chatId, String name) {
 		FavoriteTeam teamToDelete = new FavoriteTeam(chatId, name, null);
-		if (!isTeamPresents(teamToDelete)) {
+		if (!isTeamPresents(chatId, teamToDelete)) {
 			return DbResult.NOTHING_WAS_CHANGED;
 		}
 		entityManager.remove(entityManager.contains(teamToDelete) ? teamToDelete : entityManager.merge(teamToDelete));
 		return DbResult.DELETED;
 	}
 
-	private boolean isTeamPresents(FavoriteTeam teamToCheck) {
-		if (getTeams().stream().anyMatch(team -> team.equals(teamToCheck))) {
+	private boolean isTeamPresents(Long chatId, FavoriteTeam teamToCheck) {
+		if (getTeams(chatId).stream().anyMatch(team -> team.equals(teamToCheck))) {
 			return true;
 		}
 		return false;
@@ -88,8 +88,8 @@ public class DaoMySQLImpl implements Dao {
 	@Override
 	@SuppressWarnings("unchecked")
 	@Cacheable(value = "teams")
-	public List<FavoriteTeam> getTeams() {
-		return entityManager.createQuery("select p from FavoriteTeam p").getResultList();
+	public List<FavoriteTeam> getTeams(Long chatId) {
+		return entityManager.createQuery("select p from FavoriteTeam p where chatId = :chatId").setParameter("chatId", chatId).getResultList();
 	}
 
 }

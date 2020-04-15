@@ -125,7 +125,7 @@ public class BotController extends TelegramLongPollingBot {
 			}
 			// Favorite Teams
 			else if (text.equalsIgnoreCase(Commands.TEAMS.getName())) {
-				sendMessage(chatId, messageService.favoriteTeams(dao.getTeams(), chatId));
+				sendMessage(chatId, messageService.favoriteTeams(dao.getTeams(chatId), chatId));
 			}
 
 			else if (text.matches(TEAM_REGEXP + ".*")) {
@@ -200,7 +200,7 @@ public class BotController extends TelegramLongPollingBot {
 				sendMessage(chatId, messageService.results(doc, chatId));
 			}
 			if (data.equals(CallBackData.TEAMS.getName())) {
-				sendMessage(chatId, messageService.favoriteTeams(dao.getTeams(), chatId));
+				sendMessage(chatId, messageService.favoriteTeams(dao.getTeams(chatId), chatId));
 			}
 			if (data.equals(CallBackData.STREAMS.getName())) {
 				sendMessage(chatId, messageService.streams(twitchService.getStreams(chatId, false)));
