@@ -123,7 +123,7 @@ public class MessageService {
 		Elements header = doc.select("div.regional-ranking-header");
 		Elements rankedTeams = doc.select("div.ranked-team");
 		StringBuilder textMessage = new StringBuilder();
-		textMessage.append(Emoji.MIL_MEDAL.getCode()).append("<b>").append(header.text()).append("</b>\n");
+		textMessage.append(Emoji.MIL_MEDAL).append("<b>").append(header.text()).append("</b>\n");
 		for (Element team : rankedTeams) {
 			if (team.select("span.position").text().equals("#" + (count + 1))) {
 				break;
@@ -155,7 +155,7 @@ public class MessageService {
 		Elements rows = doc.select("tr");
 		StringBuilder textMessage = new StringBuilder();
 		String year = String.valueOf(LocalDate.now().getYear());
-		textMessage.append(Emoji.SPORT_MEDAL.getCode()).append("<b>CS:GO World Top Players ").append(year)
+		textMessage.append(Emoji.SPORT_MEDAL).append("<b>CS:GO World Top Players ").append(year)
 				.append("</b>\n").append("<b>");
 		Elements stat = doc.select("tr.stats-table-row").select("th");
 		for (int i = 0; i < stat.size(); i++) {
@@ -193,7 +193,7 @@ public class MessageService {
 	public SendMessage matches(Document doc, Long chatId) {
 		StringBuilder textMessage = new StringBuilder();
 		if (doc.select("div.live-match").size() > 1) {
-			textMessage.append("<b>Live matches</b>").append(Emoji.EXCL_MARK.getCode()).append("\n");
+			textMessage.append("<b>Live matches</b>").append(Emoji.EXCL_MARK).append("\n");
 		}
 
 		for (Element match : doc.select("div.live-match")) {
@@ -201,16 +201,15 @@ public class MessageService {
 				continue;
 			}
 
-			textMessage.append(Emoji.CUP.getCode()).append("<a href=\'https://hltv.org")
+			textMessage.append(Emoji.CUP).append("<a href=\'https://hltv.org")
 					.append(match.select("a").attr("href")).append("\'>").append(match.select("div.event-name").text())
 					.append("</a>\n").append(favoriteTeam(chatId, match.select("span.team-name").get(0).text(), false))
-					.append(" ").append(Emoji.VS.getCode()).append(" ")
+					.append(" ").append(Emoji.VS).append(" ")
 					.append(favoriteTeam(chatId, match.select("span.team-name").get(1).text(), false)).append(" (")
 					.append(match.select("tr.header").select("td.bestof").text()).append(") ").append(getStars(match))
-					.append("\nMatch ID: ")
-					.append(match.select("table.table").attr("data-livescore-match"))
+					.append("\nMatch ID: ").append(match.select("table.table").attr("data-livescore-match"))
 					.append("\n");
-			
+
 			Elements maps = match.select("tr.header").select("td.map");
 			int numMaps = maps.size();
 
@@ -247,10 +246,10 @@ public class MessageService {
 
 			if (!match.select("div.line-align").isEmpty()) {
 				textMessage.append(favoriteTeam(chatId, match.select("td.team-cell").get(0).text(), true)).append(" ")
-						.append(Emoji.VS.getCode()).append(" ")
+						.append(Emoji.VS).append(" ")
 						.append(favoriteTeam(chatId, match.select("td.team-cell").get(1).text(), true)).append(" (")
 						.append(match.select("div.map-text").text()).append(") ").append(getStars(match))
-						.append(Emoji.SQUARE.getCode()).append(" ").append("<a href=\'https://hltv.org")
+						.append(Emoji.SQUARE).append(" ").append("<a href=\'https://hltv.org")
 						.append(match.select("a").attr("href")).append("\'>").append(match.select("td.event").text())
 						.append("</a>\n");
 
@@ -273,7 +272,7 @@ public class MessageService {
 				headerText = "Featured Results";
 			}
 
-			textMessage.append(Emoji.CUP.getCode()).append(" <b>").append(headerText).append("</b>\n");
+			textMessage.append(Emoji.CUP).append(" <b>").append(headerText).append("</b>\n");
 
 			for (Element resultCon : resultList.select("div.result-con")) {
 				Element team1 = resultCon.select("div.team").get(0);
@@ -296,7 +295,7 @@ public class MessageService {
 				}
 
 				textMessage.append(" (").append(resultCon.select("div.map-text").text()).append(") ")
-						.append(getStars(resultCon)).append(Emoji.SQUARE.getCode()).append(" ")
+						.append(getStars(resultCon)).append(Emoji.SQUARE).append(" ")
 						.append("<a href=\'https://hltv.org").append(resultCon.select("a").attr("href")).append("\'>")
 						.append(resultCon.select("td.event").text()).append("</a> \n");
 
@@ -313,7 +312,7 @@ public class MessageService {
 
 	public SendMessage streams(JSONObject json) {
 		StringBuilder textMessage = new StringBuilder();
-		textMessage.append("<b>Live</b>").append(Emoji.EXCL_MARK.getCode()).append("<b>Streams on Twitch:</b>\n");
+		textMessage.append("<b>Live</b>").append(Emoji.EXCL_MARK).append("<b>Streams on Twitch:</b>\n");
 		JSONArray arr = json.getJSONArray("data");
 		for (int i = 0; i < arr.length(); i++) {
 			JSONObject data = arr.getJSONObject(i);
@@ -338,31 +337,31 @@ public class MessageService {
 		return text(text);
 	}
 
-	public SendMessage dbResult(DbResult dbResult, String name) {
+	public SendMessage dbResult(String dbResult, String name) {
 		switch (dbResult) {
-		case FLAG_NOT_FOUND:
-			return text(DbResult.NOTHING_WAS_CHANGED.getText());
-		case NOTHING_WAS_CHANGED:
-			return text(DbResult.NOTHING_WAS_CHANGED.getText());
-		case UPDATED:
-			return text("<b>" + name + "</b> " + DbResult.UPDATED.getText());
-		case ALREADY_EXIST:
-			return text("<b>" + name + "</b> " + DbResult.ALREADY_EXIST.getText());
-		case INSERTED:
-			return text("<b>" + name + "</b> " + DbResult.INSERTED.getText());
-		case DELETED:
-			return text("<b>" + name + "</b> " + DbResult.DELETED.getText());
+		case DbResult.FLAG_NOT_FOUND:
+			return text(DbResult.NOTHING_WAS_CHANGED);
+		case DbResult.NOTHING_WAS_CHANGED:
+			return text(DbResult.NOTHING_WAS_CHANGED);
+		case DbResult.UPDATED:
+			return text("<b>" + name + "</b> " + DbResult.UPDATED);
+		case DbResult.ALREADY_EXIST:
+			return text("<b>" + name + "</b> " + DbResult.ALREADY_EXIST);
+		case DbResult.INSERTED:
+			return text("<b>" + name + "</b> " + DbResult.INSERTED);
+		case DbResult.DELETED:
+			return text("<b>" + name + "</b> " + DbResult.DELETED);
 		default:
-			return text(DbResult.OOPS.getText());
+			return text(DbResult.OOPS);
 		}
 	}
 
 	public SendMessage favoriteTeams(List<FavoriteTeam> teams, Long chatId) {
 		StringBuilder textMessage = new StringBuilder();
 		if (teams.isEmpty())
-			return text(Emoji.INFO.getCode() + " Ваши любимые команды:\n\n<b>У вас пока нет любимых команд!</b> "
-					+ Emoji.SAD.getCode() + "\n\n" + TEAMS_COMMANDS);
-		textMessage.append(Emoji.INFO.getCode()).append(" Ваши любимые команды:\n\n");
+			return text(Emoji.INFO + " Ваши любимые команды:\n\n<b>У вас пока нет любимых команд!</b> "
+					+ Emoji.SAD + "\n\n" + TEAMS_COMMANDS);
+		textMessage.append(Emoji.INFO).append(" Ваши любимые команды:\n\n");
 		teams.stream()
 				.forEach(team -> textMessage.append("<b>").append(team.getName()).append("</b> [")
 						.append(team.getCountryCode().getCode()).append("] ")
@@ -387,26 +386,28 @@ public class MessageService {
 			String tScore = json.query("/RoundEnd/terroristScore").toString();
 			textMessage.append("<b>Round Over: ");
 			if (winner.equals("TERRORIST")) {
-				textMessage.append(Emoji.DIMOND_ORANGE.getCode()).append("T");
+				textMessage.append(Emoji.DIMOND_ORANGE).append("T");
 			} else {
-				textMessage.append(Emoji.DIMOND_BLUE.getCode()).append("CT");
+				textMessage.append(Emoji.DIMOND_BLUE).append("CT");
 			}
-			textMessage.append(" Win (").append(Emoji.DIMOND_ORANGE.getCode()).append(tScore).append(" - ")
-					.append(Emoji.DIMOND_BLUE.getCode()).append(ctScore).append(") - ");
+			textMessage.append(" Win - ");
 			switch (winType) {
 			case "Target_Bombed":
-				textMessage.append("Target Bombed</b>");
+				textMessage.append("Target Bombed");
 				break;
 			case "Bomb_Defused":
-				textMessage.append("Bomb Defused</b>");
+				textMessage.append("Bomb Defused");
 				break;
 			case "Target_Saved":
-				textMessage.append("Target Saved</b>");
+				textMessage.append("Target Saved");
 				break;
 			default:
-				textMessage.append("Enemy Eliminated</b>");
+				textMessage.append("Enemy Eliminated");
 				break;
 			}
+			textMessage.append("\n").append(Emoji.DIMOND_ORANGE).append(tScore).append(" - ")
+					.append(Emoji.DIMOND_BLUE).append(ctScore).append("</b>");
+
 		}
 		// Kill
 		if (logType.equals("Kill")) {
@@ -417,19 +418,19 @@ public class MessageService {
 			String weapon = json.query("/Kill/weapon").toString();
 			boolean isHeadShot = (boolean) json.query("/Kill/headShot");
 			if (killerSide.equals("TERRORIST")) {
-				textMessage.append(Emoji.DIMOND_ORANGE.getCode());
+				textMessage.append(Emoji.DIMOND_ORANGE);
 			} else {
-				textMessage.append(Emoji.DIMOND_BLUE.getCode());
+				textMessage.append(Emoji.DIMOND_BLUE);
 			}
 			textMessage.append("<b>").append(killerNick).append("</b> killed");
 			if (victimSide.equals("TERRORIST")) {
-				textMessage.append(Emoji.DIMOND_ORANGE.getCode());
+				textMessage.append(Emoji.DIMOND_ORANGE);
 			} else {
-				textMessage.append(Emoji.DIMOND_BLUE.getCode());
+				textMessage.append(Emoji.DIMOND_BLUE);
 			}
 			textMessage.append("<b>").append(victimNick).append("</b> with ").append(weapon);
 			if (isHeadShot) {
-				textMessage.append(" ").append(Emoji.HELM.getCode());
+				textMessage.append(" ").append(Emoji.HELM);
 			}
 		}
 
@@ -438,23 +439,25 @@ public class MessageService {
 			String playerNick = json.query("/BombPlanted/playerNick").toString();
 			String tPlayers = json.query("/BombPlanted/tPlayers").toString();
 			String ctPlayers = json.query("/BombPlanted/ctPlayers").toString();
-			textMessage.append(Emoji.DIMOND_ORANGE.getCode()).append("<b>").append(playerNick).append(" ")
-					.append(Emoji.BOMB.getCode()).append(" planted the bomb").append(Emoji.DIMOND_ORANGE.getCode())
-					.append(tPlayers).append(" on").append(Emoji.DIMOND_BLUE.getCode()).append(ctPlayers).append("</b>");
+			textMessage.append(Emoji.DIMOND_ORANGE).append("<b>").append(playerNick).append(" ")
+					.append(Emoji.BOMB).append(" planted the bomb").append(Emoji.DIMOND_ORANGE)
+					.append(tPlayers).append(" on").append(Emoji.DIMOND_BLUE).append(ctPlayers)
+					.append("</b>");
 		}
-		//Bomb Defused
+		// Bomb Defused
 		if (logType.equals("BombDefused")) {
 			String playerNick = json.query("/BombDefused/playerNick").toString();
-			textMessage.append(Emoji.DIMOND_BLUE.getCode()).append("<b>").append(playerNick).append(" defused the bomb</b>");
+			textMessage.append(Emoji.DIMOND_BLUE).append("<b>").append(playerNick)
+					.append(" defused the bomb</b>");
 		}
 		// Suicide
 		if (logType.equals("Suicide")) {
 			String playerNick = json.query("/Suicide/playerNick").toString();
 			String side = json.query("/Suicide/side").toString();
 			if (side.equals("TERRORIST")) {
-				textMessage.append(Emoji.DIMOND_ORANGE.getCode());
+				textMessage.append(Emoji.DIMOND_ORANGE);
 			} else {
-				textMessage.append(Emoji.DIMOND_BLUE.getCode());
+				textMessage.append(Emoji.DIMOND_BLUE);
 			}
 			textMessage.append("<b>").append(playerNick).append("</b> committed suicide");
 		}
@@ -468,10 +471,10 @@ public class MessageService {
 			String playerNick = json.query("/PlayerQuit/playerNick").toString();
 			String playerSide = json.query("/PlayerQuit/playerSide").toString();
 			if (playerSide.equals("TERRORIST")) {
-				textMessage.append(Emoji.DIMOND_ORANGE.getCode());
+				textMessage.append(Emoji.DIMOND_ORANGE);
 			}
 			if (playerSide.equals("CT")) {
-				textMessage.append(Emoji.DIMOND_BLUE.getCode());
+				textMessage.append(Emoji.DIMOND_BLUE);
 			}
 			textMessage.append("<b>").append(playerNick).append("</b> quit the game");
 		}
@@ -499,13 +502,19 @@ public class MessageService {
 	public SendMessage oops() {
 		return text("Упс, ты слишком долго думал парень!");
 	}
+
 	public SendMessage stoped() {
 		return text("Трансляция остановлена");
 	}
 
+	public SendMessage scorebot() {
+		return text(Emoji.INFO
+				+ " Для запуска трансляции:\n.<b>старт-1234567</b> (где 1234567 это Match ID - его можно посмотреть в .мачти)\n<b>.стоп</b> - остановить трансяцию");
+	}
+
 	private StringBuilder getStars(Element match) {
 		StringBuilder stars = new StringBuilder();
-		match.select("div.stars").select("i").stream().forEach(star -> stars.append(Emoji.STAR.getCode()));
+		match.select("div.stars").select("i").stream().forEach(star -> stars.append(Emoji.STAR));
 		return stars;
 	}
 
@@ -562,26 +571,28 @@ public class MessageService {
 		List<InlineKeyboardButton> row2 = new ArrayList<>();
 		List<InlineKeyboardButton> row3 = new ArrayList<>();
 		List<InlineKeyboardButton> row4 = new ArrayList<>();
-		row1.add(new InlineKeyboardButton().setText(Emoji.FIRE.getCode() + " Матчи")
-				.setCallbackData(CallBackData.MATCHES.getName()));
-		row1.add(new InlineKeyboardButton().setText(Emoji.TV.getCode() + " Стримы")
-				.setCallbackData(CallBackData.STREAMS.getName()));
-		row1.add(new InlineKeyboardButton().setText(Emoji.CUP.getCode() + " Результаты")
-				.setCallbackData(CallBackData.RESULTS.getName()));
-		row2.add(new InlineKeyboardButton().setText(Emoji.MIL_MEDAL.getCode() + "Топ 10")
-				.setCallbackData(CallBackData.TOP_10.getName()));
-		row2.add(new InlineKeyboardButton().setText(Emoji.MIL_MEDAL.getCode() + "Топ 20")
-				.setCallbackData(CallBackData.TOP_20.getName()));
-		row2.add(new InlineKeyboardButton().setText(Emoji.MIL_MEDAL.getCode() + "Топ 30")
-				.setCallbackData(CallBackData.TOP_30.getName()));
-		row3.add(new InlineKeyboardButton().setText(Emoji.SPORT_MEDAL.getCode() + "Топ 10 Игроков")
-				.setCallbackData(CallBackData.TOP_10_PLAYERS.getName()));
-		row3.add(new InlineKeyboardButton().setText(Emoji.SPORT_MEDAL.getCode() + "Топ 20 Игроков")
-				.setCallbackData(CallBackData.TOP_20_PLAYERS.getName()));
-		row3.add(new InlineKeyboardButton().setText(Emoji.SPORT_MEDAL.getCode() + "Топ 30 Игроков")
-				.setCallbackData(CallBackData.TOP_30_PLAYERS.getName()));
-		row4.add(new InlineKeyboardButton().setText(Emoji.SUNGLASSES.getCode() + "Любимые команды")
-				.setCallbackData(CallBackData.TEAMS.getName()));
+		row1.add(new InlineKeyboardButton().setText(Emoji.FIRE + " Матчи")
+				.setCallbackData(CallBackData.MATCHES));
+		row1.add(new InlineKeyboardButton().setText(Emoji.TV + " Стримы")
+				.setCallbackData(CallBackData.STREAMS));
+		row1.add(new InlineKeyboardButton().setText(Emoji.CUP + " Результаты")
+				.setCallbackData(CallBackData.RESULTS));
+		row2.add(new InlineKeyboardButton().setText(Emoji.SUNGLASSES + "Любимые команды")
+				.setCallbackData(CallBackData.TEAMS));
+		row2.add(new InlineKeyboardButton().setText(Emoji.MIC + "Трансляции")
+				.setCallbackData(CallBackData.SCOREBOT));
+		row3.add(new InlineKeyboardButton().setText(Emoji.MIL_MEDAL + "Топ 10")
+				.setCallbackData(CallBackData.TOP_10));
+		row3.add(new InlineKeyboardButton().setText(Emoji.MIL_MEDAL + "Топ 20")
+				.setCallbackData(CallBackData.TOP_20));
+		row3.add(new InlineKeyboardButton().setText(Emoji.MIL_MEDAL + "Топ 30")
+				.setCallbackData(CallBackData.TOP_30));
+		row4.add(new InlineKeyboardButton().setText(Emoji.SPORT_MEDAL + "Топ 10 Игроков")
+				.setCallbackData(CallBackData.TOP_10_PLAYERS));
+		row4.add(new InlineKeyboardButton().setText(Emoji.SPORT_MEDAL + "Топ 20 Игроков")
+				.setCallbackData(CallBackData.TOP_20_PLAYERS));
+		row4.add(new InlineKeyboardButton().setText(Emoji.SPORT_MEDAL + "Топ 30 Игроков")
+				.setCallbackData(CallBackData.TOP_30_PLAYERS));
 		rowsInLine.add(row1);
 		rowsInLine.add(row2);
 		rowsInLine.add(row3);

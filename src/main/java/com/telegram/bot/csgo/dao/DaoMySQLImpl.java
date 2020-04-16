@@ -28,8 +28,8 @@ public class DaoMySQLImpl implements Dao {
 	@Override
 	@Transactional
 	@CacheEvict(value = "teams", allEntries = true)
-	public DbResult updateOrSaveTeam(Long chatId, String name, String countryCode) {
-		DbResult result = null;
+	public String updateOrSaveTeam(Long chatId, String name, String countryCode) {
+		String result = null;
 		Flag newFtFlag = getFlags().parallelStream().filter(flag -> flag.getCode().equals(countryCode)).findFirst()
 				.orElse(null);
 		if (newFtFlag == null) {
@@ -55,7 +55,7 @@ public class DaoMySQLImpl implements Dao {
 	@Override
 	@Transactional
 	@CacheEvict(value = "teams", allEntries = true)
-	public DbResult deleteTeam(Long chatId, String name) {
+	public String deleteTeam(Long chatId, String name) {
 		FavoriteTeam teamToDelete = new FavoriteTeam(chatId, name, null);
 		if (!isTeamPresents(chatId, teamToDelete)) {
 			return DbResult.NOTHING_WAS_CHANGED;

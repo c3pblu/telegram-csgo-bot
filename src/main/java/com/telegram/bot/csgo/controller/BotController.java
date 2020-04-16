@@ -20,7 +20,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import com.telegram.bot.csgo.dao.Dao;
 import com.telegram.bot.csgo.model.CallBackData;
 import com.telegram.bot.csgo.model.Commands;
-import com.telegram.bot.csgo.model.DbResult;
 import com.telegram.bot.csgo.service.HttpService;
 import com.telegram.bot.csgo.service.MessageService;
 import com.telegram.bot.csgo.service.TwitchService;
@@ -87,44 +86,44 @@ public class BotController extends TelegramLongPollingBot {
 			Long chatId = update.getMessage().getChatId();
 			String text = update.getMessage().getText();
 			// Help
-			if (text.equalsIgnoreCase(Commands.HELP.getName())) {
+			if (text.equalsIgnoreCase(Commands.HELP)) {
 				sendMessage(chatId, messageService.help());
 			}
 			// Menu
-			else if (text.equalsIgnoreCase(Commands.MENU.getName())) {
+			else if (text.equalsIgnoreCase(Commands.MENU)) {
 				sendMessage(chatId, messageService.menu());
 			}
 			// Matches
-			else if (text.equalsIgnoreCase(Commands.MATCHES.getName())) {
+			else if (text.equalsIgnoreCase(Commands.MATCHES)) {
 				Document doc = httpService.getDocument(HLTV + "/matches");
 				sendMessage(chatId, messageService.matches(doc, chatId));
 			}
 			// Results
-			else if (text.equalsIgnoreCase(Commands.RESULTS.getName())) {
+			else if (text.equalsIgnoreCase(Commands.RESULTS)) {
 				Document doc = httpService.getDocument(HLTV + "/results");
 				sendMessage(chatId, messageService.results(doc, chatId));
 			}
 			// Top Players
-			else if (text.equalsIgnoreCase(Commands.TOP_10_PLAYERS.getName())
-					|| text.equalsIgnoreCase(Commands.TOP_20_PLAYERS.getName())
-					|| text.equalsIgnoreCase(Commands.TOP_30_PLAYERS.getName())) {
+			else if (text.equalsIgnoreCase(Commands.TOP_10_PLAYERS)
+					|| text.equalsIgnoreCase(Commands.TOP_20_PLAYERS)
+					|| text.equalsIgnoreCase(Commands.TOP_30_PLAYERS)) {
 				Integer count = Integer.parseInt(text.substring(4, 6));
 				topPlayers(chatId, count);
 			}
 			// Top Teams
-			else if (text.equalsIgnoreCase(Commands.TOP_10.getName())
-					|| text.equalsIgnoreCase(Commands.TOP_20.getName())
-					|| text.equalsIgnoreCase(Commands.TOP_30.getName())) {
+			else if (text.equalsIgnoreCase(Commands.TOP_10)
+					|| text.equalsIgnoreCase(Commands.TOP_20)
+					|| text.equalsIgnoreCase(Commands.TOP_30)) {
 				Integer count = Integer.parseInt(update.getMessage().getText().substring(4));
 				topTeams(chatId, count);
 			}
 			// Twitch streams
-			else if (text.equalsIgnoreCase(Commands.STREAMS.getName())) {
+			else if (text.equalsIgnoreCase(Commands.STREAMS)) {
 				sendMessage(chatId, messageService.streams(twitchService.getStreams(chatId, false)));
 				sendMessage(chatId, messageService.nextPage());
 			}
 			// Favorite Teams
-			else if (text.equalsIgnoreCase(Commands.TEAMS.getName())) {
+			else if (text.equalsIgnoreCase(Commands.TEAMS)) {
 				sendMessage(chatId, messageService.favoriteTeams(dao.getTeams(chatId), chatId));
 			}
 
@@ -134,23 +133,26 @@ public class BotController extends TelegramLongPollingBot {
 					String team = text.replaceAll("\\[..\\]", "").replaceAll(TEAM_REGEXP + PLUS_REGEXP, "").trim();
 					String countryCode = text.replaceAll(TEAM_REGEXP + PLUS_REGEXP + NAME_REGEXP, "")
 							.replaceAll("\\[", "").replaceAll("\\]", "");
-					DbResult dbResult = dao.updateOrSaveTeam(chatId, team, countryCode);
+					String dbResult = dao.updateOrSaveTeam(chatId, team, countryCode);
 					sendMessage(chatId, messageService.dbResult(dbResult, team));
 				}
 				// Delete (.команды-)
 				else if (text.matches(TEAM_REGEXP + MINUS_REGEXP + NAME_REGEXP)) {
 					String team = text.replaceAll(TEAM_REGEXP + MINUS_REGEXP, "").trim();
-					DbResult dbResult = dao.deleteTeam(chatId, team);
+					String dbResult = dao.deleteTeam(chatId, team);
 					sendMessage(chatId, messageService.dbResult(dbResult, team));
 				} else {
 					sendMessage(chatId, messageService.teamsFormat());
 				}
 			}
 			// ScoreBot
+			else if (text.equals(Commands.SCOREBOT)) {
+				sendMessage(chatId, messageService.scorebot());
+			}
 			else if (text.matches(START_REGEXP)) {
 				webSocketService.live(chatId, text.substring(7));
 			}
-			else if (text.equalsIgnoreCase(Commands.STOP.getName())) {
+			else if (text.equalsIgnoreCase(Commands.STOP)) {
 				webSocketService.stop(chatId);
 				sendMessage(chatId, messageService.stoped());
 			}
@@ -173,42 +175,45 @@ public class BotController extends TelegramLongPollingBot {
 				return;
 			}
 			String data = callBack.getData();
-			if (data.equals(CallBackData.TOP_10.getName())) {
+			if (data.equals(CallBackData.TOP_10)) {
 				topTeams(chatId, 10);
 			}
-			if (data.equals(CallBackData.TOP_20.getName())) {
+			if (data.equals(CallBackData.TOP_20)) {
 				topTeams(chatId, 20);
 			}
-			if (data.equals(CallBackData.TOP_30.getName())) {
+			if (data.equals(CallBackData.TOP_30)) {
 				topTeams(chatId, 30);
 			}
-			if (data.equals(CallBackData.TOP_10_PLAYERS.getName())) {
+			if (data.equals(CallBackData.TOP_10_PLAYERS)) {
 				topPlayers(chatId, 10);
 			}
-			if (data.equals(CallBackData.TOP_20_PLAYERS.getName())) {
+			if (data.equals(CallBackData.TOP_20_PLAYERS)) {
 				topPlayers(chatId, 20);
 			}
-			if (data.equals(CallBackData.TOP_30_PLAYERS.getName())) {
+			if (data.equals(CallBackData.TOP_30_PLAYERS)) {
 				topPlayers(chatId, 30);
 			}
-			if (data.equals(CallBackData.MATCHES.getName())) {
+			if (data.equals(CallBackData.MATCHES)) {
 				Document doc = httpService.getDocument(HLTV + "/matches");
 				sendMessage(chatId, messageService.matches(doc, chatId));
 			}
-			if (data.equals(CallBackData.RESULTS.getName())) {
+			if (data.equals(CallBackData.RESULTS)) {
 				Document doc = httpService.getDocument(HLTV + "/results");
 				sendMessage(chatId, messageService.results(doc, chatId));
 			}
-			if (data.equals(CallBackData.TEAMS.getName())) {
+			if (data.equals(CallBackData.TEAMS)) {
 				sendMessage(chatId, messageService.favoriteTeams(dao.getTeams(chatId), chatId));
 			}
-			if (data.equals(CallBackData.STREAMS.getName())) {
+			if (data.equals(CallBackData.STREAMS)) {
 				sendMessage(chatId, messageService.streams(twitchService.getStreams(chatId, false)));
 				sendMessage(chatId, messageService.nextPage());
 			}
-			if (data.equals(CallBackData.NEXT_PAGE.getName())) {
+			if (data.equals(CallBackData.NEXT_PAGE)) {
 				sendMessage(chatId, messageService.streams(twitchService.getStreams(chatId, true)));
 				sendMessage(chatId, messageService.nextPage());
+			}
+			if (data.equals(CallBackData.SCOREBOT)) {
+				sendMessage(chatId, messageService.scorebot());
 			}
 
 			deleteMessage(chatId, update.getCallbackQuery().getMessage().getMessageId());
