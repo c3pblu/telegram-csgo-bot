@@ -1,13 +1,12 @@
 package com.telegram.bot.csgo.service;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONObject;
+import org.jsoup.Connection.Method;
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,8 +29,7 @@ public class TwitchService {
 	public JSONObject getStreams(Long chatid, boolean isNextPage) {
 		if (ACCESS_TOKEN == null || ACCESS_TOKEN.isEmpty()) {
 			updateAccessToken();
-		}
-		else {
+		} else {
 			// Validate token
 			HashMap<String, String> headers = new HashMap<>();
 			headers.put("Authorization", "OAuth " + ACCESS_TOKEN);
@@ -60,7 +58,7 @@ public class TwitchService {
 
 	private void updateAccessToken() {
 		JSONObject accessToken = httpRequest("https://id.twitch.tv/oauth2/token?client_id=" + clientId
-				+ "&client_secret=" + clientSecret + "&grant_type=client_credentials", "POST", null);
+				+ "&client_secret=" + clientSecret + "&grant_type=client_credentials", "POST", new HashMap<>());
 		if (accessToken != null) {
 			ACCESS_TOKEN = accessToken.getString("access_token");
 		}
@@ -68,29 +66,13 @@ public class TwitchService {
 
 	public JSONObject httpRequest(String uri, String method, HashMap<String, String> headers) {
 		try {
-			URL url = new URL(uri);
-			HttpURLConnection con = (HttpURLConnection) url.openConnection();
-			con.setRequestMethod(method);
-			con.setRequestProperty("User-Agent", USER_AGENT_NAME);
-			if (headers != null) {
-				for (Map.Entry<String, String> entry : headers.entrySet()) {
-					con.setRequestProperty(entry.getKey(), entry.getValue());
-				}
-			}
-			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-			String inputLine;
-			StringBuffer content = new StringBuffer();
-			while ((inputLine = in.readLine()) != null) {
-				content.append(inputLine);
-			}
-			in.close();
-			con.disconnect();
-			return new JSONObject(content.toString());
-
-		} catch (Exception e) {
+			return new JSONObject(Jsoup.connect(uri).userAgent(USER_AGENT_NAME).method(Method.valueOf(method))
+					.headers(headers).ignoreContentType(true).execute().body());
+		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
 		}
+
 	}
 
 }
