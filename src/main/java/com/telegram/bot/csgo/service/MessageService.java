@@ -197,16 +197,17 @@ public class MessageService {
 		if (!liveMatches.isEmpty()) {
 			textMessage.append("<b>Live matches</b>").append(Emoji.EXCL_MARK).append("\n");
 			for (Element match : liveMatches.select("div.liveMatch")) {
-				textMessage.append(Emoji.CUP).append("<a href=\'https://hltv.org").append(match.select("a").attr("href"))
-				.append("\'>").append(match.select("div.matchEventName").text()).append("</a>\n")
-				.append(favoriteTeam(chatId, match.select("div.matchTeamName").get(0).text(), true)).append(" ")
-				.append(Emoji.VS).append(" ")
-				.append(favoriteTeam(chatId, match.select("div.matchTeamName").get(1).text(), true)).append(" (")
-				.append(match.select("div.matchMeta").text()).append(") ").append(getUpcomingStars(match))
-				.append("\nMatch ID: ").append(match.select("div.liveMatch").attr("data-livescore-match"))
-				.append("\n\n");
+				textMessage.append(Emoji.CUP).append("<a href=\'https://hltv.org")
+						.append(match.select("a").attr("href")).append("\'>")
+						.append(match.select("div.matchEventName").text()).append("</a>\n")
+						.append(favoriteTeam(chatId, match.select("div.matchTeamName").get(0).text(), true)).append(" ")
+						.append(Emoji.VS).append(" ")
+						.append(favoriteTeam(chatId, match.select("div.matchTeamName").get(1).text(), true))
+						.append(" (").append(match.select("div.matchMeta").text()).append(") ")
+						.append(getUpcomingStars(match)).append("\nMatch ID: ")
+						.append(match.select("div.liveMatch").attr("data-livescore-match")).append("\n\n");
 			}
-			
+
 		}
 		// Upcoming Matches for today
 		Element todayMatches = doc.select("div.upcomingMatchesContainer").select("div.upcomingMatchesSection").first();
@@ -533,15 +534,18 @@ public class MessageService {
 			ourFlag = flags.parallelStream().filter(t -> t.getName().equals(country)).findFirst().orElse(null);
 		}
 
-		if (!StringUtils.isBlank(ourFlag.getUnicode())) {
-			text = StringEscapeUtils.unescapeJava(ourFlag.getUnicode());
-		} else {
-			text = EmojiParser.parseToUnicode(ourFlag.getEmojiCode());
+		if (ourFlag != null) {
+			if (!StringUtils.isBlank(ourFlag.getUnicode())) {
+				text = StringEscapeUtils.unescapeJava(ourFlag.getUnicode());
+			} else {
+				text = EmojiParser.parseToUnicode(ourFlag.getEmojiCode());
+			}
+			LOGGER.debug("Country code: {}, Emoji code: {}", country, ourFlag.getEmojiCode());
 		}
-
-		if (text == null)
+		if (text == null) {
 			text = EmojiParser.parseToUnicode(":un:");
-		LOGGER.debug("Country code: {}, Emoji code: {}", country, ourFlag.getEmojiCode());
+			LOGGER.debug("Country code: {}, Emoji code: {}", country, ":un: (default)");
+		}
 		return text;
 	}
 
