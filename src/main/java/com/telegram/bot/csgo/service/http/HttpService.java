@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.service;
+package com.telegram.bot.csgo.service.http;
 
 import java.io.IOException;
 
