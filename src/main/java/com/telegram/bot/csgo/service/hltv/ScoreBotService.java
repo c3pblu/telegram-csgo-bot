@@ -11,13 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import com.telegram.bot.csgo.controller.BotController;
 import com.telegram.bot.csgo.model.Emoji;
-import com.telegram.bot.csgo.service.MessageService;
+import com.telegram.bot.csgo.service.message.MessageService;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -36,7 +35,7 @@ public class ScoreBotService {
 	private BotController botController;
 
 	@Autowired
-	public ScoreBotService(MessageService messageService, @Lazy BotController botController) {
+	public ScoreBotService(MessageService messageService, BotController botController) {
 		this.messageService = messageService;
 		this.botController = botController;
 	}
@@ -153,7 +152,7 @@ public class ScoreBotService {
 			textMessage.append("<b>Match Started: ").append(map).append("</b>");
 		}
 		LOGGER.debug("Log Message: {}", textMessage);
-		return messageService.text(textMessage.toString());
+		return messageService.htmlMessage(textMessage.toString());
 	}
 
 	public void live(Long chatId, String matchId) {
@@ -214,8 +213,8 @@ public class ScoreBotService {
 		}
 	}
 
-	public SendMessage scorebot() {
-		return messageService.text(Emoji.INFO
+	public SendMessage scorebotHelp() {
+		return messageService.htmlMessage(Emoji.INFO
 				+ " Для запуска трансляции:\n.<b>старт-1234567</b> (где 1234567 это Match ID - его можно посмотреть в .мачти)\n<b>.стоп</b> - остановить трансяцию");
 	}
 

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import com.telegram.bot.csgo.model.Emoji;
-import com.telegram.bot.csgo.service.MessageService;
+import com.telegram.bot.csgo.service.message.MessageService;
 
 @Service
 public class ResultsService {
@@ -70,7 +70,7 @@ public class ResultsService {
 		}
 
 		LOGGER.debug("Results final message:\n{}", textMessage);
-		return messageService.text(textMessage);
+		return messageService.htmlMessage(textMessage);
 	}
 
 	private StringBuilder getStars(Element match) {
@@ -80,7 +80,7 @@ public class ResultsService {
 	}
 
 	public SendMessage resultsForToday() {
-		return messageService.text("Последние результаты:");
+		return messageService.htmlMessage("Последние результаты:");
 	}
 
 }

@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import com.telegram.bot.csgo.model.Emoji;
-import com.telegram.bot.csgo.service.MessageService;
 import com.telegram.bot.csgo.service.http.HttpService;
+import com.telegram.bot.csgo.service.message.MessageService;
 
 @Service
 public class MatchesService {
@@ -98,7 +98,7 @@ public class MatchesService {
 		}
 
 		LOGGER.debug("Matches final message:\n{}", textMessage);
-		return messageService.text(textMessage);
+		return messageService.htmlMessage(textMessage);
 
 	}
 
@@ -111,7 +111,7 @@ public class MatchesService {
 	}
 
 	public SendMessage matchesForToday() {
-		return messageService.text("Ближайшие матчи:");
+		return messageService.htmlMessage("Ближайшие матчи:");
 	}
 
 }

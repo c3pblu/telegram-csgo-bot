@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.service;
+package com.telegram.bot.csgo.service.message;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,15 +10,13 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 
 import com.telegram.bot.csgo.model.CallBackData;
 import com.telegram.bot.csgo.model.Emoji;
+import com.telegram.bot.csgo.model.SendMessageBuilder;
 
 @Service
-public class MenuService {
+public class MenuMessageService {
 
 	public SendMessage menu() {
-		SendMessage sendMessage = new SendMessage();
-		sendMessage.setReplyMarkup(createMenu());
-		sendMessage.setText("Easy Peasy Lemon Squeezy!");
-		return sendMessage;
+		return new SendMessageBuilder().replyMarkup(createMenu()).text("Easy Peasy Lemon Squeezy!").build();
 	}
 
 	private InlineKeyboardMarkup createMenu() {

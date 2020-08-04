@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.service;
+package com.telegram.bot.csgo.service.message;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -12,14 +12,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
+import com.telegram.bot.csgo.model.SendMessageBuilder;
+
 @Service
-public class HelpService {
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(HelpService.class);
-	
+public class HelpMessageService {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(HelpMessageService.class);
+
 	@Value("${help.message.file:#{null}}")
 	private String helpFile;
-	
+
 	public String helpText() {
 		String helpMessage = "Не найден файл описания помощи!";
 		if (helpFile == null) {
@@ -33,12 +35,9 @@ public class HelpService {
 		}
 		return helpMessage;
 	}
-	
+
 	public SendMessage help() {
-		SendMessage sendMessage = new SendMessage();
-		sendMessage.setText(helpText());
-		sendMessage.setParseMode("markdown");
-		return sendMessage;
+		return new SendMessageBuilder().parseMode("markdown").text(helpText()).build();
 	}
 
 }

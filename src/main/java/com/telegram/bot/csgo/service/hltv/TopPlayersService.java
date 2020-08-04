@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import com.telegram.bot.csgo.model.Emoji;
-import com.telegram.bot.csgo.service.MessageService;
+import com.telegram.bot.csgo.service.message.MessageService;
 
 @Service
 public class TopPlayersService {
@@ -63,7 +63,7 @@ public class TopPlayersService {
 			number++;
 		}
 		LOGGER.debug("TopPlayers final message:\n{}", textMessage);
-		return messageService.text(textMessage);
+		return messageService.htmlMessage(textMessage);
 	}
 
 }

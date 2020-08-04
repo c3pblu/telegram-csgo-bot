@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.service;
+package com.telegram.bot.csgo.service.message;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,32 +21,42 @@ import com.telegram.bot.csgo.model.DbResult;
 import com.telegram.bot.csgo.model.Emoji;
 import com.telegram.bot.csgo.model.FavoriteTeam;
 import com.telegram.bot.csgo.model.Flag;
+import com.telegram.bot.csgo.model.SendMessageBuilder;
 import com.telegram.bot.csgo.model.Sticker;
 import com.vdurmont.emoji.EmojiParser;
 
 @Service
 public class MessageService {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(MessageService.class);
 	private static final String TEAMS_COMMANDS = "Добавить команду/изменить код страны:\n <b>.команды+Natus Vincere[RU]</b> \nУдалить команду: \n<b>.команды-Natus Vincere</b>";
 	private Map<Long, List<Sticker>> chatLastStickers = new HashMap<>();
+
 	private Dao dao;
+	private HelpMessageService helpMessageService;
+	private MenuMessageService menuMessageService;
 
 	@Autowired
-	public MessageService(Dao dao) {
+	public MessageService(Dao dao, HelpMessageService helpMessageService, MenuMessageService menuMessageService) {
 		this.dao = dao;
-		
+		this.helpMessageService = helpMessageService;
+		this.menuMessageService = menuMessageService;
+
 	}
-	
-	public SendMessage text(Object msg) {
-		SendMessage sendMessage = new SendMessage();
-		sendMessage.disableNotification();
-		sendMessage.disableWebPagePreview();
-		sendMessage.setParseMode("html");
-		sendMessage.setText(msg.toString());
-		return sendMessage;
+
+	public SendMessage helpMessage() {
+		return helpMessageService.help();
 	}
-	
+
+	public SendMessage menuMessage() {
+		return menuMessageService.menu();
+	}
+
+	public SendMessage htmlMessage(Object msg) {
+		return new SendMessageBuilder().disableNotification().disableWebPagePreview().parseMode("html")
+				.text(msg.toString()).build();
+	}
+
 	public SendSticker sticker(Long chatId, Integer uniqCount) {
 		List<Sticker> stickers = dao.getStickers();
 		int randomSize = stickers.size() - 1 + 1;
@@ -69,26 +79,26 @@ public class MessageService {
 		chatLastStickers.put(chatId, lastStickers);
 		return new SendSticker().setSticker(selectedSticker.getSticker());
 	}
-	
+
 	public SendMessage dbResult(String dbResult, String name) {
 		switch (dbResult) {
 		case DbResult.FLAG_NOT_FOUND:
-			return text(DbResult.NOTHING_WAS_CHANGED);
+			return htmlMessage(DbResult.NOTHING_WAS_CHANGED);
 		case DbResult.NOTHING_WAS_CHANGED:
-			return text(DbResult.NOTHING_WAS_CHANGED);
+			return htmlMessage(DbResult.NOTHING_WAS_CHANGED);
 		case DbResult.UPDATED:
-			return text("<b>" + name + "</b> " + DbResult.UPDATED);
+			return htmlMessage("<b>" + name + "</b> " + DbResult.UPDATED);
 		case DbResult.ALREADY_EXIST:
-			return text("<b>" + name + "</b> " + DbResult.ALREADY_EXIST);
+			return htmlMessage("<b>" + name + "</b> " + DbResult.ALREADY_EXIST);
 		case DbResult.INSERTED:
-			return text("<b>" + name + "</b> " + DbResult.INSERTED);
+			return htmlMessage("<b>" + name + "</b> " + DbResult.INSERTED);
 		case DbResult.DELETED:
-			return text("<b>" + name + "</b> " + DbResult.DELETED);
+			return htmlMessage("<b>" + name + "</b> " + DbResult.DELETED);
 		default:
-			return text(DbResult.OOPS);
+			return htmlMessage(DbResult.OOPS);
 		}
 	}
-	
+
 	public SendMessage cite(Document doc) {
 		StringBuilder text = new StringBuilder();
 		text.append(doc.select("cite").text());
@@ -96,26 +106,26 @@ public class MessageService {
 		if (!StringUtils.isEmpty(athor)) {
 			text.append("\n<b>").append(athor).append("</b>");
 		}
-		return text(text);
+		return htmlMessage(text);
 	}
-	
+
 	public SendMessage teamsFormat() {
-		return text("Неверный формат!\nСмотрите примеры ниже!\n\n" + TEAMS_COMMANDS);
+		return htmlMessage("Неверный формат!\nСмотрите примеры ниже!\n\n" + TEAMS_COMMANDS);
 	}
 
 	public SendMessage oops() {
-		return text("Упс, ты слишком долго думал парень!");
+		return htmlMessage("Упс, ты слишком долго думал парень!");
 	}
 
 	public SendMessage stoped() {
-		return text("Трансляция остановлена");
+		return htmlMessage("Трансляция остановлена");
 	}
 
 	public SendMessage scorebot() {
-		return text(Emoji.INFO
+		return htmlMessage(Emoji.INFO
 				+ " Для запуска трансляции:\n.<b>старт-1234567</b> (где 1234567 это Match ID - его можно посмотреть в .мачти)\n<b>.стоп</b> - остановить трансяцию");
 	}
-	
+
 	public String flagUnicodeFromCountry(String country) {
 		String text = null;
 		Flag ourFlag = new Flag();
@@ -141,8 +151,7 @@ public class MessageService {
 		}
 		return text;
 	}
-	
-	
+
 	public String favoriteTeam(Long chatId, String name, boolean isBold) {
 		String teamName = name;
 		FavoriteTeam fvTeam = dao.getTeams(chatId).parallelStream()
@@ -158,7 +167,7 @@ public class MessageService {
 		}
 		return unlinkName(teamName);
 	}
-	
+
 	private String unlinkName(String name) {
 		if (name.contains(".")) {
 			name = name.replace('.', ',');
