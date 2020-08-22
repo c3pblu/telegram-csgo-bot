@@ -3,6 +3,7 @@ package com.telegram.bot.csgo.service.hltv;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -43,8 +44,7 @@ public class TopTeamsService {
 			String teamProfileURL = team.select("div.more").select("a").attr("href");
 			Document teamProfile = httpService.getTeamProfile(teamProfileURL);
 			String teamFlag = messageService
-					.flagUnicodeFromCountry(teamProfile.select("div.team-country").text().trim());
-
+					.flagUnicodeFromCountry(StringUtils.trim(teamProfile.select("div.team-country").text()));
 			StringBuilder row = new StringBuilder();
 			row.append("<b>").append(team.select("span.position").text()).append("</b> (")
 					.append(team.select("div.change").text()).append(") ").append(teamFlag)

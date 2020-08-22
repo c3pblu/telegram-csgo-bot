@@ -128,6 +128,11 @@ public class MessageService {
 
 	public String flagUnicodeFromCountry(String country) {
 		String text = null;
+		if (country == null) {
+			text = EmojiParser.parseToUnicode(":un:");
+			LOGGER.debug("Country code: {}, Emoji code: {}", country, ":un: (default)");
+			return text;
+		}
 		Flag ourFlag = new Flag();
 		List<Flag> flags = dao.getFlags();
 		if (country.matches("[A-Z][A-Z]")) {
