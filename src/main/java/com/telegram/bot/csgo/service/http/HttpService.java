@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +20,9 @@ import okhttp3.Response;
 @Service
 public class HttpService {
 
-	private final static String HLTV = "https://www.hltv.org";
+	private static final String HLTV = "https://www.hltv.org";
+	private static final Logger LOGGER = LoggerFactory.getLogger(HttpService.class);
+
 
 	public Document getDocument(String url) {
 		return Jsoup.parse(getHtml(url, null, "GET"));
@@ -42,7 +46,11 @@ public class HttpService {
 		Request req = new Request.Builder().method(method, "GET".equals(method) ? null : body).headers(headers).url(url)
 				.build();
 		try (Response res = client.newCall(req).execute()) {
-			return res.body().string();
+			String responseBody = res.body().string();
+			LOGGER.debug("URL : {}", url);
+			LOGGER.debug("Response code : {}", res.code());
+			LOGGER.debug("Body : {}", responseBody);
+			return responseBody;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
