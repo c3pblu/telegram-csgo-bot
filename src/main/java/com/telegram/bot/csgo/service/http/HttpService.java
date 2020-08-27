@@ -44,11 +44,24 @@ public class HttpService {
 		RequestBody body = RequestBody.create(MediaType.parse("application/json"), "");
 		Request req = new Request.Builder().method(method, "GET".equals(method) ? null : body).headers(headers).url(url)
 				.build();
-		try (Response res = client.newCall(req).execute()) {
+		try {
+			Response res = client.newCall(req).execute();
 			String responseBody = res.body().string();
 			LOGGER.debug("Request URL : {}", url);
 			LOGGER.debug("Response code : {}", res.code());
 			LOGGER.debug("Response headers : {}", res.headers().toString());
+			// Check for "HttpCode 429 - Too Many Requests" header and sleep
+			if (res.code() == 429) {
+				try {
+					LOGGER.debug("Sleeping for 10 seconds because of 429 Response Code");
+					Thread.sleep(10000);
+					getHtml(url, headers, method);
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 			return responseBody;
 		} catch (IOException e) {
 			e.printStackTrace();
