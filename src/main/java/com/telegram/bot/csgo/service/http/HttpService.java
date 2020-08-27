@@ -57,7 +57,7 @@ public class HttpService {
 				try {
 					LOGGER.debug("Sleeping for {} seconds because of 429 Response Code", retryAfter);
 					Thread.sleep(Integer.parseInt(retryAfter) * 1000);
-					getHtml(url, headers, method);
+					responseBody = getHtml(url, headers, method);
 				} catch (NumberFormatException e) {
 					e.printStackTrace();
 				} catch (InterruptedException e) {
