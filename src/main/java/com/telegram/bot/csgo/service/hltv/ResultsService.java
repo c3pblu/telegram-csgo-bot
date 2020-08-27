@@ -27,10 +27,12 @@ public class ResultsService {
 	public SendMessage results(Document doc, Long chatId) {
 		StringBuilder textMessage = new StringBuilder();
 		Elements subLists = doc.select("div.results-sublist");
+		int featuredNum = 0;
 		for (Element resultList : subLists) {
 			String headerText = resultList.select("span.standard-headline").text();
 			if (headerText.isEmpty()) {
-				headerText = "Featured Results";
+				headerText = doc.select("div.tab-holder").select("div.tab").get(featuredNum).text();
+				featuredNum++;
 			}
 
 			textMessage.append(Emoji.CUP).append(" <b>").append(headerText).append("</b>\n");

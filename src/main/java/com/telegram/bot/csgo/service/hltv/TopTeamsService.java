@@ -42,9 +42,9 @@ public class TopTeamsService {
 				break;
 			}
 			String teamProfileURL = team.select("div.more").select("a").attr("href");
-			Document teamProfile = httpService.getTeamProfile(teamProfileURL);
+			Elements teamProfile = httpService.getTeamProfile(teamProfileURL).select("div.team-country");
 			String teamFlag = messageService
-					.flagUnicodeFromCountry(StringUtils.trim(teamProfile.select("div.team-country").text()));
+					.flagUnicodeFromCountry(teamProfile != null ? StringUtils.trim(teamProfile.text()) : null);
 			StringBuilder row = new StringBuilder();
 			row.append("<b>").append(team.select("span.position").text()).append("</b> (")
 					.append(team.select("div.change").text()).append(") ").append(teamFlag)
