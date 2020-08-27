@@ -2,6 +2,7 @@ package com.telegram.bot.csgo.service.http;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -51,10 +52,11 @@ public class HttpService {
 			LOGGER.debug("Response code : {}", res.code());
 			LOGGER.debug("Response headers : {}", res.headers().toString());
 			// Check for "HttpCode 429 - Too Many Requests" header and sleep
-			if (res.code() == 429) {
+			String retryAfter = res.header("Retry-After");
+			if (!StringUtils.isBlank(retryAfter)) {
 				try {
-					LOGGER.debug("Sleeping for 10 seconds because of 429 Response Code");
-					Thread.sleep(10000);
+					LOGGER.debug("Sleeping for {} seconds because of 429 Response Code", retryAfter);
+					Thread.sleep(Integer.parseInt(retryAfter) * 1000);
 					getHtml(url, headers, method);
 				} catch (NumberFormatException e) {
 					e.printStackTrace();
