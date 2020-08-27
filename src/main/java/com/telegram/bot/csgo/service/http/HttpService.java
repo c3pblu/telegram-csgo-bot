@@ -23,6 +23,7 @@ public class HttpService {
 
 	private static final String HLTV = "https://www.hltv.org";
 	private static final Logger LOGGER = LoggerFactory.getLogger(HttpService.class);
+	private OkHttpClient client = new OkHttpClient();
 
 	public Document getDocument(String url) {
 		return Jsoup.parse(getHtml(url, null, "GET"));
@@ -41,7 +42,6 @@ public class HttpService {
 		if (headers == null) {
 			headers = new Headers.Builder().build();
 		}
-		OkHttpClient client = new OkHttpClient();
 		RequestBody body = RequestBody.create(MediaType.parse("application/json"), "");
 		Request req = new Request.Builder().method(method, "GET".equals(method) ? null : body).headers(headers).url(url)
 				.build();

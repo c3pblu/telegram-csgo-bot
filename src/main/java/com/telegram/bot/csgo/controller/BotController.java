@@ -1,5 +1,9 @@
 package com.telegram.bot.csgo.controller;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,11 +24,11 @@ public class BotController extends TelegramLongPollingBot {
 	@Value(value = "${bot.token}")
 	private String botToken;
 
-	private BotService botService;
+	ObjectFactory<BotService> serviceFactory;
 
 	@Autowired
-	public void setBotService(BotService botService) {
-		this.botService = botService;
+	public BotController(ObjectFactory<BotService> serviceFactory) {
+		this.serviceFactory = serviceFactory;
 	}
 
 	@Override
@@ -39,7 +43,8 @@ public class BotController extends TelegramLongPollingBot {
 
 	@Override
 	public void onUpdateReceived(Update update) {
-		botService.processUpdate(update);
+		ExecutorService pool = Executors.newCachedThreadPool();
+		pool.execute(serviceFactory.getObject().setUpdate(update));
 	}
 
 	public void sendMessage(Long chatId, SendMessage msg) {

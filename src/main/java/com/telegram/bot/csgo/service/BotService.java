@@ -7,6 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.interfaces.BotApiObject;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -22,7 +24,8 @@ import com.telegram.bot.csgo.service.teams.FavoriteTeamsService;
 import com.telegram.bot.csgo.service.twitch.TwitchService;
 
 @Service
-public class BotService {
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public class BotService implements Runnable {
 
 	private static final String TEAM_REGEXP = "\\.[к][о][м][а][н][д][ы]";
 	private static final String NAME_REGEXP = "([\\w]*\\s{0,}\\.{0,})*";
@@ -45,6 +48,7 @@ public class BotService {
 	private FavoriteTeamsService favoriteTeamsService;
 	private BotController botController;
 	private HltvService hltvService;
+	private Update update;
 
 	@Autowired
 	public BotService(MessageService messageHelper, HttpService httpService, TwitchService twitchService,
@@ -57,7 +61,8 @@ public class BotService {
 		this.hltvService = hltvService;
 	}
 
-	public void processUpdate(Update update) {
+	@Override
+	public void run() {
 		// We check if the update has a message and the message has text
 		if (update.hasMessage() && update.getMessage().hasText()) {
 			// If message timeout - skip message
@@ -226,6 +231,11 @@ public class BotService {
 			}
 		}
 		return false;
+	}
+
+	public BotService setUpdate(Update update) {
+		this.update = update;
+		return this;
 	}
 
 }
