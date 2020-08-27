@@ -74,7 +74,7 @@ public class TwitchService {
 
 	private void updateAccessToken() {
 		JSONObject accessToken = httpService.getJson("https://id.twitch.tv/oauth2/token?client_id=" + clientId
-				+ "&client_secret=" + clientSecret + "&grant_type=client_credentials", "GET", null);
+				+ "&client_secret=" + clientSecret + "&grant_type=client_credentials", "POST", null);
 		if (accessToken != null) {
 			ACCESS_TOKEN = accessToken.getString("access_token");
 		}

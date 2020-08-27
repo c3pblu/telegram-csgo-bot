@@ -23,7 +23,6 @@ public class HttpService {
 	private static final String HLTV = "https://www.hltv.org";
 	private static final Logger LOGGER = LoggerFactory.getLogger(HttpService.class);
 
-
 	public Document getDocument(String url) {
 		return Jsoup.parse(getHtml(url, null, "GET"));
 	}
@@ -47,9 +46,9 @@ public class HttpService {
 				.build();
 		try (Response res = client.newCall(req).execute()) {
 			String responseBody = res.body().string();
-			LOGGER.debug("URL : {}", url);
+			LOGGER.debug("Request URL : {}", url);
 			LOGGER.debug("Response code : {}", res.code());
-			LOGGER.debug("Body : {}", responseBody);
+			LOGGER.debug("Response headers : {}", res.headers().toString());
 			return responseBody;
 		} catch (IOException e) {
 			e.printStackTrace();
