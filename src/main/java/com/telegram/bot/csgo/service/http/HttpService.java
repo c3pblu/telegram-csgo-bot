@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
 import org.jsoup.Connection.Method;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -37,7 +36,6 @@ public class HttpService {
 
 	}
 
-	@Cacheable("teamProfile")
 	public Document getTeamProfile(String url) {
 		return getDocument(HLTV + url);
 	}
