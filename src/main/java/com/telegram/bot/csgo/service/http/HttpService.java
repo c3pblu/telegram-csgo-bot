@@ -1,43 +1,52 @@
 package com.telegram.bot.csgo.service.http;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 import org.json.JSONObject;
-import org.jsoup.Connection.Method;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+
+import okhttp3.Headers;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 @Service
 public class HttpService {
 
 	private final static String HLTV = "https://www.hltv.org";
-	private final static String USER_AGENT_NAME = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
 
 	public Document getDocument(String url) {
-		try {
-			return Jsoup.connect(url).userAgent(USER_AGENT_NAME).get();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-
+		return Jsoup.parse(getHtml(url, null, "GET"));
 	}
 
-	public JSONObject getJson(String uri, String method, HashMap<String, String> headers) {
-		try {
-			return new JSONObject(Jsoup.connect(uri).userAgent(USER_AGENT_NAME).method(Method.valueOf(method))
-					.headers(headers).ignoreContentType(true).execute().body());
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-
+	public JSONObject getJson(String uri, String method, Headers headers) {
+		return new JSONObject(getHtml(uri, headers, method));
 	}
 
+	@Cacheable("teamProfile")
 	public Document getTeamProfile(String url) {
 		return getDocument(HLTV + url);
+	}
+
+	private String getHtml(String url, Headers headers, String method) {
+		if (headers == null) {
+			headers = new Headers.Builder().build();
+		}
+		OkHttpClient client = new OkHttpClient();
+		RequestBody body = RequestBody.create(MediaType.parse("application/json"), "");
+		Request req = new Request.Builder().method(method, "GET".equals(method) ? null : body).headers(headers).url(url)
+				.build();
+		try (Response res = client.newCall(req).execute()) {
+			return res.body().string();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return "";
 	}
 
 }

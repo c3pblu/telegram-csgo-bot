@@ -20,6 +20,8 @@ import com.telegram.bot.csgo.model.Emoji;
 import com.telegram.bot.csgo.service.http.HttpService;
 import com.telegram.bot.csgo.service.message.MessageService;
 
+import okhttp3.Headers;
+
 @Service
 public class TwitchService {
 
@@ -46,9 +48,9 @@ public class TwitchService {
 			updateAccessToken();
 		} else {
 			// Validate token
-			HashMap<String, String> headers = new HashMap<>();
-			headers.put("Authorization", "OAuth " + ACCESS_TOKEN);
-			JSONObject validateResult = httpService.getJson("https://id.twitch.tv/oauth2/validate", "GET", headers);
+			Headers headers = new Headers.Builder().add("Authorization", "OAuth " + ACCESS_TOKEN).build();
+			JSONObject validateResult = httpService.getJson("https://id.twitch.tv/oauth2/validate", "GET",
+					headers);
 			// If not valid get new token
 			if (validateResult == null) {
 				updateAccessToken();
@@ -61,9 +63,8 @@ public class TwitchService {
 			newUri = newUri.concat("&after=" + currentPage);
 			LOGGER.debug("Current page ID: {}", currentPage);
 		}
-		HashMap<String, String> headers = new HashMap<>();
-		headers.put("Client-ID", clientId);
-		headers.put("Authorization", "Bearer " + ACCESS_TOKEN);
+		Headers headers = new Headers.Builder().add("Client-ID", clientId)
+				.add("Authorization", "Bearer " + ACCESS_TOKEN).build();
 		JSONObject json = httpService.getJson(newUri, "GET", headers);
 		String nextPage = json.getJSONObject("pagination").getString("cursor");
 		LOGGER.debug("NextPage ID: {}", nextPage);
@@ -73,13 +74,11 @@ public class TwitchService {
 
 	private void updateAccessToken() {
 		JSONObject accessToken = httpService.getJson("https://id.twitch.tv/oauth2/token?client_id=" + clientId
-				+ "&client_secret=" + clientSecret + "&grant_type=client_credentials", "POST", new HashMap<>());
+				+ "&client_secret=" + clientSecret + "&grant_type=client_credentials", "GET", null);
 		if (accessToken != null) {
 			ACCESS_TOKEN = accessToken.getString("access_token");
 		}
 	}
-
-
 
 	public SendMessage nextPage() {
 		SendMessage sendMessage = new SendMessage();
