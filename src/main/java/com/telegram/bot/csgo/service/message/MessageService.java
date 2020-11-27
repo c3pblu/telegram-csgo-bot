@@ -15,13 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 
 import com.telegram.bot.csgo.dao.Dao;
 import com.telegram.bot.csgo.model.DbResult;
 import com.telegram.bot.csgo.model.Emoji;
 import com.telegram.bot.csgo.model.FavoriteTeam;
 import com.telegram.bot.csgo.model.Flag;
-import com.telegram.bot.csgo.model.SendMessageBuilder;
 import com.telegram.bot.csgo.model.Sticker;
 import com.vdurmont.emoji.EmojiParser;
 
@@ -30,7 +30,7 @@ public class MessageService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MessageService.class);
 	private static final String TEAMS_COMMANDS = "Добавить команду/изменить код страны:\n <b>.команды+Natus Vincere[RU]</b> \nУдалить команду: \n<b>.команды-Natus Vincere</b>";
-	private Map<Long, List<Sticker>> chatLastStickers = new HashMap<>();
+	private Map<String, List<Sticker>> chatLastStickers = new HashMap<>();
 
 	private Dao dao;
 	private HelpMessageService helpMessageService;
@@ -44,20 +44,20 @@ public class MessageService {
 
 	}
 
-	public SendMessage helpMessage() {
-		return helpMessageService.help();
+	public SendMessage helpMessage(String chatId) {
+		return helpMessageService.help(chatId);
 	}
 
-	public SendMessage menuMessage() {
-		return menuMessageService.menu();
+	public SendMessage menuMessage(String chatId) {
+		return menuMessageService.menu(chatId);
 	}
 
-	public SendMessage htmlMessage(Object msg) {
-		return new SendMessageBuilder().disableNotification().disableWebPagePreview().parseMode("html")
-				.text(msg.toString()).build();
+	public SendMessage htmlMessage(String chatId, Object msg) {
+		return SendMessage.builder().disableNotification(true).disableWebPagePreview(true).parseMode("html")
+				.chatId(chatId).text(String.valueOf(msg)).build();
 	}
 
-	public SendSticker sticker(Long chatId, Integer uniqCount) {
+	public SendSticker sticker(String chatId, Integer uniqCount) {
 		List<Sticker> stickers = dao.getStickers();
 		int randomSize = stickers.size() - 1 + 1;
 		int randomValue = new Random().nextInt(randomSize);
@@ -77,52 +77,52 @@ public class MessageService {
 			lastStickers.add(selectedSticker);
 		}
 		chatLastStickers.put(chatId, lastStickers);
-		return new SendSticker().setSticker(selectedSticker.getSticker());
+		return SendSticker.builder().sticker(new InputFile(selectedSticker.getSticker())).chatId(chatId).build();
 	}
 
-	public SendMessage dbResult(String dbResult, String name) {
+	public SendMessage dbResult(String chatId, String dbResult, String name) {
 		switch (dbResult) {
 		case DbResult.FLAG_NOT_FOUND:
-			return htmlMessage(DbResult.NOTHING_WAS_CHANGED);
+			return htmlMessage(chatId, DbResult.NOTHING_WAS_CHANGED);
 		case DbResult.NOTHING_WAS_CHANGED:
-			return htmlMessage(DbResult.NOTHING_WAS_CHANGED);
+			return htmlMessage(chatId, DbResult.NOTHING_WAS_CHANGED);
 		case DbResult.UPDATED:
-			return htmlMessage("<b>" + name + "</b> " + DbResult.UPDATED);
+			return htmlMessage(chatId, "<b>" + name + "</b> " + DbResult.UPDATED);
 		case DbResult.ALREADY_EXIST:
-			return htmlMessage("<b>" + name + "</b> " + DbResult.ALREADY_EXIST);
+			return htmlMessage(chatId, "<b>" + name + "</b> " + DbResult.ALREADY_EXIST);
 		case DbResult.INSERTED:
-			return htmlMessage("<b>" + name + "</b> " + DbResult.INSERTED);
+			return htmlMessage(chatId, "<b>" + name + "</b> " + DbResult.INSERTED);
 		case DbResult.DELETED:
-			return htmlMessage("<b>" + name + "</b> " + DbResult.DELETED);
+			return htmlMessage(chatId, "<b>" + name + "</b> " + DbResult.DELETED);
 		default:
-			return htmlMessage(DbResult.OOPS);
+			return htmlMessage(chatId, DbResult.OOPS);
 		}
 	}
 
-	public SendMessage cite(Document doc) {
+	public SendMessage cite(String chatId, Document doc) {
 		StringBuilder text = new StringBuilder();
 		text.append(doc.select("cite").text());
 		String athor = doc.select("small").text();
 		if (!StringUtils.isEmpty(athor)) {
 			text.append("\n<b>").append(athor).append("</b>");
 		}
-		return htmlMessage(text);
+		return htmlMessage(chatId, text);
 	}
 
-	public SendMessage teamsFormat() {
-		return htmlMessage("Неверный формат!\nСмотрите примеры ниже!\n\n" + TEAMS_COMMANDS);
+	public SendMessage teamsFormat(String chatId) {
+		return htmlMessage(chatId, "Неверный формат!\nСмотрите примеры ниже!\n\n" + TEAMS_COMMANDS);
 	}
 
-	public SendMessage oops() {
-		return htmlMessage("Упс, ты слишком долго думал парень!");
+	public SendMessage oops(String chatId) {
+		return htmlMessage(chatId, "Упс, ты слишком долго думал парень!");
 	}
 
-	public SendMessage stoped() {
-		return htmlMessage("Трансляция остановлена");
+	public SendMessage stoped(String chatId) {
+		return htmlMessage(chatId, "Трансляция остановлена");
 	}
 
-	public SendMessage scorebot() {
-		return htmlMessage(Emoji.INFO
+	public SendMessage scorebot(String chatId) {
+		return htmlMessage(chatId, Emoji.INFO
 				+ " Для запуска трансляции:\n.<b>старт-1234567</b> (где 1234567 это Match ID - его можно посмотреть в .мачти)\n<b>.стоп</b> - остановить трансяцию");
 	}
 
@@ -157,7 +157,7 @@ public class MessageService {
 		return text;
 	}
 
-	public String favoriteTeam(Long chatId, String name, boolean isBold) {
+	public String favoriteTeam(String chatId, String name, boolean isBold) {
 		String teamName = name;
 		FavoriteTeam fvTeam = dao.getTeams(chatId).parallelStream()
 				.filter(team -> team.getChatId().equals(chatId) && team.getName().equalsIgnoreCase(name)).findFirst()

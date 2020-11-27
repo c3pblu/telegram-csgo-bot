@@ -33,7 +33,7 @@ public class MatchesService {
 
 	}
 
-	public SendMessage matches(Document doc, Long chatId) {
+	public SendMessage matches(String chatId, Document doc) {
 		StringBuilder textMessage = new StringBuilder();
 		// Live Matches
 		Elements liveMatches = doc.select("div.liveMatchesContainer").select("div.liveMatches");
@@ -98,7 +98,7 @@ public class MatchesService {
 		}
 
 		LOGGER.debug("Matches final message:\n{}", textMessage);
-		return messageService.htmlMessage(textMessage);
+		return messageService.htmlMessage(chatId, textMessage);
 
 	}
 
@@ -110,8 +110,8 @@ public class MatchesService {
 		return stars;
 	}
 
-	public SendMessage matchesForToday() {
-		return messageService.htmlMessage("Ближайшие матчи:");
+	public SendMessage matchesForToday(String chatId) {
+		return messageService.htmlMessage(chatId, "Ближайшие матчи:");
 	}
 
 }

@@ -31,7 +31,7 @@ public class TwitchService {
 	private String clientSecret;
 
 	private static String ACCESS_TOKEN;
-	private Map<Long, String> chatPage = new HashMap<>();
+	private Map<String, String> chatPage = new HashMap<>();
 	private static final Logger LOGGER = LoggerFactory.getLogger(TwitchService.class);
 
 	private MessageService messageService;
@@ -43,14 +43,13 @@ public class TwitchService {
 		this.httpService = httpService;
 	}
 
-	public SendMessage getStreams(Long chatid, boolean isNextPage) {
+	public SendMessage getStreams(String chatId, boolean isNextPage) {
 		if (ACCESS_TOKEN == null || ACCESS_TOKEN.isEmpty()) {
 			updateAccessToken();
 		} else {
 			// Validate token
 			Headers headers = new Headers.Builder().add("Authorization", "OAuth " + ACCESS_TOKEN).build();
-			JSONObject validateResult = httpService.getJson("https://id.twitch.tv/oauth2/validate", "GET",
-					headers);
+			JSONObject validateResult = httpService.getJson("https://id.twitch.tv/oauth2/validate", "GET", headers);
 			// If not valid get new token
 			if (validateResult == null) {
 				updateAccessToken();
@@ -59,7 +58,7 @@ public class TwitchService {
 
 		String newUri = "https://api.twitch.tv/helix/streams?game_id=32399&language=en&language=ru";
 		if (isNextPage) {
-			String currentPage = chatPage.get(chatid);
+			String currentPage = chatPage.get(chatId);
 			newUri = newUri.concat("&after=" + currentPage);
 			LOGGER.debug("Current page ID: {}", currentPage);
 		}
@@ -68,8 +67,8 @@ public class TwitchService {
 		JSONObject json = httpService.getJson(newUri, "GET", headers);
 		String nextPage = json.getJSONObject("pagination").getString("cursor");
 		LOGGER.debug("NextPage ID: {}", nextPage);
-		chatPage.put(chatid, nextPage);
-		return streams(json);
+		chatPage.put(chatId, nextPage);
+		return streams(chatId, json);
 	}
 
 	private void updateAccessToken() {
@@ -80,20 +79,17 @@ public class TwitchService {
 		}
 	}
 
-	public SendMessage nextPage() {
-		SendMessage sendMessage = new SendMessage();
+	public SendMessage nextPage(String chatId) {
 		InlineKeyboardMarkup markUpInLine = new InlineKeyboardMarkup();
 		List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
 		List<InlineKeyboardButton> row = new ArrayList<>();
-		row.add(new InlineKeyboardButton().setText("Next 20 Streams »").setCallbackData("nextPage"));
+		row.add(InlineKeyboardButton.builder().text("Next 20 Streams »").callbackData("nextPage").build());
 		rowsInLine.add(row);
 		markUpInLine.setKeyboard(rowsInLine);
-		sendMessage.setReplyMarkup(markUpInLine);
-		sendMessage.setText("Go to next Page?");
-		return sendMessage;
+		return SendMessage.builder().replyMarkup(markUpInLine).text("Go to next Page?").chatId(chatId).build();
 	}
 
-	public SendMessage streams(JSONObject json) {
+	public SendMessage streams(String chatId, JSONObject json) {
 		StringBuilder textMessage = new StringBuilder();
 		textMessage.append("<b>Live</b>").append(Emoji.EXCL_MARK).append("<b>Streams on Twitch:</b>\n");
 		JSONArray arr = json.getJSONArray("data");
@@ -106,7 +102,7 @@ public class TwitchService {
 					.append(data.getString("title").replace("<", "").replace(">", "")).append("\n");
 		}
 		LOGGER.debug("Streams final message:\n{}", textMessage);
-		return messageService.htmlMessage(textMessage);
+		return messageService.htmlMessage(chatId, textMessage);
 
 	}
 

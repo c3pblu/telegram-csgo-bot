@@ -29,7 +29,7 @@ public class ScoreBotService {
 	private String[] endpoints;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MessageService.class);
-	private Map<Long, Socket> sessions = new HashMap<>();
+	private Map<String, Socket> sessions = new HashMap<>();
 
 	private MessageService messageService;
 	private BotController botController;
@@ -40,7 +40,7 @@ public class ScoreBotService {
 		this.botController = botController;
 	}
 
-	public SendMessage scorebot(JSONObject json) {
+	public SendMessage scorebot(String chatId, JSONObject json) {
 		StringBuilder textMessage = new StringBuilder();
 		String logType = json.keys().next();
 		LOGGER.debug("LogType: {}", logType);
@@ -50,10 +50,10 @@ public class ScoreBotService {
 		}
 		// Round End
 		if (logType.equals("RoundEnd")) {
-			String winner = json.query("/RoundEnd/winner").toString();
-			String winType = json.query("/RoundEnd/winType").toString();
-			String ctScore = json.query("/RoundEnd/counterTerroristScore").toString();
-			String tScore = json.query("/RoundEnd/terroristScore").toString();
+			String winner = String.valueOf(json.query("/RoundEnd/winner"));
+			String winType = String.valueOf(json.query("/RoundEnd/winType"));
+			String ctScore = String.valueOf(json.query("/RoundEnd/counterTerroristScore"));
+			String tScore = String.valueOf(json.query("/RoundEnd/terroristScore"));
 			textMessage.append("<b>Round Over: ");
 			if (winner.equals("TERRORIST")) {
 				textMessage.append(Emoji.DIMOND_ORANGE).append("T");
@@ -81,11 +81,11 @@ public class ScoreBotService {
 		}
 		// Kill
 		if (logType.equals("Kill")) {
-			String killerSide = json.query("/Kill/killerSide").toString();
-			String killerNick = json.query("/Kill/killerNick").toString();
-			String victimSide = json.query("/Kill/victimSide").toString();
-			String victimNick = json.query("/Kill/victimNick").toString();
-			String weapon = json.query("/Kill/weapon").toString();
+			String killerSide = String.valueOf(json.query("/Kill/killerSide"));
+			String killerNick = String.valueOf(json.query("/Kill/killerNick"));
+			String victimSide = String.valueOf(json.query("/Kill/victimSide"));
+			String victimNick = String.valueOf(json.query("/Kill/victimNick"));
+			String weapon = String.valueOf(json.query("/Kill/weapon"));
 			boolean isHeadShot = (boolean) json.query("/Kill/headShot");
 			if (killerSide.equals("TERRORIST")) {
 				textMessage.append(Emoji.DIMOND_ORANGE);
@@ -106,22 +106,22 @@ public class ScoreBotService {
 
 		// Bomb Planted
 		if (logType.equals("BombPlanted")) {
-			String playerNick = json.query("/BombPlanted/playerNick").toString();
-			String tPlayers = json.query("/BombPlanted/tPlayers").toString();
-			String ctPlayers = json.query("/BombPlanted/ctPlayers").toString();
+			String playerNick = String.valueOf(json.query("/BombPlanted/playerNick"));
+			String tPlayers = String.valueOf(json.query("/BombPlanted/tPlayers"));
+			String ctPlayers = String.valueOf(json.query("/BombPlanted/ctPlayers"));
 			textMessage.append(Emoji.DIMOND_ORANGE).append("<b>").append(playerNick).append(" ").append(Emoji.BOMB)
 					.append(" planted the bomb").append(Emoji.DIMOND_ORANGE).append(tPlayers).append(" on")
 					.append(Emoji.DIMOND_BLUE).append(ctPlayers).append("</b>");
 		}
 		// Bomb Defused
 		if (logType.equals("BombDefused")) {
-			String playerNick = json.query("/BombDefused/playerNick").toString();
+			String playerNick = String.valueOf(json.query("/BombDefused/playerNick"));
 			textMessage.append(Emoji.DIMOND_BLUE).append("<b>").append(playerNick).append(" defused the bomb</b>");
 		}
 		// Suicide
 		if (logType.equals("Suicide")) {
-			String playerNick = json.query("/Suicide/playerNick").toString();
-			String side = json.query("/Suicide/side").toString();
+			String playerNick = String.valueOf(json.query("/Suicide/playerNick"));
+			String side = String.valueOf(json.query("/Suicide/side"));
 			if (side.equals("TERRORIST")) {
 				textMessage.append(Emoji.DIMOND_ORANGE);
 			} else {
@@ -131,13 +131,13 @@ public class ScoreBotService {
 		}
 		// PlayerJoin
 		if (logType.equals("PlayerJoin")) {
-			String playerNick = json.query("/PlayerJoin/playerNick").toString();
+			String playerNick = String.valueOf(json.query("/PlayerJoin/playerNick"));
 			textMessage.append("<b>").append(playerNick).append("</b> joined the game");
 		}
 		// PlayerQuit
 		if (logType.equals("PlayerQuit")) {
-			String playerNick = json.query("/PlayerQuit/playerNick").toString();
-			String playerSide = json.query("/PlayerQuit/playerSide").toString();
+			String playerNick = String.valueOf(json.query("/PlayerQuit/playerNick"));
+			String playerSide = String.valueOf(json.query("/PlayerQuit/playerSide"));
 			if (playerSide.equals("TERRORIST")) {
 				textMessage.append(Emoji.DIMOND_ORANGE);
 			}
@@ -148,14 +148,14 @@ public class ScoreBotService {
 		}
 		// MatchStarted
 		if (logType.equals("MatchStarted")) {
-			String map = json.query("/MatchStarted/map").toString();
+			String map = String.valueOf(json.query("/MatchStarted/map"));
 			textMessage.append("<b>Match Started: ").append(map).append("</b>");
 		}
 		LOGGER.debug("Log Message: {}", textMessage);
-		return messageService.htmlMessage(textMessage.toString());
+		return messageService.htmlMessage(chatId, textMessage);
 	}
 
-	public void live(Long chatId, String matchId) {
+	public void live(String chatId, String matchId) {
 		stop(chatId);
 		try {
 			int random = ThreadLocalRandom.current().nextInt(endpoints.length);
@@ -172,12 +172,12 @@ public class ScoreBotService {
 			socket.on("log", new Emitter.Listener() {
 				@Override
 				public void call(Object... args) {
-					JSONObject json = new JSONObject(args[args.length - 1].toString());
+					JSONObject json = new JSONObject(String.valueOf(args[args.length - 1]));
 					if (json.getJSONArray("log").length() > 0) {
 						json = json.getJSONArray("log").getJSONObject(0);
-						SendMessage message = scorebot(json);
+						SendMessage message = scorebot(chatId, json);
 						if (!StringUtils.isBlank(message.getText())) {
-							botController.sendMessage(chatId, message);
+							botController.sendMessage(message);
 							LOGGER.debug("{}", json);
 						}
 					}
@@ -207,14 +207,14 @@ public class ScoreBotService {
 		}
 	}
 
-	public void stop(Long chatId) {
+	public void stop(String chatId) {
 		if (sessions.containsKey(chatId)) {
 			sessions.get(chatId).disconnect();
 		}
 	}
 
-	public SendMessage scorebotHelp() {
-		return messageService.htmlMessage(Emoji.INFO
+	public SendMessage scorebotHelp(String chatId) {
+		return messageService.htmlMessage(chatId, Emoji.INFO
 				+ " Для запуска трансляции:\n.<b>старт-1234567</b> (где 1234567 это Match ID - его можно посмотреть в .мачти)\n<b>.стоп</b> - остановить трансяцию");
 	}
 

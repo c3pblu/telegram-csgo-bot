@@ -25,37 +25,37 @@ public class HltvService {
 		this.scoreBotService = scoreBotService;
 	}
 
-	public SendMessage resultsMessage(Document doc, Long chatId) {
-		return resultsService.results(doc, chatId);
+	public SendMessage resultsMessage(String chatId, Document doc) {
+		return resultsService.results(chatId, doc);
 	}
 
-	public SendMessage matchesMessage(Document doc, Long chatId) {
-		return matchesService.matches(doc, chatId);
+	public SendMessage matchesMessage(String chatId, Document doc) {
+		return matchesService.matches(chatId, doc);
 	}
 
-	public SendMessage topPlayersMessage(Document doc, Integer count) {
-		return topPlayersService.topPlayers(doc, count);
+	public SendMessage topPlayersMessage(String chatId, Document doc, Integer count) {
+		return topPlayersService.topPlayers(chatId, doc, count);
 	}
 
-	public SendMessage topTeamsMessage(Document doc, Integer count) {
-		return topTeamsService.topTeams(doc, count);
+	public SendMessage topTeamsMessage(String chatId, Document doc, Integer count) {
+		return topTeamsService.topTeams(chatId, doc, count);
 
 	}
 
-	public SendMessage scorebotLiveMessage(JSONObject json) {
-		return scoreBotService.scorebot(json);
+	public SendMessage scorebotLiveMessage(String chatId, JSONObject json) {
+		return scoreBotService.scorebot(chatId, json);
 	}
 
-	public void startBroadcast(Long chatId, String matchId) {
+	public void startBroadcast(String chatId, String matchId) {
 		scoreBotService.live(chatId, matchId);
 	}
 
-	public void stopBroadcast(Long chatId) {
+	public void stopBroadcast(String chatId) {
 		scoreBotService.stop(chatId);
 	}
-	
-	public SendMessage scorebotHelpMessage() {
-		return scoreBotService.scorebotHelp();
+
+	public SendMessage scorebotHelpMessage(String chatId) {
+		return scoreBotService.scorebotHelp(chatId);
 	}
 
 }

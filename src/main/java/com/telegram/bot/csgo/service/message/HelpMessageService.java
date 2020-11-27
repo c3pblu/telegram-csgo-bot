@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import com.telegram.bot.csgo.model.SendMessageBuilder;
-
 @Service
 public class HelpMessageService {
 
@@ -36,8 +34,8 @@ public class HelpMessageService {
 		return helpMessage;
 	}
 
-	public SendMessage help() {
-		return new SendMessageBuilder().parseMode("markdown").text(helpText()).build();
+	public SendMessage help(String chatId) {
+		return SendMessage.builder().parseMode("markdown").text(helpText()).chatId(chatId).build();
 	}
 
 }

@@ -8,13 +8,13 @@ import com.telegram.bot.csgo.model.Sticker;
 
 public interface Dao {
 
-	String updateOrSaveTeam(Long chatId, String name, String countryCode);
+	String updateOrSaveTeam(String chatId, String name, String countryCode);
 
-	String deleteTeam(Long chatId, String name);
+	String deleteTeam(String chatId, String name);
 
 	List<Flag> getFlags();
 
-	List<FavoriteTeam> getTeams(Long chatId);
+	List<FavoriteTeam> getTeams(String chatId);
 
 	List<Sticker> getStickers();
 

@@ -47,7 +47,15 @@ public class BotController extends TelegramLongPollingBot {
 		pool.execute(serviceFactory.getObject().setUpdate(update));
 	}
 
-	public void sendMessage(Long chatId, SendMessage msg) {
+	public void sendMessage(SendMessage msg) {
+		try {
+			execute(msg); // Call method to send the message
+		} catch (TelegramApiException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void sendMessage(String chatId, SendSticker msg) {
 		msg.setChatId(chatId);
 		try {
 			execute(msg); // Call method to send the message
@@ -56,16 +64,7 @@ public class BotController extends TelegramLongPollingBot {
 		}
 	}
 
-	public void sendMessage(Long chatId, SendSticker msg) {
-		msg.setChatId(chatId);
-		try {
-			execute(msg); // Call method to send the message
-		} catch (TelegramApiException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void deleteMessage(Long chatId, Integer msgId) {
+	public void deleteMessage(String chatId, Integer msgId) {
 		try {
 			execute(new DeleteMessage(chatId, msgId));
 		} catch (TelegramApiException e) {

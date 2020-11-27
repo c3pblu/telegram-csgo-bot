@@ -50,7 +50,7 @@ public class HttpService {
 			String responseBody = res.body().string();
 			LOGGER.debug("Request URL : {}", url);
 			LOGGER.debug("Response code : {}", res.code());
-			LOGGER.debug("Response headers : {}", res.headers().toString());
+			LOGGER.debug("Response headers : {}", res.headers());
 			// Check for "HttpCode 429 - Too Many Requests" header and sleep
 			String retryAfter = res.header("Retry-After");
 			if (!StringUtils.isBlank(retryAfter)) {

@@ -32,7 +32,7 @@ public class TopTeamsService {
 
 	}
 
-	public SendMessage topTeams(Document doc, Integer count) {
+	public SendMessage topTeams(String chatId, Document doc, Integer count) {
 		Elements header = doc.select("div.regional-ranking-header");
 		Elements rankedTeams = doc.select("div.ranked-team");
 		StringBuilder textMessage = new StringBuilder();
@@ -68,7 +68,7 @@ public class TopTeamsService {
 		}
 
 		LOGGER.debug("TopTeams final message:\n{}", textMessage);
-		return messageService.htmlMessage(textMessage);
+		return messageService.htmlMessage(chatId, textMessage);
 	}
 
 }

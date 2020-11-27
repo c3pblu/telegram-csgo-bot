@@ -24,7 +24,7 @@ public class ResultsService {
 		this.messageService = messageService;
 	}
 
-	public SendMessage results(Document doc, Long chatId) {
+	public SendMessage results(String chatId, Document doc) {
 		StringBuilder textMessage = new StringBuilder();
 		Elements subLists = doc.select("div.results-sublist");
 		int featuredNum = 0;
@@ -72,7 +72,7 @@ public class ResultsService {
 		}
 
 		LOGGER.debug("Results final message:\n{}", textMessage);
-		return messageService.htmlMessage(textMessage);
+		return messageService.htmlMessage(chatId, textMessage);
 	}
 
 	private StringBuilder getStars(Element match) {
@@ -81,8 +81,8 @@ public class ResultsService {
 		return stars;
 	}
 
-	public SendMessage resultsForToday() {
-		return messageService.htmlMessage("Последние результаты:");
+	public SendMessage resultsForToday(String chatId) {
+		return messageService.htmlMessage(chatId, "Последние результаты:");
 	}
 
 }

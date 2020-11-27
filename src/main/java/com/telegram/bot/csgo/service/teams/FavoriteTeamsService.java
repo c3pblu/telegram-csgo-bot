@@ -25,26 +25,28 @@ public class FavoriteTeamsService {
 		this.dao = dao;
 	}
 
-	public SendMessage favoriteTeams(Long chatId) {
+	public SendMessage favoriteTeams(String chatId) {
 		StringBuilder textMessage = new StringBuilder();
 		List<FavoriteTeam> teams = dao.getTeams(chatId);
-		if (teams.isEmpty())
-			return messageService.htmlMessage(Emoji.INFO + " Ваши любимые команды:\n\n<b>У вас пока нет любимых команд!</b> "
-					+ Emoji.SAD + "\n\n" + TEAMS_COMMANDS);
+		if (teams.isEmpty()) {
+			return messageService.htmlMessage(chatId,
+					Emoji.INFO + " Ваши любимые команды:\n\n<b>У вас пока нет любимых команд!</b> " + Emoji.SAD + "\n\n"
+							+ TEAMS_COMMANDS);
+		}
 		textMessage.append(Emoji.INFO).append(" Ваши любимые команды:\n\n");
 		teams.stream()
 				.forEach(team -> textMessage.append("<b>").append(team.getName()).append("</b> [")
 						.append(team.getCountryCode().getCode()).append("] ")
 						.append(messageService.flagUnicodeFromCountry(team.getCountryCode().getCode())).append("\n"));
 		textMessage.append("\n").append(TEAMS_COMMANDS);
-		return messageService.htmlMessage(textMessage);
+		return messageService.htmlMessage(chatId, textMessage);
 	}
 
-	public String updateOrSaveTeam(Long chatId, String name, String countryCode) {
+	public String updateOrSaveTeam(String chatId, String name, String countryCode) {
 		return dao.updateOrSaveTeam(chatId, name, countryCode);
 	}
 
-	public String deleteTeam(Long chatId, String name) {
+	public String deleteTeam(String chatId, String name) {
 		return dao.deleteTeam(chatId, name);
 	}
 

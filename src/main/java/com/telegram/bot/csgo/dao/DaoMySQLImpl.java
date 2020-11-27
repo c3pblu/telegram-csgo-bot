@@ -28,7 +28,7 @@ public class DaoMySQLImpl implements Dao {
 	@Override
 	@Transactional
 	@CacheEvict(value = "teams", allEntries = true)
-	public String updateOrSaveTeam(Long chatId, String name, String countryCode) {
+	public String updateOrSaveTeam(String chatId, String name, String countryCode) {
 		String result = null;
 		Flag newFtFlag = getFlags().parallelStream().filter(flag -> flag.getCode().equals(countryCode)).findFirst()
 				.orElse(null);
@@ -37,8 +37,8 @@ public class DaoMySQLImpl implements Dao {
 		}
 		FavoriteTeam newFt = new FavoriteTeam(chatId, name, newFtFlag);
 		if (isTeamPresents(chatId, newFt)) {
-			boolean isSameFlag = newFtFlag.equals(
-					getTeams(chatId).parallelStream().filter(team -> team.equals(newFt)).findFirst().get().getCountryCode());
+			boolean isSameFlag = newFtFlag.equals(getTeams(chatId).parallelStream().filter(team -> team.equals(newFt))
+					.findFirst().get().getCountryCode());
 			if (isSameFlag) {
 				return DbResult.ALREADY_EXIST;
 			}
@@ -55,7 +55,7 @@ public class DaoMySQLImpl implements Dao {
 	@Override
 	@Transactional
 	@CacheEvict(value = "teams", allEntries = true)
-	public String deleteTeam(Long chatId, String name) {
+	public String deleteTeam(String chatId, String name) {
 		FavoriteTeam teamToDelete = new FavoriteTeam(chatId, name, null);
 		if (!isTeamPresents(chatId, teamToDelete)) {
 			return DbResult.NOTHING_WAS_CHANGED;
@@ -64,7 +64,7 @@ public class DaoMySQLImpl implements Dao {
 		return DbResult.DELETED;
 	}
 
-	private boolean isTeamPresents(Long chatId, FavoriteTeam teamToCheck) {
+	private boolean isTeamPresents(String chatId, FavoriteTeam teamToCheck) {
 		if (getTeams(chatId).stream().anyMatch(team -> team.equals(teamToCheck))) {
 			return true;
 		}
@@ -88,8 +88,9 @@ public class DaoMySQLImpl implements Dao {
 	@Override
 	@SuppressWarnings("unchecked")
 	@Cacheable(value = "teams")
-	public List<FavoriteTeam> getTeams(Long chatId) {
-		return entityManager.createQuery("select p from FavoriteTeam p where chatId = :chatId").setParameter("chatId", chatId).getResultList();
+	public List<FavoriteTeam> getTeams(String chatId) {
+		return entityManager.createQuery("select p from FavoriteTeam p where chatId = :chatId")
+				.setParameter("chatId", chatId).getResultList();
 	}
 
 }

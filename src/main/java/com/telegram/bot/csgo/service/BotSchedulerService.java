@@ -17,7 +17,7 @@ public class BotSchedulerService {
 	private final static String HLTV = "https://www.hltv.org";
 
 	@Value(value = "${bot.scheduler.chat.id}")
-	private Long schedulerChatId;
+	private String schedulerChatId;
 
 	private BotController botController;
 	private HttpService httpService;
@@ -35,16 +35,16 @@ public class BotSchedulerService {
 
 	@Scheduled(cron = "${bot.scheduler.matches.cron}")
 	private void todayMatchesScheduler() {
-		botController.sendMessage(schedulerChatId, matchesService.matchesForToday());
+		botController.sendMessage(matchesService.matchesForToday(schedulerChatId));
 		Document doc = httpService.getDocument(HLTV + "/matches");
-		botController.sendMessage(schedulerChatId, matchesService.matches(doc, schedulerChatId));
+		botController.sendMessage(matchesService.matches(schedulerChatId, doc));
 	}
 
 	@Scheduled(cron = "${bot.scheduler.results.cron}")
 	private void todayResultsScheduler() {
-		botController.sendMessage(schedulerChatId, resultsService.resultsForToday());
+		botController.sendMessage(resultsService.resultsForToday(schedulerChatId));
 		Document doc = httpService.getDocument(HLTV + "/results");
-		botController.sendMessage(schedulerChatId, resultsService.results(doc, schedulerChatId));
+		botController.sendMessage(resultsService.results(schedulerChatId, doc));
 	}
 
 }

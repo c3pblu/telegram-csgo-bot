@@ -69,25 +69,25 @@ public class BotService implements Runnable {
 			if (isTimeout(update)) {
 				return;
 			}
-			Long chatId = update.getMessage().getChatId();
+			String chatId = String.valueOf(update.getMessage().getChatId());
 			String text = update.getMessage().getText();
 			// Help
 			if (text.equalsIgnoreCase(Commands.HELP)) {
-				botController.sendMessage(chatId, messageHelper.helpMessage());
+				botController.sendMessage(messageHelper.helpMessage(chatId));
 			}
 			// Menu
 			else if (text.equalsIgnoreCase(Commands.MENU)) {
-				botController.sendMessage(chatId, messageHelper.menuMessage());
+				botController.sendMessage(messageHelper.menuMessage(chatId));
 			}
 			// Matches
 			else if (text.equalsIgnoreCase(Commands.MATCHES)) {
 				Document doc = httpService.getDocument(HLTV + "/matches");
-				botController.sendMessage(chatId, hltvService.matchesMessage(doc, chatId));
+				botController.sendMessage(hltvService.matchesMessage(chatId, doc));
 			}
 			// Results
 			else if (text.equalsIgnoreCase(Commands.RESULTS)) {
 				Document doc = httpService.getDocument(HLTV + "/results");
-				botController.sendMessage(chatId, hltvService.resultsMessage(doc, chatId));
+				botController.sendMessage(hltvService.resultsMessage(chatId, doc));
 			}
 			// Top Players
 			else if (text.equalsIgnoreCase(Commands.TOP_10_PLAYERS) || text.equalsIgnoreCase(Commands.TOP_20_PLAYERS)
@@ -103,12 +103,12 @@ public class BotService implements Runnable {
 			}
 			// Twitch streams
 			else if (text.equalsIgnoreCase(Commands.STREAMS)) {
-				botController.sendMessage(chatId, twitchService.getStreams(chatId, false));
-				botController.sendMessage(chatId, twitchService.nextPage());
+				botController.sendMessage(twitchService.getStreams(chatId, false));
+				botController.sendMessage(twitchService.nextPage(chatId));
 			}
 			// Favorite Teams
 			else if (text.equalsIgnoreCase(Commands.TEAMS)) {
-				botController.sendMessage(chatId, favoriteTeamsService.favoriteTeams(chatId));
+				botController.sendMessage(favoriteTeamsService.favoriteTeams(chatId));
 			}
 
 			else if (text.matches(TEAM_REGEXP + ".*")) {
@@ -118,25 +118,25 @@ public class BotService implements Runnable {
 					String countryCode = text.replaceAll(TEAM_REGEXP + PLUS_REGEXP + NAME_REGEXP, "")
 							.replaceAll("\\[", "").replaceAll("\\]", "");
 					String dbResult = favoriteTeamsService.updateOrSaveTeam(chatId, team, countryCode);
-					botController.sendMessage(chatId, messageHelper.dbResult(dbResult, team));
+					botController.sendMessage(messageHelper.dbResult(chatId, dbResult, team));
 				}
 				// Delete (.команды-)
 				else if (text.matches(TEAM_REGEXP + MINUS_REGEXP + NAME_REGEXP)) {
 					String team = text.replaceAll(TEAM_REGEXP + MINUS_REGEXP, "").trim();
 					String dbResult = favoriteTeamsService.deleteTeam(chatId, team);
-					botController.sendMessage(chatId, messageHelper.dbResult(dbResult, team));
+					botController.sendMessage(messageHelper.dbResult(chatId, dbResult, team));
 				} else {
-					botController.sendMessage(chatId, messageHelper.teamsFormat());
+					botController.sendMessage(messageHelper.teamsFormat(chatId));
 				}
 			}
 			// ScoreBot
 			else if (text.equals(Commands.SCOREBOT)) {
-				botController.sendMessage(chatId, hltvService.scorebotHelpMessage());
+				botController.sendMessage(hltvService.scorebotHelpMessage(chatId));
 			} else if (text.matches(START_REGEXP)) {
 				hltvService.startBroadcast(chatId, text.substring(7));
 			} else if (text.equalsIgnoreCase(Commands.STOP)) {
 				hltvService.stopBroadcast(chatId);
-				botController.sendMessage(chatId, messageHelper.stoped());
+				botController.sendMessage(messageHelper.stoped(chatId));
 			}
 			// Private and mentioned message
 			else if (StringUtils.startsWith(update.getMessage().getText(), "@" + botController.getBotUsername())
@@ -144,16 +144,16 @@ public class BotService implements Runnable {
 				botController.sendMessage(chatId, messageHelper.sticker(chatId, uniqCount));
 				Document doc = httpService
 						.getDocument("https://api.forismatic.com/api/1.0/?method=getQuote&format=html&lang=ru");
-				botController.sendMessage(chatId, messageHelper.cite(doc));
+				botController.sendMessage(messageHelper.cite(chatId, doc));
 			}
 		}
 
 		// Check call back from Menu
 		if (update.getCallbackQuery() != null) {
-			Long chatId = update.getCallbackQuery().getMessage().getChatId();
+			String chatId = String.valueOf(update.getCallbackQuery().getMessage().getChatId());
 			CallbackQuery callBack = update.getCallbackQuery();
 			if (isTimeout(callBack)) {
-				botController.sendMessage(chatId, messageHelper.oops());
+				botController.sendMessage(messageHelper.oops(chatId));
 				botController.deleteMessage(chatId, update.getCallbackQuery().getMessage().getMessageId());
 				return;
 			}
@@ -178,41 +178,41 @@ public class BotService implements Runnable {
 			}
 			if (data.equals(CallBackData.MATCHES)) {
 				Document doc = httpService.getDocument(HLTV + "/matches");
-				botController.sendMessage(chatId, hltvService.matchesMessage(doc, chatId));
+				botController.sendMessage(hltvService.matchesMessage(chatId, doc));
 			}
 			if (data.equals(CallBackData.RESULTS)) {
 				Document doc = httpService.getDocument(HLTV + "/results");
-				botController.sendMessage(chatId, hltvService.resultsMessage(doc, chatId));
+				botController.sendMessage(hltvService.resultsMessage(chatId, doc));
 			}
 			if (data.equals(CallBackData.TEAMS)) {
-				botController.sendMessage(chatId, favoriteTeamsService.favoriteTeams(chatId));
+				botController.sendMessage(favoriteTeamsService.favoriteTeams(chatId));
 			}
 			if (data.equals(CallBackData.STREAMS)) {
-				botController.sendMessage(chatId, twitchService.getStreams(chatId, false));
-				botController.sendMessage(chatId, twitchService.nextPage());
+				botController.sendMessage(twitchService.getStreams(chatId, false));
+				botController.sendMessage(twitchService.nextPage(chatId));
 			}
 			if (data.equals(CallBackData.NEXT_PAGE)) {
-				botController.sendMessage(chatId, twitchService.getStreams(chatId, true));
-				botController.sendMessage(chatId, twitchService.nextPage());
+				botController.sendMessage(twitchService.getStreams(chatId, true));
+				botController.sendMessage(twitchService.nextPage(chatId));
 			}
 			if (data.equals(CallBackData.SCOREBOT)) {
-				botController.sendMessage(chatId, hltvService.scorebotHelpMessage());
+				botController.sendMessage(hltvService.scorebotHelpMessage(chatId));
 			}
 
 			botController.deleteMessage(chatId, update.getCallbackQuery().getMessage().getMessageId());
 		}
 	}
 
-	private void topPlayers(Long chatId, int count) {
+	private void topPlayers(String chatId, int count) {
 		String year = String.valueOf(LocalDate.now().getYear());
 		Document doc = httpService
 				.getDocument(HLTV + "/stats/players?startDate=" + year + "-01-01&endDate=" + year + "-12-31");
-		botController.sendMessage(chatId, hltvService.topPlayersMessage(doc, count));
+		botController.sendMessage(hltvService.topPlayersMessage(chatId, doc, count));
 	}
 
-	private void topTeams(Long chatId, int count) {
+	private void topTeams(String chatId, int count) {
 		Document doc = httpService.getDocument(HLTV + "/ranking/teams");
-		botController.sendMessage(chatId, hltvService.topTeamsMessage(doc, count));
+		botController.sendMessage(hltvService.topTeamsMessage(chatId, doc, count));
 	}
 
 	private <T extends BotApiObject> boolean isTimeout(T obj) {

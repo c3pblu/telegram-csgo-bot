@@ -26,7 +26,7 @@ public class TopPlayersService {
 		this.messageService = messageService;
 	}
 
-	public SendMessage topPlayers(Document doc, Integer count) {
+	public SendMessage topPlayers(String chatId, Document doc, Integer count) {
 		Elements rows = doc.select("tr");
 		StringBuilder textMessage = new StringBuilder();
 		String year = String.valueOf(LocalDate.now().getYear());
@@ -63,7 +63,7 @@ public class TopPlayersService {
 			number++;
 		}
 		LOGGER.debug("TopPlayers final message:\n{}", textMessage);
-		return messageService.htmlMessage(textMessage);
+		return messageService.htmlMessage(chatId, textMessage);
 	}
 
 }
