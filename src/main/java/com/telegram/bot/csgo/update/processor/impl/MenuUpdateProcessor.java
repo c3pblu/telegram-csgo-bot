@@ -1,21 +1,41 @@
-package com.telegram.bot.csgo.service.message;
+package com.telegram.bot.csgo.update.processor.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
+import com.telegram.bot.csgo.controller.BotController;
 import com.telegram.bot.csgo.model.CallBackData;
 import com.telegram.bot.csgo.model.Emoji;
+import com.telegram.bot.csgo.update.processor.UpdateProcessor;
 
-@Service
-public class MenuMessageService {
+@Component
+public class MenuUpdateProcessor implements UpdateProcessor {
 
-	public SendMessage menu(String chatId) {
+	private BotController botController;
+
+	@Autowired
+	public MenuUpdateProcessor(BotController botController) {
+		this.botController = botController;
+	}
+
+	private static final String MENU_COMMAND = ".меню";
+
+	@Override
+	public void process(Update update) {
+		if (update.hasMessage() && MENU_COMMAND.equalsIgnoreCase(update.getMessage().getText())) {
+			botController.send(menuMessage(getChatId(update)));
+		}
+	}
+
+	private SendMessage menuMessage(String chatId) {
 		return SendMessage.builder().replyMarkup(createMenu()).text("Easy Peasy Lemon Squeezy!").chatId(chatId).build();
 	}
 

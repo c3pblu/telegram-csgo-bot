@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.service.http;
+package com.telegram.bot.csgo.service;
 
 import java.io.IOException;
 
@@ -21,7 +21,7 @@ import okhttp3.Response;
 @Service
 public class HttpService {
 
-	private static final String HLTV = "https://www.hltv.org";
+	public static final String HLTV = "https://www.hltv.org";
 	private static final Logger LOGGER = LoggerFactory.getLogger(HttpService.class);
 	private OkHttpClient client = new OkHttpClient();
 

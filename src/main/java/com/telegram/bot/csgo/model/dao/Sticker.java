@@ -1,4 +1,6 @@
-package com.telegram.bot.csgo.model;
+package com.telegram.bot.csgo.model.dao;
+
+import java.io.Serializable;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -13,7 +15,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Sticker {
+public class Sticker implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	private int id;

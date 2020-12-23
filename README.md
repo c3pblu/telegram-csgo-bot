@@ -1,5 +1,5 @@
 ## Telegram CS:GO Bot
-Get data from [HLTV.org](https://HLTV.org/) about CS:GO events, teams, players etc. 
+Get information about CS:GO events, teams, players, streams etc. 
 
 ### What Is Done:
 - Top Teams, Players, Matches, Results messages (~~Apache Http~~, Jsoup, Telegram Bot API)

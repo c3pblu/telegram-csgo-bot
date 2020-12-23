@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.service.hltv;
+package com.telegram.bot.csgo.adaptor;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -11,25 +11,25 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import com.telegram.bot.csgo.model.Emoji;
-import com.telegram.bot.csgo.service.http.HttpService;
-import com.telegram.bot.csgo.service.message.MessageService;
+import com.telegram.bot.csgo.model.HtmlMessage;
+import com.telegram.bot.csgo.service.HttpService;
 
-@Service
-public class MatchesService {
+@Component
+public class MatchesAdaptor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MatchesService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MatchesAdaptor.class);
 
-	private MessageService messageService;
+	private FlagsAdaptor flagsAdaptor;
 	private HttpService httpService;
 
 	@Autowired
-	public MatchesService(HttpService httpService, MessageService messageService) {
+	public MatchesAdaptor(HttpService httpService, FlagsAdaptor flagsAdaptor) {
 		this.httpService = httpService;
-		this.messageService = messageService;
+		this.flagsAdaptor = flagsAdaptor;
 
 	}
 
@@ -43,10 +43,10 @@ public class MatchesService {
 				textMessage.append(Emoji.CUP).append("<a href=\'https://hltv.org")
 						.append(match.select("a").attr("href")).append("\'>")
 						.append(match.select("div.matchEventName").text()).append("</a>\n")
-						.append(messageService
+						.append(flagsAdaptor
 								.favoriteTeam(chatId, match.select("div.matchTeamName").get(0).text(), true))
 						.append(" ").append(Emoji.VS).append(" ")
-						.append(messageService.favoriteTeam(chatId, match.select("div.matchTeamName").get(1).text(),
+						.append(flagsAdaptor.favoriteTeam(chatId, match.select("div.matchTeamName").get(1).text(),
 								true))
 						.append(" (").append(match.select("div.matchMeta").text()).append(") ").append(getStars(match))
 						.append("\nMatch ID: ").append(match.select("div.liveMatch").attr("data-livescore-match"))
@@ -84,10 +84,9 @@ public class MatchesService {
 			if (!match.select("div.matchInfoEmpty").isEmpty()) {
 				textMessage.append(match.select("div.matchInfoEmpty").text()).append(" ");
 			} else {
-				textMessage
-						.append(messageService.favoriteTeam(chatId, match.select("div.matchTeam.team1").text(), true))
+				textMessage.append(flagsAdaptor.favoriteTeam(chatId, match.select("div.matchTeam.team1").text(), true))
 						.append(" ").append(Emoji.VS).append(" ")
-						.append(messageService.favoriteTeam(chatId, match.select("div.matchTeam.team2").text(), true))
+						.append(flagsAdaptor.favoriteTeam(chatId, match.select("div.matchTeam.team2").text(), true))
 						.append(" (").append(match.select("div.matchMeta").text()).append(") ");
 			}
 
@@ -98,7 +97,7 @@ public class MatchesService {
 		}
 
 		LOGGER.debug("Matches final message:\n{}", textMessage);
-		return messageService.htmlMessage(chatId, textMessage);
+		return new HtmlMessage(chatId, textMessage);
 
 	}
 
@@ -108,10 +107,6 @@ public class MatchesService {
 			stars.append(Emoji.STAR);
 		}
 		return stars;
-	}
-
-	public SendMessage matchesForToday(String chatId) {
-		return messageService.htmlMessage(chatId, "Ближайшие матчи:");
 	}
 
 }

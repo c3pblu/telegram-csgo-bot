@@ -3,32 +3,62 @@ package com.telegram.bot.csgo.controller;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import com.telegram.bot.csgo.service.BotService;
+import com.telegram.bot.csgo.service.UpdateProcessingService;
 
 @Service
 public class BotController extends TelegramLongPollingBot {
 
-	@Value(value = "${bot.name}")
+	@Value("${bot.name}")
 	private String botName;
-	@Value(value = "${bot.token}")
+	@Value("${bot.token}")
 	private String botToken;
+	@Value("${bot.callback.timeout}")
+	private Long callBackTimeout;
+	@Value("${bot.message.timeout}")
+	private Long messageTimeout;
 
-	ObjectFactory<BotService> serviceFactory;
+	private ObjectProvider<UpdateProcessingService> updateProcessingFactory;
 
 	@Autowired
-	public BotController(ObjectFactory<BotService> serviceFactory) {
-		this.serviceFactory = serviceFactory;
+	public BotController(ObjectProvider<UpdateProcessingService> updateProcessingFactory) {
+		this.updateProcessingFactory = updateProcessingFactory;
+	}
+
+	@Override
+	public void onUpdateReceived(Update update) {
+		ExecutorService pool = Executors.newCachedThreadPool();
+		pool.execute(updateProcessingFactory.getObject().setUpdate(update));
+	}
+
+	public void send(PartialBotApiMethod<?> message) {
+		try {
+			if (message instanceof SendMessage) {
+				SendMessage sendMessage = (SendMessage) message;
+				execute(sendMessage);
+			}
+			if (message instanceof SendSticker) {
+				SendSticker stickerMessage = (SendSticker) message;
+				execute(stickerMessage);
+			}
+			if (message instanceof DeleteMessage) {
+				DeleteMessage deleteMessage = (DeleteMessage) message;
+				execute(deleteMessage);
+			}
+		} catch (TelegramApiException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -41,35 +71,12 @@ public class BotController extends TelegramLongPollingBot {
 		return botToken;
 	}
 
-	@Override
-	public void onUpdateReceived(Update update) {
-		ExecutorService pool = Executors.newCachedThreadPool();
-		pool.execute(serviceFactory.getObject().setUpdate(update));
+	public Long getCallBackTimeout() {
+		return callBackTimeout;
 	}
 
-	public void sendMessage(SendMessage msg) {
-		try {
-			execute(msg); // Call method to send the message
-		} catch (TelegramApiException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void sendMessage(String chatId, SendSticker msg) {
-		msg.setChatId(chatId);
-		try {
-			execute(msg); // Call method to send the message
-		} catch (TelegramApiException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void deleteMessage(String chatId, Integer msgId) {
-		try {
-			execute(new DeleteMessage(chatId, msgId));
-		} catch (TelegramApiException e) {
-			e.printStackTrace();
-		}
+	public Long getMessageTimeout() {
+		return messageTimeout;
 	}
 
 }

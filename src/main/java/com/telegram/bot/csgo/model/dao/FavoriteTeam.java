@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.model;
+package com.telegram.bot.csgo.model.dao;
 
 import java.io.Serializable;
 

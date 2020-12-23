@@ -1,9 +1,9 @@
-package com.telegram.bot.csgo.service.twitch;
+package com.telegram.bot.csgo.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -16,9 +16,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
+import com.telegram.bot.csgo.adaptor.FlagsAdaptor;
 import com.telegram.bot.csgo.model.Emoji;
-import com.telegram.bot.csgo.service.http.HttpService;
-import com.telegram.bot.csgo.service.message.MessageService;
+import com.telegram.bot.csgo.model.HtmlMessage;
 
 import okhttp3.Headers;
 
@@ -31,15 +31,15 @@ public class TwitchService {
 	private String clientSecret;
 
 	private static String ACCESS_TOKEN;
-	private Map<String, String> chatPage = new HashMap<>();
+	private Map<String, String> chatPage = new ConcurrentHashMap<>();
 	private static final Logger LOGGER = LoggerFactory.getLogger(TwitchService.class);
 
-	private MessageService messageService;
+	private FlagsAdaptor flagsAdaptor;
 	private HttpService httpService;
 
 	@Autowired
-	public TwitchService(MessageService messageService, HttpService httpService) {
-		this.messageService = messageService;
+	public TwitchService(FlagsAdaptor flagsAdaptor, HttpService httpService) {
+		this.flagsAdaptor = flagsAdaptor;
 		this.httpService = httpService;
 	}
 
@@ -98,11 +98,11 @@ public class TwitchService {
 			textMessage.append("<b>(").append(data.getNumber("viewer_count")).append(")</b> ")
 					.append("<a href=\'https://www.twitch.tv/").append(data.getString("user_name")).append("\'>")
 					.append(data.getString("user_name")).append("</a> ")
-					.append(messageService.flagUnicodeFromCountry(data.getString("language").toUpperCase())).append(" ")
+					.append(flagsAdaptor.flagUnicodeFromCountry(data.getString("language").toUpperCase())).append(" ")
 					.append(data.getString("title").replace("<", "").replace(">", "")).append("\n");
 		}
 		LOGGER.debug("Streams final message:\n{}", textMessage);
-		return messageService.htmlMessage(chatId, textMessage);
+		return new HtmlMessage(chatId, textMessage);
 
 	}
 

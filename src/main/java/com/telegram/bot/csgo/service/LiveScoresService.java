@@ -1,8 +1,8 @@
-package com.telegram.bot.csgo.service.hltv;
+package com.telegram.bot.csgo.service;
 
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.lang3.StringUtils;
@@ -16,31 +16,93 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import com.telegram.bot.csgo.controller.BotController;
 import com.telegram.bot.csgo.model.Emoji;
-import com.telegram.bot.csgo.service.message.MessageService;
+import com.telegram.bot.csgo.model.HtmlMessage;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
 @Service
-public class ScoreBotService {
+public class LiveScoresService {
 
 	@Value("${scorebot.endpoints}")
 	private String[] endpoints;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MessageService.class);
-	private Map<String, Socket> sessions = new HashMap<>();
+	private static final Logger LOGGER = LoggerFactory.getLogger(LiveScoresService.class);
+	private Map<String, Socket> sessions = new ConcurrentHashMap<>();
 
-	private MessageService messageService;
 	private BotController botController;
 
 	@Autowired
-	public ScoreBotService(MessageService messageService, BotController botController) {
-		this.messageService = messageService;
+	public LiveScoresService(BotController botController) {
 		this.botController = botController;
 	}
 
-	public SendMessage scorebot(String chatId, JSONObject json) {
+	public void start(String chatId, String matchId) {
+		stop(chatId, false);
+		try {
+			int random = ThreadLocalRandom.current().nextInt(endpoints.length);
+			String endpoint = endpoints[random];
+			Socket socket = IO.socket(endpoint);
+			sessions.put(chatId, socket);
+			socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+				@Override
+				public void call(Object... args) {
+					socket.emit("readyForMatch", "{token: '', listId: " + matchId + " }");
+				}
+			});
+
+			socket.on("log", new Emitter.Listener() {
+				@Override
+				public void call(Object... args) {
+					JSONObject json = new JSONObject(String.valueOf(args[args.length - 1]));
+					if (json.getJSONArray("log").length() > 0) {
+						json = json.getJSONArray("log").getJSONObject(0);
+						SendMessage message = scorebotMessage(chatId, json);
+						if (!StringUtils.isBlank(message.getText())) {
+							botController.send(message);
+							LOGGER.debug("{}", json);
+						}
+					}
+				}
+			});
+
+			socket.on("reconnect", new Emitter.Listener() {
+				@Override
+				public void call(Object... args) {
+					socket.emit("readyForMatch", "{token: '', listId: " + matchId + " }");
+				}
+			});
+
+			socket.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+				@Override
+				public void call(Object... args) {
+					socket.close();
+				}
+
+			});
+
+			socket.connect();
+			LOGGER.info("Connected to " + endpoint);
+
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void stop(String chatId, boolean sendMessage) {
+		if (sessions.containsKey(chatId)) {
+			sessions.get(chatId).disconnect();
+			sessions.remove(chatId);
+			if (sendMessage) {
+				botController.send(new HtmlMessage(chatId, "Трансляция остановлена"));
+			}
+		} else if (sendMessage) {
+			botController.send(new HtmlMessage(chatId, "Запущеная трансляция не найдена"));
+		}
+	}
+
+	public SendMessage scorebotMessage(String chatId, JSONObject json) {
 		StringBuilder textMessage = new StringBuilder();
 		String logType = json.keys().next();
 		LOGGER.debug("LogType: {}", logType);
@@ -152,70 +214,7 @@ public class ScoreBotService {
 			textMessage.append("<b>Match Started: ").append(map).append("</b>");
 		}
 		LOGGER.debug("Log Message: {}", textMessage);
-		return messageService.htmlMessage(chatId, textMessage);
-	}
-
-	public void live(String chatId, String matchId) {
-		stop(chatId);
-		try {
-			int random = ThreadLocalRandom.current().nextInt(endpoints.length);
-			String endpoint = endpoints[random];
-			Socket socket = IO.socket(endpoint);
-			sessions.put(chatId, socket);
-			socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-				@Override
-				public void call(Object... args) {
-					socket.emit("readyForMatch", "{token: '', listId: " + matchId + " }");
-				}
-			});
-
-			socket.on("log", new Emitter.Listener() {
-				@Override
-				public void call(Object... args) {
-					JSONObject json = new JSONObject(String.valueOf(args[args.length - 1]));
-					if (json.getJSONArray("log").length() > 0) {
-						json = json.getJSONArray("log").getJSONObject(0);
-						SendMessage message = scorebot(chatId, json);
-						if (!StringUtils.isBlank(message.getText())) {
-							botController.sendMessage(message);
-							LOGGER.debug("{}", json);
-						}
-					}
-				}
-			});
-
-			socket.on("reconnect", new Emitter.Listener() {
-				@Override
-				public void call(Object... args) {
-					socket.emit("readyForMatch", "{token: '', listId: " + matchId + " }");
-				}
-			});
-
-			socket.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-				@Override
-				public void call(Object... args) {
-					socket.close();
-				}
-
-			});
-
-			socket.connect();
-			LOGGER.info("Connected to " + endpoint);
-
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void stop(String chatId) {
-		if (sessions.containsKey(chatId)) {
-			sessions.get(chatId).disconnect();
-		}
-	}
-
-	public SendMessage scorebotHelp(String chatId) {
-		return messageService.htmlMessage(chatId, Emoji.INFO
-				+ " Для запуска трансляции:\n.<b>старт-1234567</b> (где 1234567 это Match ID - его можно посмотреть в .мачти)\n<b>.стоп</b> - остановить трансяцию");
+		return new HtmlMessage(chatId, textMessage);
 	}
 
 }

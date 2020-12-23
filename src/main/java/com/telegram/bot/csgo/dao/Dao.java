@@ -2,15 +2,16 @@ package com.telegram.bot.csgo.dao;
 
 import java.util.List;
 
-import com.telegram.bot.csgo.model.FavoriteTeam;
-import com.telegram.bot.csgo.model.Flag;
-import com.telegram.bot.csgo.model.Sticker;
+import com.telegram.bot.csgo.model.dao.FavoriteTeam;
+import com.telegram.bot.csgo.model.dao.Flag;
+import com.telegram.bot.csgo.model.dao.Result;
+import com.telegram.bot.csgo.model.dao.Sticker;
 
 public interface Dao {
 
-	String updateOrSaveTeam(String chatId, String name, String countryCode);
+	Result updateOrSaveTeam(String chatId, String name, String countryCode);
 
-	String deleteTeam(String chatId, String name);
+	Result deleteTeam(String chatId, String name);
 
 	List<Flag> getFlags();
 

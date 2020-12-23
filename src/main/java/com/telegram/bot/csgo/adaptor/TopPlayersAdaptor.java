@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.service.hltv;
+package com.telegram.bot.csgo.adaptor;
 
 import java.time.LocalDate;
 
@@ -8,22 +8,22 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import com.telegram.bot.csgo.model.Emoji;
-import com.telegram.bot.csgo.service.message.MessageService;
+import com.telegram.bot.csgo.model.HtmlMessage;
 
-@Service
-public class TopPlayersService {
+@Component
+public class TopPlayersAdaptor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TopPlayersService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TopPlayersAdaptor.class);
 
-	private MessageService messageService;
+	private FlagsAdaptor flagsAdaptor;
 
 	@Autowired
-	public TopPlayersService(MessageService messageService) {
-		this.messageService = messageService;
+	public TopPlayersAdaptor(FlagsAdaptor flagsAdaptor) {
+		this.flagsAdaptor = flagsAdaptor;
 	}
 
 	public SendMessage topPlayers(String chatId, Document doc, Integer count) {
@@ -50,7 +50,7 @@ public class TopPlayersService {
 				break;
 			}
 			textMessage.append("<b>#").append(number)
-					.append(messageService
+					.append(flagsAdaptor
 							.flagUnicodeFromCountry(value.select("td.playerCol").select("img").attr("title")))
 					.append("</b> <a href=\'https://hltv.org")
 					.append(value.select("td.playerCol").select("a").attr("href")).append("\'>")
@@ -63,7 +63,7 @@ public class TopPlayersService {
 			number++;
 		}
 		LOGGER.debug("TopPlayers final message:\n{}", textMessage);
-		return messageService.htmlMessage(chatId, textMessage);
+		return new HtmlMessage(chatId, textMessage);
 	}
 
 }

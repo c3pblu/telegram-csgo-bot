@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.service.hltv;
+package com.telegram.bot.csgo.adaptor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,25 +10,25 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import com.telegram.bot.csgo.model.Emoji;
-import com.telegram.bot.csgo.service.http.HttpService;
-import com.telegram.bot.csgo.service.message.MessageService;
+import com.telegram.bot.csgo.model.HtmlMessage;
+import com.telegram.bot.csgo.service.HttpService;
 
-@Service
-public class TopTeamsService {
+@Component
+public class TopTeamsAdaptor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TopTeamsService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TopTeamsAdaptor.class);
 
 	private HttpService httpService;
-	private MessageService messageService;
+	private FlagsAdaptor flagsAdaptor;
 
 	@Autowired
-	public TopTeamsService(HttpService httpService, MessageService messageService) {
+	public TopTeamsAdaptor(HttpService httpService, FlagsAdaptor flagsAdaptor) {
 		this.httpService = httpService;
-		this.messageService = messageService;
+		this.flagsAdaptor = flagsAdaptor;
 
 	}
 
@@ -47,10 +47,10 @@ public class TopTeamsService {
 			String teamFlag = "";
 			if (teamProfile != null) {
 				Elements country = teamProfile.select("div.team-country");
-				teamFlag = messageService
+				teamFlag = flagsAdaptor
 						.flagUnicodeFromCountry(country != null ? StringUtils.trim(country.text()) : null);
 			} else {
-				teamFlag = messageService.flagUnicodeFromCountry(null);
+				teamFlag = flagsAdaptor.flagUnicodeFromCountry(null);
 			}
 			StringBuilder row = new StringBuilder();
 			row.append("<b>").append(team.select("span.position").text()).append("</b> (")
@@ -68,7 +68,7 @@ public class TopTeamsService {
 		}
 
 		LOGGER.debug("TopTeams final message:\n{}", textMessage);
-		return messageService.htmlMessage(chatId, textMessage);
+		return new HtmlMessage(chatId, textMessage);
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.service.hltv;
+package com.telegram.bot.csgo.adaptor;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -6,22 +6,22 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import com.telegram.bot.csgo.model.Emoji;
-import com.telegram.bot.csgo.service.message.MessageService;
+import com.telegram.bot.csgo.model.HtmlMessage;
 
-@Service
-public class ResultsService {
+@Component
+public class ResultsAdaptor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ResultsService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ResultsAdaptor.class);
 
-	private MessageService messageService;
+	private FlagsAdaptor flagsAdaptor;
 
 	@Autowired
-	public ResultsService(MessageService messageService) {
-		this.messageService = messageService;
+	public ResultsAdaptor(FlagsAdaptor flagsAdaptor) {
+		this.flagsAdaptor = flagsAdaptor;
 	}
 
 	public SendMessage results(String chatId, Document doc) {
@@ -40,9 +40,9 @@ public class ResultsService {
 			for (Element resultCon : resultList.select("div.result-con")) {
 				Element team1 = resultCon.select("div.team").get(0);
 				Element team2 = resultCon.select("div.team").get(1);
-				String team1String = messageService.favoriteTeam(chatId, resultCon.select("div.team").get(0).text(),
+				String team1String = flagsAdaptor.favoriteTeam(chatId, resultCon.select("div.team").get(0).text(),
 						false);
-				String team2String = messageService.favoriteTeam(chatId, resultCon.select("div.team").get(1).text(),
+				String team2String = flagsAdaptor.favoriteTeam(chatId, resultCon.select("div.team").get(1).text(),
 						false);
 
 				if (team1.hasClass("team-won")) {
@@ -72,17 +72,13 @@ public class ResultsService {
 		}
 
 		LOGGER.debug("Results final message:\n{}", textMessage);
-		return messageService.htmlMessage(chatId, textMessage);
+		return new HtmlMessage(chatId, textMessage);
 	}
 
 	private StringBuilder getStars(Element match) {
 		StringBuilder stars = new StringBuilder();
 		match.select("div.stars").select("i").stream().forEach(star -> stars.append(Emoji.STAR));
 		return stars;
-	}
-
-	public SendMessage resultsForToday(String chatId) {
-		return messageService.htmlMessage(chatId, "Последние результаты:");
 	}
 
 }
