@@ -17,66 +17,61 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import com.telegram.bot.csgo.service.UpdateProcessingService;
 
+import lombok.Getter;
+
 @Service
+@Getter
 public class BotController extends TelegramLongPollingBot {
 
-	@Value("${bot.name}")
-	private String botName;
-	@Value("${bot.token}")
-	private String botToken;
-	@Value("${bot.callback.timeout}")
-	private Long callBackTimeout;
-	@Value("${bot.message.timeout}")
-	private Long messageTimeout;
+    @Value("${bot.name}")
+    private String botName;
+    @Value("${bot.token}")
+    private String botToken;
+    @Value("${bot.callback.timeout}")
+    private Long callBackTimeout;
+    @Value("${bot.message.timeout}")
+    private Long messageTimeout;
 
-	private ObjectProvider<UpdateProcessingService> updateProcessingFactory;
+    private ObjectProvider<UpdateProcessingService> updateProcessingFactory;
 
-	@Autowired
-	public BotController(ObjectProvider<UpdateProcessingService> updateProcessingFactory) {
-		this.updateProcessingFactory = updateProcessingFactory;
-	}
+    @Autowired
+    public BotController(ObjectProvider<UpdateProcessingService> updateProcessingFactory) {
+        this.updateProcessingFactory = updateProcessingFactory;
+    }
 
-	@Override
-	public void onUpdateReceived(Update update) {
-		ExecutorService pool = Executors.newCachedThreadPool();
-		pool.execute(updateProcessingFactory.getObject().setUpdate(update));
-	}
+    @Override
+    public void onUpdateReceived(Update update) {
+        ExecutorService pool = Executors.newCachedThreadPool();
+        pool.execute(updateProcessingFactory.getObject().setUpdate(update));
+    }
 
-	public void send(PartialBotApiMethod<?> message) {
-		try {
-			if (message instanceof SendMessage) {
-				SendMessage sendMessage = (SendMessage) message;
-				execute(sendMessage);
-			}
-			if (message instanceof SendSticker) {
-				SendSticker stickerMessage = (SendSticker) message;
-				execute(stickerMessage);
-			}
-			if (message instanceof DeleteMessage) {
-				DeleteMessage deleteMessage = (DeleteMessage) message;
-				execute(deleteMessage);
-			}
-		} catch (TelegramApiException e) {
-			e.printStackTrace();
-		}
-	}
+    public void send(PartialBotApiMethod<?> message) {
+        try {
+            if (message instanceof SendMessage) {
+                SendMessage sendMessage = (SendMessage) message;
+                execute(sendMessage);
+            }
+            if (message instanceof SendSticker) {
+                SendSticker stickerMessage = (SendSticker) message;
+                execute(stickerMessage);
+            }
+            if (message instanceof DeleteMessage) {
+                DeleteMessage deleteMessage = (DeleteMessage) message;
+                execute(deleteMessage);
+            }
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	public String getBotUsername() {
-		return botName;
-	}
+    @Override
+    public String getBotUsername() {
+        return botName;
+    }
 
-	@Override
-	public String getBotToken() {
-		return botToken;
-	}
-
-	public Long getCallBackTimeout() {
-		return callBackTimeout;
-	}
-
-	public Long getMessageTimeout() {
-		return messageTimeout;
-	}
+    @Override
+    public String getBotToken() {
+        return botToken;
+    }
 
 }

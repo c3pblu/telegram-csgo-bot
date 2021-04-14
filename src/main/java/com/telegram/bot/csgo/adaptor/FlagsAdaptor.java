@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,10 +12,11 @@ import com.telegram.bot.csgo.model.dao.FavoriteTeam;
 import com.telegram.bot.csgo.model.dao.Flag;
 import com.vdurmont.emoji.EmojiParser;
 
-@Component
-public class FlagsAdaptor {
+import lombok.extern.slf4j.Slf4j;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(FlagsAdaptor.class);
+@Component
+@Slf4j
+public class FlagsAdaptor {
 
 	private Dao dao;
 
@@ -30,7 +29,7 @@ public class FlagsAdaptor {
 		String text = null;
 		if (country == null) {
 			text = EmojiParser.parseToUnicode(":un:");
-			LOGGER.debug("Country code: {}, Emoji code: {}", country, ":un: (default)");
+			log.debug("Country code: {}, Emoji code: {}", country, ":un: (default)");
 			return text;
 		}
 		Flag ourFlag = new Flag();
@@ -48,11 +47,11 @@ public class FlagsAdaptor {
 			} else {
 				text = EmojiParser.parseToUnicode(ourFlag.getEmojiCode());
 			}
-			LOGGER.debug("Country code: {}, Emoji code: {}", country, ourFlag.getEmojiCode());
+			log.debug("Country code: {}, Emoji code: {}", country, ourFlag.getEmojiCode());
 		}
 		if (text == null) {
 			text = EmojiParser.parseToUnicode(":un:");
-			LOGGER.debug("Country code: {}, Emoji code: {}", country, ":un: (default)");
+			log.debug("Country code: {}, Emoji code: {}", country, ":un: (default)");
 		}
 		return text;
 	}

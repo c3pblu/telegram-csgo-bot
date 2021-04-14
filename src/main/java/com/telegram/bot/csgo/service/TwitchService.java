@@ -7,8 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,9 +18,11 @@ import com.telegram.bot.csgo.adaptor.FlagsAdaptor;
 import com.telegram.bot.csgo.model.Emoji;
 import com.telegram.bot.csgo.model.HtmlMessage;
 
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
 
 @Service
+@Slf4j
 public class TwitchService {
 
 	@Value("${twitch.client.id}")
@@ -32,7 +32,6 @@ public class TwitchService {
 
 	private static String ACCESS_TOKEN;
 	private Map<String, String> chatPage = new ConcurrentHashMap<>();
-	private static final Logger LOGGER = LoggerFactory.getLogger(TwitchService.class);
 
 	private FlagsAdaptor flagsAdaptor;
 	private HttpService httpService;
@@ -60,13 +59,13 @@ public class TwitchService {
 		if (isNextPage) {
 			String currentPage = chatPage.get(chatId);
 			newUri = newUri.concat("&after=" + currentPage);
-			LOGGER.debug("Current page ID: {}", currentPage);
+			log.debug("Current page ID: {}", currentPage);
 		}
 		Headers headers = new Headers.Builder().add("Client-ID", clientId)
 				.add("Authorization", "Bearer " + ACCESS_TOKEN).build();
 		JSONObject json = httpService.getJson(newUri, "GET", headers);
 		String nextPage = json.getJSONObject("pagination").getString("cursor");
-		LOGGER.debug("NextPage ID: {}", nextPage);
+		log.debug("NextPage ID: {}", nextPage);
 		chatPage.put(chatId, nextPage);
 		return streams(chatId, json);
 	}
@@ -101,7 +100,7 @@ public class TwitchService {
 					.append(flagsAdaptor.flagUnicodeFromCountry(data.getString("language").toUpperCase())).append(" ")
 					.append(data.getString("title").replace("<", "").replace(">", "")).append("\n");
 		}
-		LOGGER.debug("Streams final message:\n{}", textMessage);
+		log.debug("Streams final message:\n{}", textMessage);
 		return new HtmlMessage(chatId, textMessage);
 
 	}

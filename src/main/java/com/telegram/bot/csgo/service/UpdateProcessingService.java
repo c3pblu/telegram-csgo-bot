@@ -18,45 +18,46 @@ import com.telegram.bot.csgo.update.processor.UpdateProcessor;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class UpdateProcessingService implements Runnable {
 
-	private BotController botController;
-	private List<UpdateProcessor> updateProcessors;
-	private Update update;
+    private BotController botController;
+    private List<UpdateProcessor> updateProcessors;
+    private Update update;
 
-	@Autowired
-	public UpdateProcessingService(BotController botController, List<UpdateProcessor> updateProcessors) {
-		this.botController = botController;
-		this.updateProcessors = updateProcessors;
-	}
+    @Autowired
+    public UpdateProcessingService(BotController botController, List<UpdateProcessor> updateProcessors) {
+        this.botController = botController;
+        this.updateProcessors = updateProcessors;
+    }
 
-	@Override
-	public void run() {
-		if (!isTimeout(update)) {
-			updateProcessors.forEach(processor -> processor.process(update));
-		}
-	}
+    @Override
+    public void run() {
+        if (!isTimeout(update)) {
+            updateProcessors.forEach(processor -> processor.process(update));
+            System.gc();
+        }
+    }
 
-	private boolean isTimeout(Update update) {
-		if (update.hasMessage()) {
-			long responseTime = Instant.now().getEpochSecond() - update.getMessage().getDate();
-			if (responseTime > botController.getMessageTimeout()) {
-				return true;
-			}
-		}
-		if (update.hasCallbackQuery()) {
-			long responseTime = Instant.now().getEpochSecond() - update.getCallbackQuery().getMessage().getDate();
-			if (responseTime > botController.getCallBackTimeout()) {
-				String chatId = String.valueOf(update.getCallbackQuery().getMessage().getChatId());
-				botController.send(new HtmlMessage(chatId, "Упс, ты слишком долго думал парень!"));
-				botController.send(new DeleteMessage(chatId, update.getCallbackQuery().getMessage().getMessageId()));
-				return true;
-			}
-		}
-		return false;
-	}
+    private boolean isTimeout(Update update) {
+        if (update.hasMessage()) {
+            long responseTime = Instant.now().getEpochSecond() - update.getMessage().getDate();
+            if (responseTime > botController.getMessageTimeout()) {
+                return true;
+            }
+        }
+        if (update.hasCallbackQuery()) {
+            long responseTime = Instant.now().getEpochSecond() - update.getCallbackQuery().getMessage().getDate();
+            if (responseTime > botController.getCallBackTimeout()) {
+                String chatId = String.valueOf(update.getCallbackQuery().getMessage().getChatId());
+                botController.send(new HtmlMessage(chatId, "Упс, ты слишком долго думал парень!"));
+                botController.send(new DeleteMessage(chatId, update.getCallbackQuery().getMessage().getMessageId()));
+                return true;
+            }
+        }
+        return false;
+    }
 
-	public UpdateProcessingService setUpdate(Update update) {
-		this.update = update;
-		return this;
-	}
+    public UpdateProcessingService setUpdate(Update update) {
+        this.update = update;
+        return this;
+    }
 
 }
