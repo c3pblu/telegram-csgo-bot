@@ -22,10 +22,8 @@ public class UpdateProcessingService implements Runnable {
     private List<UpdateProcessor> updateProcessors;
     private Update update;
 
-    @Autowired
-    public UpdateProcessingService(BotController botController, List<UpdateProcessor> updateProcessors) {
-        this.botController = botController;
-        this.updateProcessors = updateProcessors;
+    public UpdateProcessingService(Update update) {
+        this.update = update;
     }
 
     @Override
@@ -55,9 +53,13 @@ public class UpdateProcessingService implements Runnable {
         return false;
     }
 
-    public UpdateProcessingService setUpdate(Update update) {
-        this.update = update;
-        return this;
+    @Autowired
+    public void setBotController(BotController botController) {
+        this.botController = botController;
     }
 
+    @Autowired
+    public void setUpdateProcessors(List<UpdateProcessor> updateProcessors) {
+        this.updateProcessors = updateProcessors;
+    }
 }

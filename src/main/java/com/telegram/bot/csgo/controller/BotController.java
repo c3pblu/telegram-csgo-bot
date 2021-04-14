@@ -42,7 +42,7 @@ public class BotController extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         ExecutorService pool = Executors.newCachedThreadPool();
-        pool.execute(updateProcessingFactory.getObject().setUpdate(update));
+        pool.execute(updateProcessingFactory.getObject(update));
     }
 
     public void send(PartialBotApiMethod<?> message) {
