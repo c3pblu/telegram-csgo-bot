@@ -31,7 +31,7 @@ public class BotController extends TelegramLongPollingBot {
     private Long callBackTimeout;
     @Value("${bot.message.timeout}")
     private Long messageTimeout;
-
+    ExecutorService threadPool = Executors.newCachedThreadPool();
     private ObjectProvider<UpdateProcessingService> updateProcessingFactory;
 
     @Autowired
@@ -41,8 +41,7 @@ public class BotController extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        ExecutorService pool = Executors.newCachedThreadPool();
-        pool.execute(updateProcessingFactory.getObject(update));
+        threadPool.execute(updateProcessingFactory.getObject(update));
     }
 
     public void send(PartialBotApiMethod<?> message) {
