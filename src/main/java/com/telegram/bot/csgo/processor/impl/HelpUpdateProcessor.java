@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.update.processor.impl;
+package com.telegram.bot.csgo.processor.impl;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -13,7 +13,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import com.telegram.bot.csgo.controller.BotController;
-import com.telegram.bot.csgo.update.processor.UpdateProcessor;
+import com.telegram.bot.csgo.processor.UpdateProcessor;
 
 import lombok.extern.slf4j.Slf4j;
 

@@ -18,7 +18,7 @@ import com.telegram.bot.csgo.model.dao.Result;
 import com.telegram.bot.csgo.model.dao.Sticker;
 
 @Repository
-public class DaoMySQL implements Dao {
+public class DaoMySQLImpl implements Dao {
 
 	@PersistenceContext
 	private EntityManager entityManager;

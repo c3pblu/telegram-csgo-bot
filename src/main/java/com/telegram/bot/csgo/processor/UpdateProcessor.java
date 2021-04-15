@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.update.processor;
+package com.telegram.bot.csgo.processor;
 
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;

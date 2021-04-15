@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.update.processor.impl;
+package com.telegram.bot.csgo.processor.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -8,8 +8,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import com.telegram.bot.csgo.controller.BotController;
 import com.telegram.bot.csgo.model.Emoji;
 import com.telegram.bot.csgo.model.HtmlMessage;
+import com.telegram.bot.csgo.processor.UpdateProcessor;
 import com.telegram.bot.csgo.service.LiveScoresService;
-import com.telegram.bot.csgo.update.processor.UpdateProcessor;
 
 @Component
 public class LiveScoresUpdateProcessor implements UpdateProcessor {

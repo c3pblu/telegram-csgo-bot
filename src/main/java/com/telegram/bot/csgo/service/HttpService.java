@@ -43,11 +43,10 @@ public class HttpService {
             log.debug("Request URL : {}", url);
             log.debug("Response code : {}", res.code());
             log.debug("Response headers : {}", res.headers());
-            // Check for "HttpCode 429 - Too Many Requests" header and sleep
             String retryAfter = res.header("Retry-After");
             if (!StringUtils.isBlank(retryAfter)) {
                 try {
-                    log.debug("Sleeping for {} seconds because of 429 Response Code", retryAfter);
+                    log.info("Sleeping for {} seconds because of 429 Response Code", retryAfter);
                     Thread.sleep(Integer.parseInt(retryAfter) * 1000);
                     responseBody = getHtml(url, headers, method);
                 } catch (NumberFormatException | InterruptedException e) {

@@ -12,7 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import com.telegram.bot.csgo.controller.BotController;
 import com.telegram.bot.csgo.model.HtmlMessage;
-import com.telegram.bot.csgo.update.processor.UpdateProcessor;
+import com.telegram.bot.csgo.processor.UpdateProcessor;
 
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -29,6 +29,7 @@ public class UpdateProcessingService implements Runnable {
     @Override
     public void run() {
         if (!isTimeout(update)) {
+            Thread.currentThread().setName(String.valueOf(System.currentTimeMillis()));
             updateProcessors.forEach(processor -> processor.process(update));
             System.gc();
         }

@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.update.processor.impl;
+package com.telegram.bot.csgo.processor.impl;
 
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,8 +7,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import com.telegram.bot.csgo.adaptor.TopTeamsAdaptor;
 import com.telegram.bot.csgo.controller.BotController;
+import com.telegram.bot.csgo.processor.UpdateProcessor;
 import com.telegram.bot.csgo.service.HttpService;
-import com.telegram.bot.csgo.update.processor.UpdateProcessor;
 
 @Component
 public class TopTeamsUpdateProcessor implements UpdateProcessor {

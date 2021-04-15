@@ -1,4 +1,4 @@
-package com.telegram.bot.csgo.update.processor.impl;
+package com.telegram.bot.csgo.processor.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import com.telegram.bot.csgo.controller.BotController;
 import com.telegram.bot.csgo.model.CallBackData;
 import com.telegram.bot.csgo.model.Emoji;
-import com.telegram.bot.csgo.update.processor.UpdateProcessor;
+import com.telegram.bot.csgo.processor.UpdateProcessor;
 
 @Component
 public class MenuUpdateProcessor implements UpdateProcessor {
