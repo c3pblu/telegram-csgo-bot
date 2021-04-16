@@ -63,7 +63,8 @@ public class AdminUpdateProcessor implements UpdateProcessor {
                     Runtime runtime = Runtime.getRuntime();
                     try {
                         log.info("Executing command: {}", command);
-                        Process proc = runtime.exec(command);
+                        String[] cmd = { "/bin/sh", "-c", command };
+                        Process proc = runtime.exec(cmd);
                         proc.waitFor(1, TimeUnit.MINUTES);
                         BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
                         StringBuilder result = new StringBuilder();
