@@ -28,8 +28,7 @@ public class ResultsAdaptor {
         for (Element resultList : doc.select("div.results-sublist")) {
             String headerText = resultList.select("span.standard-headline").text();
             if (headerText.isEmpty()) {
-                headerText = doc.select("div.tab-holder").select("div.tab").get(featuredNum).text();
-                featuredNum++;
+                headerText = doc.select("div.tab-holder").select("div.tab").get(featuredNum++).text();
             }
             textMessage.append(Emoji.CUP).append(" <b>").append(headerText).append("</b>\n");
             for (Element resultCon : resultList.select("div.result-con")) {
@@ -37,7 +36,7 @@ public class ResultsAdaptor {
                         false);
                 String team2String = flagsAdaptor.favoriteTeam(chatId, resultCon.select("div.team").get(1).text(),
                         false);
-                if (doc.select("div.results-sublist").hasClass("team-won")) {
+                if (resultCon.select("div.team").get(0).hasClass("team-won")) {
                     textMessage.append("<b>").append(team1String).append("</b>");
                 } else {
                     textMessage.append(team1String);
