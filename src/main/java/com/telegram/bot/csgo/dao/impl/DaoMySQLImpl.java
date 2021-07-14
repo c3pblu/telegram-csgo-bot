@@ -61,10 +61,7 @@ public class DaoMySQLImpl implements Dao {
 	}
 
 	private boolean isTeamPresents(String chatId, FavoriteTeam teamToCheck) {
-		if (getTeams(chatId).stream().anyMatch(team -> team.equals(teamToCheck))) {
-			return true;
-		}
-		return false;
+		return getTeams(chatId).stream().anyMatch(team -> team.equals(teamToCheck));
 	}
 
 	@Override

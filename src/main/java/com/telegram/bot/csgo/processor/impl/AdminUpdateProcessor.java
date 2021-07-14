@@ -26,7 +26,7 @@ public class AdminUpdateProcessor implements UpdateProcessor {
     private Integer[] adminUsers;
     private static final String STATS_COMMAND = ".стат";
     private static final String EXEC_COMMAND = ".exec.";
-    private BotController botController;
+    private final BotController botController;
 
     @Autowired
     public AdminUpdateProcessor(BotController botController) {
@@ -63,13 +63,13 @@ public class AdminUpdateProcessor implements UpdateProcessor {
                     Runtime runtime = Runtime.getRuntime();
                     try {
                         log.info("Executing command: {}", command);
-                        String[] cmd = { "/bin/sh", "-c", command };
+                        String[] cmd = {"/bin/sh", "-c", command};
                         Process proc = runtime.exec(cmd);
                         proc.waitFor(1, TimeUnit.MINUTES);
                         BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
                         StringBuilder result = new StringBuilder();
                         reader.lines().forEach(line -> result.append(line).append("\n"));
-                        log.info("Command output: {}", String.valueOf(result));
+                        log.info("Command output: {}", result);
                         botController
                                 .send(SendMessage.builder().chatId(getChatId(update)).text(String.valueOf(result)).build());
                     } catch (Exception e) {
