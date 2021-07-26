@@ -13,9 +13,9 @@ import com.telegram.bot.csgo.service.HttpService;
 @Component
 public class TopTeamsUpdateProcessor implements UpdateProcessor {
 
-    private BotController botController;
-    private HttpService httpService;
-    private TopTeamsAdaptor topTeamsAdaptor;
+    private final BotController botController;
+    private final HttpService httpService;
+    private final TopTeamsAdaptor topTeamsAdaptor;
 
     @Autowired
     public TopTeamsUpdateProcessor(BotController botController, HttpService httpService,
@@ -35,7 +35,7 @@ public class TopTeamsUpdateProcessor implements UpdateProcessor {
             String text = update.getMessage().getText();
             if (TOP_10_COMMAND.equalsIgnoreCase(text) || TOP_20_COMMAND.equalsIgnoreCase(text)
                     || TOP_30_COMMAND.equalsIgnoreCase(text)) {
-                Integer count = Integer.parseInt(update.getMessage().getText().substring(4));
+                int count = Integer.parseInt(update.getMessage().getText().substring(4));
                 topTeams(getChatId(update), count);
             }
         }

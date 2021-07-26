@@ -20,7 +20,7 @@ public class UpdateProcessingService implements Runnable {
 
     private BotController botController;
     private List<UpdateProcessor> updateProcessors;
-    private Update update;
+    private final Update update;
 
     public UpdateProcessingService(Update update) {
         this.update = update;

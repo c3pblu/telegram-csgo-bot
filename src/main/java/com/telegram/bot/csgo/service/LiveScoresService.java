@@ -1,10 +1,11 @@
 package com.telegram.bot.csgo.service;
 
-import java.net.URISyntaxException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadLocalRandom;
-
+import com.telegram.bot.csgo.controller.BotController;
+import com.telegram.bot.csgo.model.HtmlMessage;
+import com.telegram.bot.csgo.repository.EmojiRepository;
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,14 +13,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import com.telegram.bot.csgo.controller.BotController;
-import com.telegram.bot.csgo.model.Emoji;
-import com.telegram.bot.csgo.model.HtmlMessage;
-
-import io.socket.client.IO;
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
-import lombok.extern.slf4j.Slf4j;
+import java.net.URISyntaxException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @Slf4j
@@ -27,14 +24,14 @@ public class LiveScoresService {
 
     @Value("${scorebot.endpoints}")
     private String[] endpoints;
-
-    private Map<String, Socket> sessions = new ConcurrentHashMap<>();
-
-    private BotController botController;
+    private final Map<String, Socket> sessions = new ConcurrentHashMap<>();
+    private final BotController botController;
+    private final EmojiRepository emojiRepository;
 
     @Autowired
-    public LiveScoresService(BotController botController) {
+    public LiveScoresService(BotController botController, EmojiRepository emojiRepository) {
         this.botController = botController;
+        this.emojiRepository = emojiRepository;
     }
 
     public void start(String chatId, String matchId) {
@@ -44,48 +41,27 @@ public class LiveScoresService {
             String endpoint = endpoints[random];
             Socket socket = IO.socket(endpoint);
             sessions.put(chatId, socket);
-            socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    socket.emit("readyForMatch", "{token: '', listId: " + matchId + " }");
-                }
-            });
-
-            socket.on("log", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    JSONObject json = new JSONObject(String.valueOf(args[args.length - 1]));
-                    if (json.getJSONArray("log").length() > 0) {
-                        json = json.getJSONArray("log").getJSONObject(0);
-                        SendMessage message = scorebotMessage(chatId, json);
-                        if (!StringUtils.isBlank(message.getText())) {
-                            botController.send(message);
-                            log.debug("{}", json);
-                        }
-                    }
-                }
-            });
-
-            socket.on("reconnect", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    socket.emit("readyForMatch", "{token: '', listId: " + matchId + " }");
-                }
-            });
-
-            socket.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    socket.close();
-                }
-
-            });
-
+            socket.on(Socket.EVENT_CONNECT, args -> socket.emit("readyForMatch", "{token: '', listId: " + matchId + " }"));
+            socket.on("log", args -> processLog(chatId, args));
+            socket.on("reconnect", args -> socket.emit("readyForMatch", "{token: '', listId: " + matchId + " }"));
+            socket.on(Socket.EVENT_DISCONNECT, args -> socket.close());
             socket.connect();
             log.info("Connected to " + endpoint);
 
         } catch (URISyntaxException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void processLog(String chatId, Object... args) {
+        JSONObject json = new JSONObject(String.valueOf(args[args.length - 1]));
+        if (json.getJSONArray("log").length() > 0) {
+            json = json.getJSONArray("log").getJSONObject(0);
+            SendMessage message = scorebotMessage(chatId, json);
+            if (!StringUtils.isBlank(message.getText())) {
+                botController.send(message);
+                log.debug("{}", json);
+            }
         }
     }
 
@@ -102,6 +78,8 @@ public class LiveScoresService {
     }
 
     public SendMessage scorebotMessage(String chatId, JSONObject json) {
+        String diamondOrange = emojiRepository.getEmoji("diamond_orange");
+        String diamondBlue = emojiRepository.getEmoji("diamond_blue");
         StringBuilder textMessage = new StringBuilder();
         String logType = json.keys().next();
         log.debug("LogType: {}", logType);
@@ -117,9 +95,9 @@ public class LiveScoresService {
             String tScore = String.valueOf(json.query("/RoundEnd/terroristScore"));
             textMessage.append("<b>Round Over: ");
             if (winner.equals("TERRORIST")) {
-                textMessage.append(Emoji.DIMOND_ORANGE).append("T");
+                textMessage.append(diamondOrange).append("T");
             } else {
-                textMessage.append(Emoji.DIMOND_BLUE).append("CT");
+                textMessage.append(diamondBlue).append("CT");
             }
             textMessage.append(" Win - ");
             switch (winType) {
@@ -136,7 +114,7 @@ public class LiveScoresService {
                     textMessage.append("Enemy Eliminated");
                     break;
             }
-            textMessage.append("\n").append(Emoji.DIMOND_ORANGE).append(tScore).append(" - ").append(Emoji.DIMOND_BLUE)
+            textMessage.append("\n").append(diamondOrange).append(tScore).append(" - ").append(diamondBlue)
                     .append(ctScore).append("</b>");
 
         }
@@ -149,19 +127,19 @@ public class LiveScoresService {
             String weapon = String.valueOf(json.query("/Kill/weapon"));
             boolean isHeadShot = (boolean) json.query("/Kill/headShot");
             if (killerSide.equals("TERRORIST")) {
-                textMessage.append(Emoji.DIMOND_ORANGE);
+                textMessage.append(diamondOrange);
             } else {
-                textMessage.append(Emoji.DIMOND_BLUE);
+                textMessage.append(diamondBlue);
             }
             textMessage.append("<b>").append(killerNick).append("</b> killed");
             if (victimSide.equals("TERRORIST")) {
-                textMessage.append(Emoji.DIMOND_ORANGE);
+                textMessage.append(diamondOrange);
             } else {
-                textMessage.append(Emoji.DIMOND_BLUE);
+                textMessage.append(diamondBlue);
             }
             textMessage.append("<b>").append(victimNick).append("</b> with ").append(weapon);
             if (isHeadShot) {
-                textMessage.append(" ").append(Emoji.HELM);
+                textMessage.append(" ").append(emojiRepository.getEmoji("helm"));
             }
         }
 
@@ -170,23 +148,23 @@ public class LiveScoresService {
             String playerNick = String.valueOf(json.query("/BombPlanted/playerNick"));
             String tPlayers = String.valueOf(json.query("/BombPlanted/tPlayers"));
             String ctPlayers = String.valueOf(json.query("/BombPlanted/ctPlayers"));
-            textMessage.append(Emoji.DIMOND_ORANGE).append("<b>").append(playerNick).append(" ").append(Emoji.BOMB)
-                    .append(" planted the bomb").append(Emoji.DIMOND_ORANGE).append(tPlayers).append(" on")
-                    .append(Emoji.DIMOND_BLUE).append(ctPlayers).append("</b>");
+            textMessage.append(diamondOrange).append("<b>").append(playerNick).append(" ").append(emojiRepository.getEmoji("bomb"))
+                    .append(" planted the bomb").append(diamondOrange).append(tPlayers).append(" on")
+                    .append(diamondBlue).append(ctPlayers).append("</b>");
         }
         // Bomb Defused
         if (logType.equals("BombDefused")) {
             String playerNick = String.valueOf(json.query("/BombDefused/playerNick"));
-            textMessage.append(Emoji.DIMOND_BLUE).append("<b>").append(playerNick).append(" defused the bomb</b>");
+            textMessage.append(diamondBlue).append("<b>").append(playerNick).append(" defused the bomb</b>");
         }
         // Suicide
         if (logType.equals("Suicide")) {
             String playerNick = String.valueOf(json.query("/Suicide/playerNick"));
             String side = String.valueOf(json.query("/Suicide/side"));
             if (side.equals("TERRORIST")) {
-                textMessage.append(Emoji.DIMOND_ORANGE);
+                textMessage.append(diamondOrange);
             } else {
-                textMessage.append(Emoji.DIMOND_BLUE);
+                textMessage.append(diamondBlue);
             }
             textMessage.append("<b>").append(playerNick).append("</b> committed suicide");
         }
@@ -200,10 +178,10 @@ public class LiveScoresService {
             String playerNick = String.valueOf(json.query("/PlayerQuit/playerNick"));
             String playerSide = String.valueOf(json.query("/PlayerQuit/playerSide"));
             if (playerSide.equals("TERRORIST")) {
-                textMessage.append(Emoji.DIMOND_ORANGE);
+                textMessage.append(diamondOrange);
             }
             if (playerSide.equals("CT")) {
-                textMessage.append(Emoji.DIMOND_BLUE);
+                textMessage.append(diamondBlue);
             }
             textMessage.append("<b>").append(playerNick).append("</b> quit the game");
         }

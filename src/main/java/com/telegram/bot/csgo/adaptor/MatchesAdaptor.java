@@ -1,48 +1,47 @@
 package com.telegram.bot.csgo.adaptor;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-
+import com.telegram.bot.csgo.model.HtmlMessage;
+import com.telegram.bot.csgo.repository.EmojiRepository;
+import com.telegram.bot.csgo.service.HttpService;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import com.telegram.bot.csgo.model.Emoji;
-import com.telegram.bot.csgo.model.HtmlMessage;
-import com.telegram.bot.csgo.service.HttpService;
-
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 @Component
 @Slf4j
 public class MatchesAdaptor {
 
-    private FlagsAdaptor flagsAdaptor;
-    private HttpService httpService;
+    private final FlagsAdaptor flagsAdaptor;
+    private final HttpService httpService;
+    private final EmojiRepository emojiRepository;
 
     @Autowired
-    public MatchesAdaptor(HttpService httpService, FlagsAdaptor flagsAdaptor) {
+    public MatchesAdaptor(HttpService httpService, FlagsAdaptor flagsAdaptor, EmojiRepository emojiRepository) {
         this.httpService = httpService;
         this.flagsAdaptor = flagsAdaptor;
-
+        this.emojiRepository = emojiRepository;
     }
 
     public SendMessage matches(String chatId, Document doc) {
         StringBuilder textMessage = new StringBuilder();
         // Live Matches
         if (!doc.select("div.liveMatchesContainer").select("div.liveMatches").isEmpty()) {
-            textMessage.append("<b>Live matches</b>").append(Emoji.EXCL_MARK).append("\n");
+            textMessage.append("<b>Live matches</b>").append(emojiRepository.getEmoji("excl_mark")).append("\n");
             for (Element match : doc.select("div.liveMatchesContainer").select("div.liveMatches").select("div.liveMatch")) {
-                textMessage.append(Emoji.CUP).append("<a href=\'https://hltv.org")
-                        .append(match.select("a").attr("href")).append("\'>")
+                textMessage.append(emojiRepository.getEmoji("cup")).append("<a href='https://hltv.org")
+                        .append(match.select("a").attr("href")).append("'>")
                         .append(match.select("div.matchEventName").text()).append("</a>\n")
                         .append(flagsAdaptor
                                 .favoriteTeam(chatId, match.select("div.matchTeamName").get(0).text(), true))
-                        .append(" ").append(Emoji.VS).append(" ")
+                        .append(" ").append(emojiRepository.getEmoji("vs")).append(" ")
                         .append(flagsAdaptor.favoriteTeam(chatId, match.select("div.matchTeamName").get(1).text(),
                                 true))
                         .append(" (").append(match.select("div.matchMeta").text()).append(") ").append(getStars(match))
@@ -80,12 +79,12 @@ public class MatchesAdaptor {
                 textMessage.append(match.select("div.matchInfoEmpty").text()).append(" ");
             } else {
                 textMessage.append(flagsAdaptor.favoriteTeam(chatId, match.select("div.matchTeam.team1").text(), true))
-                        .append(" ").append(Emoji.VS).append(" ")
+                        .append(" ").append(emojiRepository.getEmoji("vs")).append(" ")
                         .append(flagsAdaptor.favoriteTeam(chatId, match.select("div.matchTeam.team2").text(), true))
                         .append(" (").append(match.select("div.matchMeta").text()).append(") ");
             }
-            textMessage.append(getStars(match)).append(Emoji.SQUARE).append(" ").append("<a href=\'https://hltv.org")
-                    .append(match.select("a").attr("href")).append("\'>")
+            textMessage.append(getStars(match)).append(emojiRepository.getEmoji("square")).append(" ").append("<a href='https://hltv.org")
+                    .append(match.select("a").attr("href")).append("'>")
                     .append(match.select("div.matchEventName").text()).append("</a>\n");
 
         }
@@ -97,7 +96,7 @@ public class MatchesAdaptor {
     private StringBuilder getStars(Element match) {
         StringBuilder stars = new StringBuilder();
         for (int i = 0; i < 5 - match.select("i.fa.fa-star.faded").size(); i++) {
-            stars.append(Emoji.STAR);
+            stars.append(emojiRepository.getEmoji("star"));
         }
         return stars;
     }

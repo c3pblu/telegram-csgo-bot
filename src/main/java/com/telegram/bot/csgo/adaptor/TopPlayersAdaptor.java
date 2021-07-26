@@ -2,6 +2,7 @@ package com.telegram.bot.csgo.adaptor;
 
 import java.time.LocalDate;
 
+import com.telegram.bot.csgo.repository.EmojiRepository;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import com.telegram.bot.csgo.model.Emoji;
 import com.telegram.bot.csgo.model.HtmlMessage;
 
 import lombok.extern.slf4j.Slf4j;
@@ -18,17 +18,19 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TopPlayersAdaptor {
 
-    private FlagsAdaptor flagsAdaptor;
+    private final FlagsAdaptor flagsAdaptor;
+    private final EmojiRepository emojiRepository;
 
     @Autowired
-    public TopPlayersAdaptor(FlagsAdaptor flagsAdaptor) {
+    public TopPlayersAdaptor(FlagsAdaptor flagsAdaptor, EmojiRepository emojiRepository) {
         this.flagsAdaptor = flagsAdaptor;
+        this.emojiRepository = emojiRepository;
     }
 
     public SendMessage topPlayers(String chatId, Document doc, Integer count) {
         StringBuilder textMessage = new StringBuilder();
         String year = String.valueOf(LocalDate.now().getYear());
-        textMessage.append(Emoji.SPORT_MEDAL).append("<b>CS:GO World Top Players ").append(year).append("</b>\n")
+        textMessage.append(emojiRepository.getEmoji("sport_medal")).append("<b>CS:GO World Top Players ").append(year).append("</b>\n")
                 .append("<b>");
         Elements stat = doc.select("tr.stats-table-row").select("th");
         for (int i = 0; i < stat.size(); i++) {
@@ -50,8 +52,8 @@ public class TopPlayersAdaptor {
             textMessage.append("<b>#").append(number)
                     .append(flagsAdaptor
                             .flagUnicodeFromCountry(value.select("td.playerCol").select("img").attr("title")))
-                    .append("</b> <a href=\'https://hltv.org")
-                    .append(value.select("td.playerCol").select("a").attr("href")).append("\'>")
+                    .append("</b> <a href='https://hltv.org")
+                    .append(value.select("td.playerCol").select("a").attr("href")).append("'>")
                     .append(value.select("td.playerCol").text()).append("</a>, ")
                     .append(value.select("td.teamCol").select("img").attr("title")).append(", ")
                     .append(value.select("td.statsDetail").get(0).text()).append(", ")

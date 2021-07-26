@@ -24,7 +24,7 @@ public class HelpUpdateProcessor implements UpdateProcessor {
     @Value("${help.message.file:#{null}}")
     private String helpFile;
 
-    private BotController botController;
+    private final BotController botController;
 
     @Autowired
     public HelpUpdateProcessor(BotController botController) {
@@ -36,10 +36,14 @@ public class HelpUpdateProcessor implements UpdateProcessor {
 
     @Override
     public void process(Update update) {
-        if (update.hasMessage()
-                && (HELP.equalsIgnoreCase(update.getMessage().getText()) || START.equals(update.getMessage().getText()))) {
+        if (commandMatches(update)) {
             botController.send(helpMessage(getChatId(update)));
         }
+    }
+    
+    private boolean commandMatches(Update update) {
+        return update.hasMessage()
+                && (HELP.equalsIgnoreCase(update.getMessage().getText()) || START.equals(update.getMessage().getText()));
     }
 
     private SendMessage helpMessage(String chatId) {
