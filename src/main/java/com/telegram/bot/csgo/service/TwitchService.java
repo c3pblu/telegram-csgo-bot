@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.telegram.bot.csgo.repository.EmojiRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import com.telegram.bot.csgo.adaptor.FlagsAdaptor;
-import com.telegram.bot.csgo.model.Emoji;
 import com.telegram.bot.csgo.model.HtmlMessage;
 
 import lombok.extern.slf4j.Slf4j;
@@ -31,15 +31,17 @@ public class TwitchService {
 	private String clientSecret;
 
 	private static String ACCESS_TOKEN;
-	private Map<String, String> chatPage = new ConcurrentHashMap<>();
+	private final Map<String, String> chatPage = new ConcurrentHashMap<>();
 
-	private FlagsAdaptor flagsAdaptor;
-	private HttpService httpService;
+	private final FlagsAdaptor flagsAdaptor;
+	private final HttpService httpService;
+	private final EmojiRepository emojiRepository;
 
 	@Autowired
-	public TwitchService(FlagsAdaptor flagsAdaptor, HttpService httpService) {
+	public TwitchService(FlagsAdaptor flagsAdaptor, HttpService httpService, EmojiRepository emojiRepository) {
 		this.flagsAdaptor = flagsAdaptor;
 		this.httpService = httpService;
+		this.emojiRepository = emojiRepository;
 	}
 
 	public SendMessage getStreams(String chatId, boolean isNextPage) {
@@ -90,12 +92,12 @@ public class TwitchService {
 
 	public SendMessage streams(String chatId, JSONObject json) {
 		StringBuilder textMessage = new StringBuilder();
-		textMessage.append("<b>Live</b>").append(Emoji.EXCL_MARK).append("<b>Streams on Twitch:</b>\n");
+		textMessage.append("<b>Live</b>").append(emojiRepository.getEmoji("excl_mark")).append("<b>Streams on Twitch:</b>\n");
 		JSONArray arr = json.getJSONArray("data");
 		for (int i = 0; i < arr.length(); i++) {
 			JSONObject data = arr.getJSONObject(i);
 			textMessage.append("<b>(").append(data.getNumber("viewer_count")).append(")</b> ")
-					.append("<a href=\'https://www.twitch.tv/").append(data.getString("user_name")).append("\'>")
+					.append("<a href='https://www.twitch.tv/").append(data.getString("user_name")).append("'>")
 					.append(data.getString("user_name")).append("</a> ")
 					.append(flagsAdaptor.flagUnicodeFromCountry(data.getString("language").toUpperCase())).append(" ")
 					.append(data.getString("title").replace("<", "").replace(">", "")).append("\n");

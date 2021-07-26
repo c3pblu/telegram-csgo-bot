@@ -13,9 +13,9 @@ import com.telegram.bot.csgo.service.HttpService;
 @Component
 public class ResultsUpdateProcessor implements UpdateProcessor {
 
-	private BotController botController;
-	private HttpService httpService;
-	private ResultsAdaptor resultsAdaptor;
+	private final BotController botController;
+	private final HttpService httpService;
+	private final ResultsAdaptor resultsAdaptor;
 
 	@Autowired
 	public ResultsUpdateProcessor(BotController botController, HttpService httpService, ResultsAdaptor resultsAdaptor) {

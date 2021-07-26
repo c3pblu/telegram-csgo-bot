@@ -47,8 +47,7 @@ public class AdminUpdateProcessor implements UpdateProcessor {
                 Long max = runtime.maxMemory() / 1024 / 1024;
                 Long total = runtime.totalMemory() / 1024 / 1024;
                 Long used = total - free;
-                String message = String.format("JVM Memory Stats (MB), Free: %d, Used: %d, Total: %d, Max: %d", free, used,
-                        total, max);
+                String message = String.format("JVM Memory Stats (MB), Free: %d, Used: %d, Total: %d, Max: %d", free, used, total, max);
                 log.info(message);
                 botController.send(SendMessage.builder().chatId(getChatId(update)).text(message).build());
             }
@@ -70,8 +69,7 @@ public class AdminUpdateProcessor implements UpdateProcessor {
                         StringBuilder result = new StringBuilder();
                         reader.lines().forEach(line -> result.append(line).append("\n"));
                         log.info("Command output: {}", result);
-                        botController
-                                .send(SendMessage.builder().chatId(getChatId(update)).text(String.valueOf(result)).build());
+                        botController.send(SendMessage.builder().chatId(getChatId(update)).text(String.valueOf(result)).build());
                     } catch (Exception e) {
                         log.info(e.getMessage());
                         botController.send(SendMessage.builder().chatId(getChatId(update)).text(e.getMessage()).build());

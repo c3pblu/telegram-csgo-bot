@@ -11,8 +11,8 @@ import com.telegram.bot.csgo.service.TwitchService;
 @Component
 public class TwitchUpdateProcessor implements UpdateProcessor {
 
-	private BotController botController;
-	private TwitchService twitchService;
+	private final BotController botController;
+	private final TwitchService twitchService;
 
 	@Autowired
 	public TwitchUpdateProcessor(BotController botController, TwitchService twitchService) {

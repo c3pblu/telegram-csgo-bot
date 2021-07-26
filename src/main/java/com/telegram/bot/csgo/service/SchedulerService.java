@@ -17,10 +17,10 @@ public class SchedulerService {
 	@Value("${bot.scheduler.chat.id}")
 	private String schedulerChatId;
 
-	private BotController botController;
-	private HttpService httpService;
-	private MatchesAdaptor matchesAdaptor;
-	private ResultsAdaptor resultsAdaptor;
+	private final BotController botController;
+	private final HttpService httpService;
+	private final MatchesAdaptor matchesAdaptor;
+	private final ResultsAdaptor resultsAdaptor;
 
 	@Autowired
 	public SchedulerService(BotController botController, HttpService httpService, MatchesAdaptor matchesAdaptor,

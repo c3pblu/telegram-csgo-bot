@@ -1,23 +1,20 @@
 package com.telegram.bot.csgo.controller;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
+import com.telegram.bot.csgo.service.UpdateProcessingService;
+import lombok.Getter;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import com.telegram.bot.csgo.service.UpdateProcessingService;
-
-import lombok.Getter;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 @Getter
@@ -31,8 +28,8 @@ public class BotController extends TelegramLongPollingBot {
     private Long callBackTimeout;
     @Value("${bot.message.timeout}")
     private Long messageTimeout;
-    ExecutorService threadPool = Executors.newCachedThreadPool();
-    private ObjectProvider<UpdateProcessingService> updateProcessingFactory;
+    private final ExecutorService threadPool = Executors.newCachedThreadPool();
+    private final ObjectProvider<UpdateProcessingService> updateProcessingFactory;
 
     @Autowired
     public BotController(ObjectProvider<UpdateProcessingService> updateProcessingFactory) {
@@ -46,17 +43,11 @@ public class BotController extends TelegramLongPollingBot {
 
     public void send(PartialBotApiMethod<?> message) {
         try {
-            if (message instanceof SendMessage) {
-                SendMessage sendMessage = (SendMessage) message;
-                execute(sendMessage);
+            if (message instanceof BotApiMethod) {
+                execute((BotApiMethod<?>) message);
             }
             if (message instanceof SendSticker) {
-                SendSticker stickerMessage = (SendSticker) message;
-                execute(stickerMessage);
-            }
-            if (message instanceof DeleteMessage) {
-                DeleteMessage deleteMessage = (DeleteMessage) message;
-                execute(deleteMessage);
+                execute((SendSticker) message);
             }
         } catch (TelegramApiException e) {
             e.printStackTrace();

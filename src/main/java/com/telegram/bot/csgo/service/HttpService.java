@@ -21,7 +21,7 @@ import okhttp3.Response;
 public class HttpService {
 
     public static final String HLTV = "https://www.hltv.org";
-    private OkHttpClient client = new OkHttpClient();
+    private final OkHttpClient client = new OkHttpClient();
 
     public Document getDocument(String url) {
         return Jsoup.parse(getHtml(url, null, "GET"));
@@ -39,7 +39,7 @@ public class HttpService {
         Request req = new Request.Builder().method(method, "GET".equals(method) ? null : body).headers(headers).url(url)
                 .build();
         try (Response res = client.newCall(req).execute()) {
-            String responseBody = res.body().string();
+            String responseBody = res.body() != null ? res.body().string() : null;
             log.debug("Request URL : {}", url);
             log.debug("Response code : {}", res.code());
             log.debug("Response headers : {}", res.headers());
@@ -47,7 +47,7 @@ public class HttpService {
             if (!StringUtils.isBlank(retryAfter)) {
                 try {
                     log.info("Sleeping for {} seconds because of 429 Response Code", retryAfter);
-                    Thread.sleep(Integer.parseInt(retryAfter) * 1000);
+                    Thread.sleep(Long.parseLong(retryAfter) * 1000);
                     responseBody = getHtml(url, headers, method);
                 } catch (NumberFormatException | InterruptedException e) {
                     e.printStackTrace();
