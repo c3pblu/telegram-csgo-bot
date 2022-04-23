@@ -1,66 +1,51 @@
 package com.telegram.bot.csgo.service;
 
-import java.time.Instant;
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
+import static java.lang.String.valueOf;
+import static java.lang.System.currentTimeMillis;
+import static java.lang.Thread.currentThread;
+import static java.time.Instant.now;
+import com.telegram.bot.csgo.config.properties.BotProperties;
+import com.telegram.bot.csgo.controller.BotController;
+import com.telegram.bot.csgo.model.message.HtmlMessage;
+import com.telegram.bot.csgo.processor.UpdateProcessor;
+import lombok.RequiredArgsConstructor;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import com.telegram.bot.csgo.controller.BotController;
-import com.telegram.bot.csgo.model.HtmlMessage;
-import com.telegram.bot.csgo.processor.UpdateProcessor;
-
-@Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@RequiredArgsConstructor
 public class UpdateProcessingService implements Runnable {
 
-    private BotController botController;
-    private List<UpdateProcessor> updateProcessors;
+    private final BotController botController;
+    private final BotProperties botProperties;
+    private final List<UpdateProcessor> updateProcessors;
     private final Update update;
 
-    public UpdateProcessingService(Update update) {
-        this.update = update;
-    }
+    private static final String TIMEOUT_MESSAGE = "Oops, you are too slow! Try again";
 
     @Override
     public void run() {
-        if (!isTimeout(update)) {
-            Thread.currentThread().setName(String.valueOf(System.currentTimeMillis()));
+        currentThread().setName(valueOf(currentTimeMillis()));
+
+        if (!isExpired()) {
             updateProcessors.forEach(processor -> processor.process(update));
-            System.gc();
         }
     }
 
-    private boolean isTimeout(Update update) {
+    private boolean isExpired() {
         if (update.hasMessage()) {
-            long responseTime = Instant.now().getEpochSecond() - update.getMessage().getDate();
-            if (responseTime > botController.getMessageTimeout()) {
-                return true;
-            }
+            var responseTime = now().getEpochSecond() - update.getMessage().getDate();
+            return responseTime > botProperties.getMessage().getTimeout();
         }
         if (update.hasCallbackQuery()) {
-            long responseTime = Instant.now().getEpochSecond() - update.getCallbackQuery().getMessage().getDate();
-            if (responseTime > botController.getCallBackTimeout()) {
-                String chatId = String.valueOf(update.getCallbackQuery().getMessage().getChatId());
-                botController.send(new HtmlMessage(chatId, "Упс, ты слишком долго думал парень!"));
+            var responseTime = now().getEpochSecond() - update.getCallbackQuery().getMessage().getDate();
+            if (responseTime > botProperties.getCallbackTimeout()) {
+                var chatId = valueOf(update.getCallbackQuery().getMessage().getChatId());
+                botController.send(new HtmlMessage(chatId, TIMEOUT_MESSAGE));
                 botController.send(new DeleteMessage(chatId, update.getCallbackQuery().getMessage().getMessageId()));
                 return true;
             }
         }
         return false;
-    }
-
-    @Autowired
-    public void setBotController(BotController botController) {
-        this.botController = botController;
-    }
-
-    @Autowired
-    public void setUpdateProcessors(List<UpdateProcessor> updateProcessors) {
-        this.updateProcessors = updateProcessors;
     }
 }

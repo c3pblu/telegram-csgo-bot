@@ -1,110 +1,157 @@
 package com.telegram.bot.csgo.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.telegram.bot.csgo.repository.EmojiRepository;
-import org.json.JSONArray;
+import static com.fasterxml.jackson.databind.PropertyNamingStrategies.SNAKE_CASE;
+import static com.telegram.bot.csgo.helper.CommandHelper.STREAMS_NEXT_PAGE_CALLBACK;
+import static com.telegram.bot.csgo.helper.MessageHelper.BOLD;
+import static com.telegram.bot.csgo.helper.MessageHelper.EMPTY_STRING;
+import static com.telegram.bot.csgo.helper.MessageHelper.LEFT_BRACKET;
+import static com.telegram.bot.csgo.helper.MessageHelper.LINE_BRAKE;
+import static com.telegram.bot.csgo.helper.MessageHelper.LINK_END;
+import static com.telegram.bot.csgo.helper.MessageHelper.LINK_HLTV;
+import static com.telegram.bot.csgo.helper.MessageHelper.RIGHT_BRACKET;
+import static com.telegram.bot.csgo.helper.MessageHelper.UNBOLD;
+import static com.telegram.bot.csgo.helper.MessageHelper.UNLINK;
+import static com.telegram.bot.csgo.helper.MessageHelper.WHITESPACE;
+import static com.telegram.bot.csgo.model.message.EmojiCode.EXCL_MARK;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.telegram.bot.csgo.config.properties.TwitchProperties;
+import com.telegram.bot.csgo.model.message.HtmlMessage;
+import com.telegram.bot.csgo.model.twitch.Stream;
+import com.telegram.bot.csgo.model.twitch.Token;
+import com.telegram.bot.csgo.model.twitch.TwitchStreams;
+import com.telegram.bot.csgo.service.http.HttpService;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
-import com.telegram.bot.csgo.adaptor.FlagsAdaptor;
-import com.telegram.bot.csgo.model.HtmlMessage;
-
-import lombok.extern.slf4j.Slf4j;
-import okhttp3.Headers;
-
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class TwitchService {
 
-	@Value("${twitch.client.id}")
-	private String clientId;
-	@Value("${twitch.client.secret}")
-	private String clientSecret;
+    private final FlagService flagService;
+    private final HttpService httpService;
+    private final TwitchProperties twitchProperties;
+    private final EmojiService emojiService;
+    private final Map<String, String> chatPage = new ConcurrentHashMap<>();
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .setPropertyNamingStrategy(SNAKE_CASE);
+    private String accessToken;
 
-	private static String ACCESS_TOKEN;
-	private final Map<String, String> chatPage = new ConcurrentHashMap<>();
+    private static final String OAUTH_PREFIX = "OAuth ";
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final String CLIENT_ID_HEADER = "Client-ID";
+    private static final String TOKEN_VALIDATE_URL = "https://id.twitch.tv/oauth2/validate";
+    private static final String STREAMS_URL = "https://api.twitch.tv/helix/streams?game_id=32399&language=en&language=ru";
+    private static final String TOKE_URL_PREFIX = "https://id.twitch.tv/oauth2/token?client_id=";
+    private static final String CLIENT_SECRET_POSTFIX = "&client_secret=";
+    private static final String GRANT_TYPE_POSTFIX = "&grant_type=client_credentials";
+    private static final String AFTER_POSTFIX = "&after=";
+    private static final String LIVE_STR = "Live";
+    private static final String STREAMS_STR = "Streams on Twitch:";
+    private static final String NEXT_PAGE_TITLE = "Next 20 Streams »";
+    private static final String NEXT_PAGE_QUESTION = "Go to next Page?";
 
-	private final FlagsAdaptor flagsAdaptor;
-	private final HttpService httpService;
-	private final EmojiRepository emojiRepository;
+    public SendMessage getStreams(String chatId, boolean isNextPage) {
+        if (accessToken == null || accessToken.isEmpty()) {
+            updateToken();
+        } else {
+            validateAndUpdateToken();
+        }
+        var streams = getStreams(isNextPage, chatId);
+        var nextPage = streams.getPagination().getCursor();
+        log.debug("NextPage ID: {}", nextPage);
+        chatPage.put(chatId, nextPage);
+        return prepareMessage(chatId, streams.getData());
+    }
 
-	@Autowired
-	public TwitchService(FlagsAdaptor flagsAdaptor, HttpService httpService, EmojiRepository emojiRepository) {
-		this.flagsAdaptor = flagsAdaptor;
-		this.httpService = httpService;
-		this.emojiRepository = emojiRepository;
-	}
+    public SendMessage nextPage(String chatId) {
+        var markUpInLine = InlineKeyboardMarkup.builder().keyboard(List.of(
+                        List.of(InlineKeyboardButton.builder()
+                                .text(NEXT_PAGE_TITLE)
+                                .callbackData(STREAMS_NEXT_PAGE_CALLBACK)
+                                .build())))
+                .build();
+        return SendMessage.builder()
+                .replyMarkup(markUpInLine)
+                .text(NEXT_PAGE_QUESTION)
+                .chatId(chatId)
+                .build();
+    }
 
-	public SendMessage getStreams(String chatId, boolean isNextPage) {
-		if (ACCESS_TOKEN == null || ACCESS_TOKEN.isEmpty()) {
-			updateAccessToken();
-		} else {
-			// Validate token
-			Headers headers = new Headers.Builder().add("Authorization", "OAuth " + ACCESS_TOKEN).build();
-			JSONObject validateResult = httpService.getJson("https://id.twitch.tv/oauth2/validate", "GET", headers);
-			// If not valid get new token
-			if (validateResult == null) {
-				updateAccessToken();
-			}
-		}
+    private void validateAndUpdateToken() {
+        var headers = new HttpHeaders();
+        headers.add(AUTHORIZATION, OAUTH_PREFIX + accessToken);
+        var validateTokenResult = httpService.get(TOKEN_VALIDATE_URL, headers, JSONObject::new);
+        if (validateTokenResult == null) {
+            updateToken();
+        }
+    }
 
-		String newUri = "https://api.twitch.tv/helix/streams?game_id=32399&language=en&language=ru";
-		if (isNextPage) {
-			String currentPage = chatPage.get(chatId);
-			newUri = newUri.concat("&after=" + currentPage);
-			log.debug("Current page ID: {}", currentPage);
-		}
-		Headers headers = new Headers.Builder().add("Client-ID", clientId)
-				.add("Authorization", "Bearer " + ACCESS_TOKEN).build();
-		JSONObject json = httpService.getJson(newUri, "GET", headers);
-		String nextPage = json.getJSONObject("pagination").getString("cursor");
-		log.debug("NextPage ID: {}", nextPage);
-		chatPage.put(chatId, nextPage);
-		return streams(chatId, json);
-	}
+    @SneakyThrows
+    private void updateToken() {
+        var newAccessTokenStr = httpService.post(TOKE_URL_PREFIX + twitchProperties.getClientId()
+                + CLIENT_SECRET_POSTFIX + twitchProperties.getClientSecret() + GRANT_TYPE_POSTFIX, "", null, String.class);
+        var newAccessToken = objectMapper.readValue(newAccessTokenStr, Token.class);
+        if (newAccessToken != null) {
+            this.accessToken = newAccessToken.getAccessToken();
+        }
+    }
 
-	private void updateAccessToken() {
-		JSONObject accessToken = httpService.getJson("https://id.twitch.tv/oauth2/token?client_id=" + clientId
-				+ "&client_secret=" + clientSecret + "&grant_type=client_credentials", "POST", null);
-		if (accessToken != null) {
-			ACCESS_TOKEN = accessToken.getString("access_token");
-		}
-	}
+    @SneakyThrows
+    private TwitchStreams getStreams(boolean isNextPage, String chatId) {
+        var url = STREAMS_URL;
+        if (isNextPage) {
+            var currentPage = chatPage.get(chatId);
+            url = url + AFTER_POSTFIX + currentPage;
+            log.debug("Current page ID: {}", currentPage);
+        }
+        var headers = new HttpHeaders();
+        headers.add(CLIENT_ID_HEADER, twitchProperties.getClientId());
+        headers.add(AUTHORIZATION, BEARER_PREFIX + accessToken);
+        var streamsStr = httpService.get(url, headers, String.class);
+        return objectMapper.readValue(streamsStr, TwitchStreams.class);
+    }
 
-	public SendMessage nextPage(String chatId) {
-		InlineKeyboardMarkup markUpInLine = new InlineKeyboardMarkup();
-		List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
-		List<InlineKeyboardButton> row = new ArrayList<>();
-		row.add(InlineKeyboardButton.builder().text("Next 20 Streams »").callbackData("nextPage").build());
-		rowsInLine.add(row);
-		markUpInLine.setKeyboard(rowsInLine);
-		return SendMessage.builder().replyMarkup(markUpInLine).text("Go to next Page?").chatId(chatId).build();
-	}
-
-	public SendMessage streams(String chatId, JSONObject json) {
-		StringBuilder textMessage = new StringBuilder();
-		textMessage.append("<b>Live</b>").append(emojiRepository.getEmoji("excl_mark")).append("<b>Streams on Twitch:</b>\n");
-		JSONArray arr = json.getJSONArray("data");
-		for (int i = 0; i < arr.length(); i++) {
-			JSONObject data = arr.getJSONObject(i);
-			textMessage.append("<b>(").append(data.getNumber("viewer_count")).append(")</b> ")
-					.append("<a href='https://www.twitch.tv/").append(data.getString("user_name")).append("'>")
-					.append(data.getString("user_name")).append("</a> ")
-					.append(flagsAdaptor.flagUnicodeFromCountry(data.getString("language").toUpperCase())).append(" ")
-					.append(data.getString("title").replace("<", "").replace(">", "")).append("\n");
-		}
-		log.debug("Streams final message:\n{}", textMessage);
-		return new HtmlMessage(chatId, textMessage);
-
-	}
+    private SendMessage prepareMessage(String chatId, List<Stream> streams) {
+        var textMessage = new StringBuilder();
+        textMessage.append(BOLD)
+                .append(LIVE_STR)
+                .append(UNBOLD)
+                .append(emojiService.getEmoji(EXCL_MARK))
+                .append(BOLD)
+                .append(STREAMS_STR)
+                .append(UNBOLD)
+                .append(LINE_BRAKE);
+        streams.forEach(s ->
+                textMessage.append(BOLD)
+                        .append(LEFT_BRACKET)
+                        .append(s.getViewerCount())
+                        .append(RIGHT_BRACKET)
+                        .append(UNBOLD)
+                        .append(WHITESPACE)
+                        .append(LINK_HLTV)
+                        .append(s.getUserName())
+                        .append(LINK_END)
+                        .append(s.getUserName())
+                        .append(UNLINK)
+                        .append(WHITESPACE)
+                        .append(flagService.flagUnicodeFromCountry(s.getLanguage().toUpperCase()))
+                        .append(WHITESPACE)
+                        .append(s.getTitle().replace("<", EMPTY_STRING).replace(">", EMPTY_STRING))
+                        .append(LINE_BRAKE));
+        log.debug("Streams final message: {}", textMessage);
+        return new HtmlMessage(chatId, textMessage);
+    }
 
 }

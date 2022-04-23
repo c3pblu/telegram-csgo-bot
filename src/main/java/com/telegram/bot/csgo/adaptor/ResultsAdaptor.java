@@ -1,70 +1,125 @@
 package com.telegram.bot.csgo.adaptor;
 
-import com.telegram.bot.csgo.repository.EmojiRepository;
+import static com.telegram.bot.csgo.model.message.EmojiCode.CUP;
+import static com.telegram.bot.csgo.model.message.EmojiCode.SQUARE;
+import static com.telegram.bot.csgo.model.message.EmojiCode.STAR;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.EVENT;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.HLINK;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.HREF;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.I;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.MAP_TEXT;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.RESULTS_SUBLIST;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.RESULT_CON;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.RESULT_SCORE;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.STANDARD_HEADLINE;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.STARS;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.TAB;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.TAB_HOLDER;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.TEAM;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.TEAM_WON;
+import static com.telegram.bot.csgo.helper.MessageHelper.BOLD;
+import static com.telegram.bot.csgo.helper.MessageHelper.LEFT_BRACKET;
+import static com.telegram.bot.csgo.helper.MessageHelper.LEFT_SQUARE_BRACKET;
+import static com.telegram.bot.csgo.helper.MessageHelper.LINE_BRAKE;
+import static com.telegram.bot.csgo.helper.MessageHelper.LINK_END;
+import static com.telegram.bot.csgo.helper.MessageHelper.LINK_HLTV;
+import static com.telegram.bot.csgo.helper.MessageHelper.RIGHT_BRACKET;
+import static com.telegram.bot.csgo.helper.MessageHelper.RIGHT_SQUARE_BRACKET;
+import static com.telegram.bot.csgo.helper.MessageHelper.UNBOLD;
+import static com.telegram.bot.csgo.helper.MessageHelper.UNLINK;
+import static com.telegram.bot.csgo.helper.MessageHelper.WHITESPACE;
+import com.telegram.bot.csgo.model.message.HtmlMessage;
+import com.telegram.bot.csgo.service.EmojiService;
+import com.telegram.bot.csgo.service.FavoriteTeamService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import com.telegram.bot.csgo.model.HtmlMessage;
-
-import lombok.extern.slf4j.Slf4j;
-
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class ResultsAdaptor {
 
-    private final FlagsAdaptor flagsAdaptor;
-    private final EmojiRepository emojiRepository;
+    private final FavoriteTeamService favoriteTeamService;
+    private final EmojiService emojiService;
 
-    @Autowired
-    public ResultsAdaptor(FlagsAdaptor flagsAdaptor, EmojiRepository emojiRepository) {
-        this.flagsAdaptor = flagsAdaptor;
-        this.emojiRepository = emojiRepository;
-    }
+    private static final String RESULTS_STR = "Results";
 
     public SendMessage results(String chatId, Document doc) {
-        StringBuilder textMessage = new StringBuilder();
-        int featuredNum = 0;
-        for (Element resultList : doc.select("div.results-sublist")) {
-            String headerText = resultList.select("span.standard-headline").text();
+        var message = prepareMessage(chatId, doc);
+        log.debug("Results final message: {}", message);
+        return new HtmlMessage(chatId, message);
+    }
+
+    private String prepareMessage(String chatId, Document doc) {
+        var textMessage = new StringBuilder();
+        var featuredNum = 0;
+        for (var resultList : doc.select(RESULTS_SUBLIST)) {
+            var headerText = resultList.select(STANDARD_HEADLINE).text();
             if (headerText.isEmpty()) {
-                headerText = doc.select("div.tab-holder").select("div.tab").get(featuredNum++).text();
+                headerText = doc.select(TAB_HOLDER).select(TAB).get(featuredNum++).text();
             }
-            textMessage.append(emojiRepository.getEmoji("cup")).append(" <b>").append(headerText).append("</b>\n");
-            for (Element resultCon : resultList.select("div.result-con")) {
-                String team1String = flagsAdaptor.favoriteTeam(chatId, resultCon.select("div.team").get(0).text(),
+            textMessage.append(emojiService.getEmoji(CUP))
+                    .append(WHITESPACE)
+                    .append(BOLD)
+                    .append(headerText)
+                    .append(UNBOLD)
+                    .append(LINE_BRAKE);
+            for (var resultCon : resultList.select(RESULT_CON)) {
+                var team1String = favoriteTeamService.favoriteTeam(chatId, resultCon.select(TEAM).get(0).text(),
                         false);
-                String team2String = flagsAdaptor.favoriteTeam(chatId, resultCon.select("div.team").get(1).text(),
+                var team2String = favoriteTeamService.favoriteTeam(chatId, resultCon.select(TEAM).get(1).text(),
                         false);
-                if (resultCon.select("div.team").get(0).hasClass("team-won")) {
-                    textMessage.append("<b>").append(team1String).append("</b>");
+                if (resultCon.select(TEAM).get(0).hasClass(TEAM_WON)) {
+                    textMessage.append(BOLD)
+                            .append(team1String)
+                            .append(UNBOLD);
                 } else {
                     textMessage.append(team1String);
                 }
-                textMessage.append(" [").append(resultCon.select("td.result-score").text()).append("] ");
-                if (resultCon.select("div.team").get(1).hasClass("team-won")) {
-                    textMessage.append("<b>").append(team2String).append("</b>");
+                textMessage
+                        .append(WHITESPACE)
+                        .append(LEFT_SQUARE_BRACKET)
+                        .append(resultCon.select(RESULT_SCORE).text())
+                        .append(RIGHT_SQUARE_BRACKET)
+                        .append(WHITESPACE);
+                if (resultCon.select(TEAM).get(1).hasClass(TEAM_WON)) {
+                    textMessage.append(BOLD)
+                            .append(team2String)
+                            .append(UNBOLD);
                 } else {
                     textMessage.append(team2String);
                 }
-                textMessage.append(" (").append(resultCon.select("div.map-text").text()).append(") ")
-                        .append(getStars(resultCon)).append(emojiRepository.getEmoji("square")).append(" ")
-                        .append("<a href='https://hltv.org").append(resultCon.select("a").attr("href")).append("'>")
-                        .append(resultCon.select("td.event").text()).append("</a> \n");
+                textMessage.append(WHITESPACE)
+                        .append(LEFT_BRACKET)
+                        .append(resultCon.select(MAP_TEXT).text())
+                        .append(RIGHT_BRACKET)
+                        .append(WHITESPACE)
+                        .append(getStars(resultCon))
+                        .append(emojiService.getEmoji(SQUARE))
+                        .append(WHITESPACE)
+                        .append(LINK_HLTV).append(resultCon.select(HLINK).attr(HREF))
+                        .append(LINK_END)
+                        .append(resultCon.select(EVENT).text())
+                        .append(UNLINK)
+                        .append(WHITESPACE)
+                        .append(LINE_BRAKE);
             }
-            textMessage.append("\n");
-            if (headerText.startsWith("Results"))
+            textMessage.append(LINE_BRAKE);
+            if (headerText.startsWith(RESULTS_STR)) {
                 break;
+            }
         }
-        log.debug("Results final message:\n{}", textMessage);
-        return new HtmlMessage(chatId, textMessage);
+        return textMessage.toString();
     }
 
     private StringBuilder getStars(Element match) {
-        StringBuilder stars = new StringBuilder();
-        match.select("div.stars").select("i").forEach(star -> stars.append(emojiRepository.getEmoji("star")));
+        var stars = new StringBuilder();
+        match.select(STARS).select(I)
+                .forEach(star -> stars.append(emojiService.getEmoji(STAR)));
         return stars;
     }
 }

@@ -1,0 +1,20 @@
+ℹ Can have a look what is going on at HLTV.org
+Ask, don't be shy!
+
+*/help* - This help message
+*/menu* - Interactive menu
+*/matches* - Current and upcoming matches
+*/streams* - Live streams from Twitch.tv
+*/results* - Matches results
+
+*/top10* - Top 10 teams
+*/top20* - Top 20 teams
+*/top30* - Top 30 teams
+
+*/top10players* - Top 10 players
+*/top20players* - Top 20 players
+*/top30players* - Top 30 players
+
+*/teams* - List of your favorite teams
+*/teams+* - Add/update your favorite teams
+*/teams-* - Remove team from favorite

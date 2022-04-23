@@ -1,0 +1,37 @@
+bot:
+  name: ${BOT_NAME:changeme}
+  token: ${BOT_TOKEN:changeme}
+  callback-timeout: ${BOT_CALLBACK_TIMEOUT:30}
+  message:
+    timeout: ${BOT_MESSAGE_TIMEOUT:300}
+    uniq-count: ${BOT_MESSAGE_UNIQ_COUNT:10}
+  scheduler:
+    chat-id: ${BOT_SCHEDULER_CHAT_ID:0}
+    matches-cron: ${BOT_SCHEDULER_MATCHES_CRON:0 0 9 * * *}
+    results-cron: ${BOT_SCHEDULER_RESULTS_CRON:0 59 23 * * *}
+
+twitch:
+  client-id: ${TWITCH_CLIENT_ID:changeme}
+  client-secret: ${TWITCH_CLIENT_SECRET:changeme}
+
+spring:
+  liquibase:
+    change-log: classpath:db/changelog.xml
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/bot}
+    username: ${DB_USER:bot}
+    password: ${DB_PASS:changeme}
+  jpa:
+    properties:
+      hibernate:
+        show_sql: ${DB_DEBUG_SQL:false}
+        format_sql: true
+    hibernate:
+      ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+logging:
+  level:
+    root: ${ROOT_LOGGING_LEVEL:INFO}
+    com.telegram.bot.csgo: ${BOT_LOGGING_LEVEL:DEBUG}

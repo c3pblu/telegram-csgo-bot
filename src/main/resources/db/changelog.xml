@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="1" author="Siarhei Yurkin">
+        <comment>Create 'Emoji' table</comment>
+        <sql>
+            CREATE TABLE Emoji
+            (
+                `id`      INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+                `name`    VARCHAR(100) NOT NULL,
+                `unicode` VARCHAR(100) NOT NULL
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="2" author="Siarhei Yurkin">
+        <comment>Insert values for 'Emoji' table</comment>
+        <sql>
+            INSERT INTO Emoji (name, unicode)
+            VALUES ('BOMB', '\\ud83d\\udca3'),
+                   ('CUP', '\\uD83C\\uDFC6'),
+                   ('DIAMOND_BLUE', '\\ud83d\\udd39'),
+                   ('DIAMOND_ORANGE', '\\ud83d\\udd38'),
+                   ('EXCL_MARK', '\\u2757'),
+                   ('FIRE', '\\uD83D\\uDD25'),
+                   ('HELM', '\\u26d1'),
+                   ('INFO', '\\u2139'),
+                   ('MIC', '\\ud83c\\udf99'),
+                   ('MIL_MEDAL', '\\ud83c\\udf96'),
+                   ('SAD', '\\u2639\\ufe0f'),
+                   ('SPORT_MEDAL', '\\ud83c\\udfc5'),
+                   ('SQUARE', '\\u25AB'),
+                   ('STAR', '\\u2b50\\ufe0f'),
+                   ('SUNGLASSES', '\\ud83d\\ude0e'),
+                   ('TV', '\\ud83d\\udcfa'),
+                   ('VS', '\\uD83C\\uDD9A');
+        </sql>
+    </changeSet>
+
+    <changeSet id="3" author="Siarhei Yurkin">
+        <comment>Create 'Sticker' table</comment>
+        <sql>
+            CREATE TABLE Sticker
+            (
+                `id`   INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+                `code` VARCHAR(100) NOT NULL
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="4" author="Siarhei Yurkin">
+        <comment>Insert values for 'Sticker' table</comment>
+        <sql>
+            INSERT INTO Sticker (code)
+            VALUES ('CAADAgADIQAD9mOfG2LGtCrsw7bFFgQ'),
+                   ('CAADAgADHgAD9mOfG7X25hWYzpI1FgQ'),
+                   ('CAADAgADHwAD9mOfG_Ba2iIqOnazFgQ'),
+                   ('CAADAgADIgAD9mOfG4hfcToK4DCYFgQ'),
+                   ('CAADAgADJQAD9mOfG963ItgypxoIFgQ'),
+                   ('CAADAgADKgAD9mOfG7fCrBPbLEDJFgQ'),
+                   ('CAADAgADFAAD9mOfGxFXaqquJHwYFgQ'),
+                   ('CAADAgADEQAD9mOfG94SbA2pBiwnFgQ'),
+                   ('CAADAgADCwAD9mOfG8RskvZsrlZsFgQ'),
+                   ('CAADAgADDQAD9mOfGxyG9FhomVn0FgQ'),
+                   ('CAADAgADBwAD9mOfGwvUQUWU0Bv_FgQ'),
+                   ('CAADAgADBgAD9mOfG-4M62fmXafEFgQ'),
+                   ('CAADAgADAwAD9mOfGzeICv_hr6IOFgQ'),
+                   ('CAADAgADCgAD9mOfG91GVm2tjQaEFgQ'),
+                   ('CAADAgADJAAD9mOfGw-taxRFVDWeFgQ'),
+                   ('CAADAgADKAAD9mOfG-AyIRVUq8l0FgQ'),
+                   ('CAADAgADJgAD9mOfG-rYuchCMU8-FgQ'),
+                   ('CAADAgADHAAD9mOfG8QGYzOYAXv9FgQ'),
+                   ('CAADAgADFgAD9mOfG7tdoHpun4KJFgQ'),
+                   ('CAADAgADIwAD9mOfG7uEav_8NSjTFgQ')
+        </sql>
+    </changeSet>
+
+    <changeSet id="5" author="Siarhei Yurkin">
+        <comment>Create 'Flag' table</comment>
+        <sql>
+            CREATE TABLE Flag
+            (
+                `id`         INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+                `name`       VARCHAR(100) NOT NULL,
+                `code`       VARCHAR(4)   NOT NULL,
+                `emoji_code` VARCHAR(4)   NOT NULL,
+                `unicode`    VARCHAR(100) DEFAULT NULL
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="6" author="Siarhei Yurkin">
+        <comment>Insert values for 'Flag' table</comment>
+        <sql>
+            INSERT INTO Flag (name, code, emoji_code, unicode)
+            VALUES ('Aland Islands', 'AX', ':ax:', ''),
+                   ('Albania', 'AL', ':al:', ''),
+                   ('Algeria', 'DZ', ':dz:', ''),
+                   ('American Samoa', 'AS', ':as:', ''),
+                   ('Andorra', 'AD', ':ad:', ''),
+                   ('Angola', 'AO', ':ao:', ''),
+                   ('Anguilla', 'AI', ':ai:', ''),
+                   ('Antarctica', 'AQ', ':aq:', ''),
+                   ('Antigua and Barbuda', 'AG', ':ag:', ''),
+                   ('Argentina', 'AR', ':ar:', ''),
+                   ('Armenia', 'AM', ':am:', ''),
+                   ('Aruba', 'AW', ':aw:', ''),
+                   ('Australia', 'AU', ':au:', ''),
+                   ('Austria', 'AT', ':at:', ''),
+                   ('Azerbaijan', 'AZ', ':az:', ''),
+                   ('Bahamas', 'BS', ':bs:', ''),
+                   ('Bahrain', 'BH', ':bh:', ''),
+                   ('Bangladesh', 'BD', ':bd:', ''),
+                   ('Barbados', 'BB', ':bb:', ''),
+                   ('Belarus', 'BY', ':by:', ''),
+                   ('Belgium', 'BE', ':be:', ''),
+                   ('Belize', 'BZ', ':bz:', ''),
+                   ('Benin', 'BJ', ':bj:', ''),
+                   ('Bermuda', 'BM', ':bm:', ''),
+                   ('Bhutan', 'BT', ':bt:', ''),
+                   ('Bolivia', 'BO', ':bo:', ''),
+                   ('Bonaire', 'BQ', ':bq:', ''),
+                   ('Bosnia and Herzegovina', 'BA', ':ba:', ''),
+                   ('Botswana', 'BW', ':bw:', ''),
+                   ('Bouvet Island', 'BV', ':bv:', ''),
+                   ('Brazil', 'BR', ':br:', ''),
+                   ('British Indian Ocean Territory', 'IO', ':io:', ''),
+                   ('Brunei Darussalam', 'BN', ':bn:', ''),
+                   ('Bulgaria', 'BG', ':bg:', ''),
+                   ('Burkina Faso', 'BF', ':bf:', ''),
+                   ('Burundi', 'BI', ':bi:', ''),
+                   ('Cambodia', 'KH', ':kh:', ''),
+                   ('Cameroon', 'CM', ':cm:', ''),
+                   ('Canada', 'CA', ':ca:', ''),
+                   ('Cape Verde', 'CV', ':cv:', ''),
+                   ('Cayman Islands', 'KY', ':ky:', ''),
+                   ('Central African Republic', 'CF', ':cf:', ''),
+                   ('Chad', 'TD', ':td:', ''),
+                   ('Chile', 'CL', ':cl:', '\\ud83c\\udde8\\ud83c\\uddf1'),
+                   ('China', 'CN', ':cn:', ''),
+                   ('Christmas Island', 'CX', ':cx:', ''),
+                   ('Cocos (Keeling) Islands', 'CC', ':cc:', ''),
+                   ('Colombia', 'CO', ':co:', ''),
+                   ('Comoros', 'KM', ':km:', ''),
+                   ('Congo', 'CD', ':cd:', ''),
+                   ('Congo', 'CG', ':cg:', ''),
+                   ('Cook Islands', 'CK', ':ck:', ''),
+                   ('Costa Rica', 'CR', ':cr:', ''),
+                   ('Croatia', 'HR', ':hr:', ''),
+                   ('Cuba', 'CU', ':cu:', ''),
+                   ('Cura?ao', 'CW', ':cw:', ''),
+                   ('Cyprus', 'CY', ':cy:', ''),
+                   ('Czech Republic', 'CZ', ':cz:', ''),
+                   ('Denmark', 'DK', ':dk:', ''),
+                   ('Djibouti', 'DJ', ':dj:', ''),
+                   ('Dominica', 'DM', ':dm:', ''),
+                   ('Dominican Republic', 'DO', ':do:', ''),
+                   ('Ecuador', 'EC', ':ec:', ''),
+                   ('Egypt', 'EG', ':eg:', ''),
+                   ('El Salvador', 'SV', ':sv:', ''),
+                   ('England', 'EN', ':gb:', ''),
+                   ('Equatorial Guinea', 'GQ', ':gq:', ''),
+                   ('Eritrea', 'ER', ':er:', ''),
+                   ('Estonia', 'EE', ':ee:', ''),
+                   ('Ethiopia', 'ET', ':et:', ''),
+                   ('Europe', 'EU', ':eu:', ''),
+                   ('Falkland Islands (Malvinas)', 'FK', ':fk:', ''),
+                   ('Faroe Islands', 'FO', ':fo:', ''),
+                   ('Fiji', 'FJ', ':fj:', ''),
+                   ('Finland', 'FI', ':fi:', ''),
+                   ('France', 'FR', ':fr:', ''),
+                   ('French Guiana', 'GF', ':gf:', ''),
+                   ('French Polynesia', 'PF', ':pf:', ''),
+                   ('French Southern Territories', 'TF', ':tf:', ''),
+                   ('Gabon', 'GA', ':ga:', ''),
+                   ('Gambia', 'GM', ':gm:', ''),
+                   ('Georgia', 'GE', ':ge:', ''),
+                   ('Germany', 'DE', ':de:', ''),
+                   ('Ghana', 'GH', ':gh:', ''),
+                   ('Gibraltar', 'GI', ':gi:', ''),
+                   ('Greece', 'GR', ':gr:', ''),
+                   ('Greenland', 'GL', ':gl:', ''),
+                   ('Grenada', 'GD', ':gd:', ''),
+                   ('Guadeloupe', 'GP', ':gp:', ''),
+                   ('Guam', 'GU', ':gu:', ''),
+                   ('Guatemala', 'GT', ':gt:', ''),
+                   ('Guernsey', 'GG', ':gg:', ''),
+                   ('Guinea', 'GN', ':gn:', ''),
+                   ('Guinea-Bissau', 'GW', ':gw:', ''),
+                   ('Guyana', 'GY', ':gy:', ''),
+                   ('Haiti', 'HT', ':ht:', ''),
+                   ('Heard Island and McDonald Islands', 'HM', ':hm:', ''),
+                   ('Holy See (Vatican City State)', 'VA', ':va:', ''),
+                   ('Honduras', 'HN', ':hn:', ''),
+                   ('Hong Kong', 'HK', ':hk:', ''),
+                   ('Hungary', 'HU', ':hu:', ''),
+                   ('Iceland', 'IS', ':is:', ''),
+                   ('India', 'IN', ':in:', ''),
+                   ('Indonesia', 'ID', ':id:', '\\ud83c\\uddee\\ud83c\\udde9'),
+                   ('Iran, Islamic Republic of', 'IR', ':ir:', ''),
+                   ('Iraq', 'IQ', ':iq:', ''),
+                   ('Ireland', 'IE', ':ie:', ''),
+                   ('Isle of Man', 'IM', ':im:', ''),
+                   ('Israel', 'IL', ':il:', ''),
+                   ('Italy', 'IT', ':it:', ''),
+                   ('Jamaica', 'JM', ':jm:', ''),
+                   ('Japan', 'JP', ':jp:', ''),
+                   ('Jersey', 'JE', ':je:', ''),
+                   ('Jordan', 'JO', ':jo:', ''),
+                   ('Kazakhstan', 'KZ', ':kz:', ''),
+                   ('Kenya', 'KE', ':ke:', ''),
+                   ('Kiribati', 'KI', ':ki:', ''),
+                   ('Korea', 'KP', ':kp:', ''),
+                   ('Korea', 'KR', ':kr:', ''),
+                   ('Kuwait', 'KW', ':kw:', ''),
+                   ('Kyrgyzstan', 'KG', ':kg:', ''),
+                   ('Lao Peoples Democratic Republic', 'LA', ':la:', ''),
+                   ('Latvia', 'LV', ':lv:', ''),
+                   ('Lebanon', 'LB', ':lb:', ''),
+                   ('Lesotho', 'LS', ':ls:', ''),
+                   ('Liberia', 'LR', ':lr:', ''),
+                   ('Libya', 'LY', ':ly:', ''),
+                   ('Liechtenstein', 'LI', ':li:', ''),
+                   ('Lithuania', 'LT', ':lt:', ''),
+                   ('Luxembourg', 'LU', ':lu:', ''),
+                   ('Macao', 'MO', ':mo:', ''),
+                   ('Macedonia', 'MK', ':mk:', ''),
+                   ('Madagascar', 'MG', ':mg:', ''),
+                   ('Malawi', 'MW', ':mw:', ''),
+                   ('Malaysia', 'MY', ':my:', ''),
+                   ('Maldives', 'MV', ':mv:', ''),
+                   ('Mali', 'ML', ':ml:', ''),
+                   ('Malta', 'MT', ':mt:', ''),
+                   ('Marshall Islands', 'MH', ':mh:', ''),
+                   ('Martinique', 'MQ', ':mq:', ''),
+                   ('Mauritania', 'MR', ':mr:', ''),
+                   ('Mauritius', 'MU', ':mu:', ''),
+                   ('Mayotte', 'YT', ':yt:', ''),
+                   ('Mexico', 'MX', ':mx:', ''),
+                   ('Micronesia', 'FM', ':fm:', ''),
+                   ('Moldova', 'MD', ':md:', ''),
+                   ('Monaco', 'MC', ':mc:', ''),
+                   ('Mongolia', 'MN', ':mn:', ''),
+                   ('Montenegro', 'ME', ':me:', ''),
+                   ('Montserrat', 'MS', ':ms:', ''),
+                   ('Morocco', 'MA', ':ma:', ''),
+                   ('Mozambique', 'MZ', ':mz:', ''),
+                   ('Myanmar', 'MM', ':mm:', ''),
+                   ('Namibia', 'NA', ':na:', ''),
+                   ('Nauru', 'NR', ':nr:', ''),
+                   ('Nepal', 'NP', ':np:', ''),
+                   ('Netherlands', 'NL', ':nl:', ''),
+                   ('New Caledonia', 'NC', ':nc:', ''),
+                   ('New Zealand', 'NZ', ':nz:', ''),
+                   ('Nicaragua', 'NI', ':ni:', ''),
+                   ('Niger', 'NE', ':ne:', ''),
+                   ('Nigeria', 'NG', ':ng:', ''),
+                   ('Niue', 'NU', ':nu:', ''),
+                   ('Norfolk Island', 'NF', ':nf:', ''),
+                   ('Northern Mariana Islands', 'MP', ':mp:', ''),
+                   ('Norway', 'NO', ':no:', ''),
+                   ('Oman', 'OM', ':om:', ''),
+                   ('Pakistan', 'PK', ':pk:', ''),
+                   ('Palau', 'PW', ':pw:', ''),
+                   ('Palestine', 'PS', ':ps:', ''),
+                   ('Panama', 'PA', ':pa:', ''),
+                   ('Papua New Guinea', 'PG', ':pg:', ''),
+                   ('Paraguay', 'PY', ':py:', ''),
+                   ('Peru', 'PE', ':pe:', ''),
+                   ('Philippines', 'PH', ':ph:', ''),
+                   ('Pitcairn', 'PN', ':pn:', ''),
+                   ('Poland', 'PL', ':pl:', ''),
+                   ('Portugal', 'PT', ':pt:', ''),
+                   ('Puerto Rico', 'PR', ':pr:', ''),
+                   ('Qatar', 'QA', ':qa:', ''),
+                   ('R?union', 'RE', ':re:', ''),
+                   ('Romania', 'RO', ':ro:', ''),
+                   ('Russia', 'RU', ':ru:', ''),
+                   ('Rwanda', 'RW', ':rw:', ''),
+                   ('Saint Barth?lemy', 'BL', ':bl:', ''),
+                   ('Saint Helena, Ascension and Tristan da Cunha', 'SH', ':sh:', ''),
+                   ('Saint Kitts and Nevis', 'KN', ':kn:', ''),
+                   ('Saint Lucia', 'LC', ':lc:', ''),
+                   ('Saint Martin (French part)', 'MF', ':mf:', ''),
+                   ('Saint Pierre and Miquelon', 'PM', ':pm:', ''),
+                   ('Saint Vincent and the Grenadines', 'VC', ':vc:', ''),
+                   ('Samoa', 'WS', ':ws:', ''),
+                   ('San Marino', 'SM', ':sm:', ''),
+                   ('Sao Tome and Principe', 'ST', ':st:', ''),
+                   ('Saudi Arabia', 'SA', ':sa:', '\\ud83c\\uddf8\\ud83c\\udde6'),
+                   ('Senegal', 'SN', ':sn:', ''),
+                   ('Serbia', 'RS', ':rs:', ''),
+                   ('Seychelles', 'SC', ':sc:', ''),
+                   ('Sierra Leone', 'SL', ':sl:', ''),
+                   ('Singapore', 'SG', ':sg:', ''),
+                   ('Sint Maarten (Dutch part)', 'SX', ':sx:', ''),
+                   ('Slovakia', 'SK', ':sk:', ''),
+                   ('Slovenia', 'SI', ':si:', ''),
+                   ('Solomon Islands', 'SB', ':sb:', ''),
+                   ('Somalia', 'SO', ':so:', ''),
+                   ('South Africa', 'ZA', ':za:', ''),
+                   ('South Georgia and the South Sandwich Islands', 'GS', ':gs:', ''),
+                   ('South Sudan', 'SS', ':ss:', ''),
+                   ('Spain', 'ES', ':es:', ''),
+                   ('Sri Lanka', 'LK', ':lk:', ''),
+                   ('Sudan', 'SD', ':sd:', ''),
+                   ('Suriname', 'SR', ':sr:', ''),
+                   ('Svalbard and Jan Mayen', 'SJ', ':sj:', ''),
+                   ('Swaziland', 'SZ', ':sz:', ''),
+                   ('Sweden', 'SE', ':se:', ''),
+                   ('Switzerland', 'CH', ':ch:', ''),
+                   ('Syrian Arab Republic', 'SY', ':sy:', ''),
+                   ('Taiwan', 'TW', ':tw:', ''),
+                   ('Tajikistan', 'TJ', ':tj:', ''),
+                   ('Tanzania', 'TZ', ':tz:', ''),
+                   ('Thailand', 'TH', ':th:', ''),
+                   ('Timor-Leste', 'TL', ':tl:', ''),
+                   ('Togo', 'TG', ':tg:', ''),
+                   ('Tokelau', 'TK', ':tk:', ''),
+                   ('Tonga', 'TO', ':to:', ''),
+                   ('Trinidad and Tobago', 'TT', ':tt:', ''),
+                   ('Tunisia', 'TN', ':tn:', ''),
+                   ('Turkey', 'TR', ':tr:', ''),
+                   ('Turkmenistan', 'TM', ':tm:', ''),
+                   ('Turks and Caicos Islands', 'TC', ':tc:', ''),
+                   ('Tuvalu', 'TV', ':tv:', '\\ud83c\\uddf9\\ud83c\\uddfb'),
+                   ('Uganda', 'UG', ':ug:', ''),
+                   ('Ukraine', 'UA', ':ua:', ''),
+                   ('United Arab Emirates', 'AE', ':ae:', ''),
+                   ('United Kingdom', 'GB', ':gb:', ''),
+                   ('United States', 'US', ':us:', ''),
+                   ('United States Minor Outlying Islands', 'UM', ':um:', ''),
+                   ('Uruguay', 'UY', ':uy:', ''),
+                   ('Uzbekistan', 'UZ', ':uz:', ''),
+                   ('Vanuatu', 'VU', ':vu:', ''),
+                   ('Venezuela', 'VE', ':ve:', ''),
+                   ('Viet Nam', 'VN', ':vn:', ''),
+                   ('Virgin Islands', 'VI', ':vi:', ''),
+                   ('Virgin Islands, British', 'VG', ':vg:', ''),
+                   ('Wallis and Futuna', 'WF', ':wf:', ''),
+                   ('Western Sahara', 'EH', ':eh:', ''),
+                   ('Yemen', 'YE', ':ye:', ''),
+                   ('Zambia', 'ZM', ':zm:', ''),
+                   ('Zimbabwe', 'ZW', ':zw:', '');
+        </sql>
+    </changeSet>
+
+    <changeSet id="7" author="Siarhei Yurkin">
+        <comment>Create 'FavoriteTeam' table</comment>
+        <sql>
+            CREATE TABLE FavoriteTeam
+            (
+                `id`      INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+                `chat_id` VARCHAR(50) NOT NULL,
+                `name`    VARCHAR(100) NOT NULL,
+                `flag_id` INT UNSIGNED NOT NULL,
+                CONSTRAINT fk_flag FOREIGN KEY (flag_id) REFERENCES Flag (id)
+            );
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

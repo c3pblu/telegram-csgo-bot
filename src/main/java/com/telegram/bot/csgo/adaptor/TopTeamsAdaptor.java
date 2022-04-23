@@ -1,78 +1,101 @@
 package com.telegram.bot.csgo.adaptor;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.telegram.bot.csgo.repository.EmojiRepository;
+import java.util.stream.Collectors;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.CHANGE;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.HLINK;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.HREF;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.MORE;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.MORE_LINK_QUERY;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.NAME;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.POINTS;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.POSITION;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.RANKED_TEAM;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.RANKING_NICKNAMES;
+import static com.telegram.bot.csgo.helper.HtmlTagsHelper.REGIONAL_RANKING_HEADER;
+import static com.telegram.bot.csgo.helper.MessageHelper.BOLD;
+import static com.telegram.bot.csgo.helper.MessageHelper.HASH;
+import static com.telegram.bot.csgo.helper.MessageHelper.LEFT_BRACKET;
+import static com.telegram.bot.csgo.helper.MessageHelper.LEFT_SQUARE_BRACKET;
+import static com.telegram.bot.csgo.helper.MessageHelper.LINE_BRAKE;
+import static com.telegram.bot.csgo.helper.MessageHelper.LINK_END;
+import static com.telegram.bot.csgo.helper.MessageHelper.LINK_HLTV;
+import static com.telegram.bot.csgo.helper.MessageHelper.RIGHT_BRACKET;
+import static com.telegram.bot.csgo.helper.MessageHelper.RIGHT_SQUARE_BRACKET;
+import static com.telegram.bot.csgo.helper.MessageHelper.UNBOLD;
+import static com.telegram.bot.csgo.helper.MessageHelper.UNLINK;
+import static com.telegram.bot.csgo.helper.MessageHelper.WHITESPACE;
+import static com.telegram.bot.csgo.model.message.EmojiCode.MIL_MEDAL;
+import static java.lang.String.join;
+import com.telegram.bot.csgo.model.message.HtmlMessage;
+import com.telegram.bot.csgo.service.EmojiService;
+import com.telegram.bot.csgo.service.FlagService;
+import com.telegram.bot.csgo.service.TeamCountryService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import com.telegram.bot.csgo.model.HtmlMessage;
-import com.telegram.bot.csgo.service.HttpService;
-
-import lombok.extern.slf4j.Slf4j;
-
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class TopTeamsAdaptor {
 
-    private final HttpService httpService;
-    private final FlagsAdaptor flagsAdaptor;
-    private final TopTeamsAdaptor self;
-    private final EmojiRepository emojiRepository;
-
-    @Autowired
-    public TopTeamsAdaptor(HttpService httpService, FlagsAdaptor flagsAdaptor, @Lazy TopTeamsAdaptor self, EmojiRepository emojiRepository) {
-        this.httpService = httpService;
-        this.flagsAdaptor = flagsAdaptor;
-        this.self = self;
-        this.emojiRepository = emojiRepository;
-    }
+    private final TeamCountryService teamCountryService;
+    private final FlagService flagService;
+    private final EmojiService emojiService;
 
     public SendMessage topTeams(String chatId, Document doc, Integer count) {
-        StringBuilder textMessage = new StringBuilder();
-        textMessage
-                .append(emojiRepository.getEmoji("mil_medal"))
-                .append("<b>")
-                .append(doc.select("div.regional-ranking-header").text())
-                .append("</b>\n");
-        for (Element team : doc.select("div.ranked-team")) {
-            if (team.select("span.position").text().equals("#" + (count + 1))) {
-                break;
-            }
-            String teamProfileURL = team.select("div.more").select("a").attr("href");
-            log.debug("Team profile URL: {}", teamProfileURL);
-            String country = self.getCountry(teamProfileURL);
-            String teamFlag = flagsAdaptor.flagUnicodeFromCountry(country);
-            StringBuilder row = new StringBuilder();
-            row.append("<b>").append(team.select("span.position").text()).append("</b> (")
-                    .append(team.select("div.change").text()).append(") ").append(teamFlag)
-                    .append("<a href='https://hltv.org")
-                    .append(team.select("div.more").select("a[class=details moreLink]").attr("href")).append("'>")
-                    .append(team.select("span.name").text()).append("</a> ").append(team.select("span.points").text())
-                    .append(" [");
-            List<String> listPlayers = new ArrayList<>();
-            for (Element player : team.select("div.rankingNicknames")) {
-                listPlayers.add(player.text());
-            }
-            row.append(String.join(", ", listPlayers)).append("]\n");
-            textMessage.append(row);
-        }
-
-        log.debug("TopTeams final message:\n{}", textMessage);
-        return new HtmlMessage(chatId, textMessage);
+        var message = prepareMessage(doc, count);
+        log.debug("TopTeams final message: {}", message);
+        return new HtmlMessage(chatId, message);
     }
 
-    @Cacheable("teamCountry")
-    public String getCountry(String url) {
-        String country = httpService.getDocument(HttpService.HLTV + url).select("div.team-country").text();
-        System.gc();
-        return country;
+    public String prepareMessage(Document doc, Integer count) {
+        var textMessage = new StringBuilder();
+        textMessage.append(emojiService.getEmoji(MIL_MEDAL))
+                .append(BOLD)
+                .append(doc.select(REGIONAL_RANKING_HEADER).text())
+                .append(UNBOLD)
+                .append(LINE_BRAKE);
+        for (var team : doc.select(RANKED_TEAM)) {
+            if (team.select(POSITION).text().equals(HASH + (count + 1))) {
+                break;
+            }
+            var teamProfileURL = team.select(MORE).select(HLINK).attr(HREF);
+            log.debug("Team profile URL: {}", teamProfileURL);
+            var country = teamCountryService.getCountry(teamProfileURL);
+            var teamFlag = flagService.flagUnicodeFromCountry(country);
+            var row = new StringBuilder();
+            row.append(BOLD)
+                    .append(team.select(POSITION).text())
+                    .append(UNBOLD)
+                    .append(WHITESPACE)
+                    .append(LEFT_BRACKET)
+                    .append(team.select(CHANGE).text())
+                    .append(RIGHT_BRACKET)
+                    .append(WHITESPACE)
+                    .append(teamFlag)
+                    .append(LINK_HLTV)
+                    .append(team.select(MORE).select(MORE_LINK_QUERY).attr(HREF))
+                    .append(LINK_END)
+                    .append(team.select(NAME).text())
+                    .append(UNLINK)
+                    .append(WHITESPACE)
+                    .append(team.select(POINTS).text())
+                    .append(WHITESPACE)
+                    .append(LEFT_SQUARE_BRACKET);
+            var playersNames = team.select(RANKING_NICKNAMES)
+                    .stream()
+                    .map(Element::text)
+                    .collect(Collectors.toList());
+            row.append(join(", ", playersNames))
+                    .append(RIGHT_SQUARE_BRACKET)
+                    .append(LINE_BRAKE);
+            textMessage.append(row);
+        }
+        return textMessage.toString();
     }
 
 }
