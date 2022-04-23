@@ -30,8 +30,8 @@ public class HelpUpdateProcessor implements UpdateProcessor {
     @PostConstruct
     void init() {
         try {
-            helpText = readString(
-                    new ClassPathResource(HELP_FILE_PATH).getFile().toPath(), UTF_8);
+            helpText = new String(
+                    new ClassPathResource(HELP_FILE_PATH).getInputStream().readAllBytes(), UTF_8);
         } catch (IOException e) {
             log.warn(e.getMessage());
         }
