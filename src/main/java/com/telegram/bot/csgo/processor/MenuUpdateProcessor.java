@@ -30,7 +30,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 
 @Component
 @RequiredArgsConstructor
-public class MenuUpdateProcessor implements UpdateProcessor {
+public class MenuUpdateProcessor extends UpdateProcessor {
 
     private final BotController botController;
     private final EmojiService emojiService;

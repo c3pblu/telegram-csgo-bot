@@ -11,7 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
 @RequiredArgsConstructor
-public class TwitchUpdateProcessor implements UpdateProcessor {
+public class TwitchUpdateProcessor extends UpdateProcessor {
 
     private final BotController botController;
     private final TwitchService twitchService;

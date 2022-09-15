@@ -20,7 +20,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class HelpUpdateProcessor implements UpdateProcessor {
+public class HelpUpdateProcessor extends UpdateProcessor {
 
     private final BotController botController;
     private String helpText;

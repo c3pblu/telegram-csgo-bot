@@ -12,7 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
 @RequiredArgsConstructor
-public class ResultsUpdateProcessor implements UpdateProcessor {
+public class ResultsUpdateProcessor extends UpdateProcessor {
 
     private final BotController botController;
     private final HttpService httpService;

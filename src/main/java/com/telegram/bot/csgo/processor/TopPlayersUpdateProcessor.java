@@ -16,7 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
 @RequiredArgsConstructor
-public class TopPlayersUpdateProcessor implements UpdateProcessor {
+public class TopPlayersUpdateProcessor extends UpdateProcessor {
 
     private final BotController botController;
     private final HttpService httpService;

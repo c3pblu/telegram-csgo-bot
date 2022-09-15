@@ -31,7 +31,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
 @RequiredArgsConstructor
-public class QuoteUpdateProcessor implements UpdateProcessor {
+public class QuoteUpdateProcessor extends UpdateProcessor {
 
     private final BotController botController;
     private final HttpService httpService;

@@ -30,7 +30,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
 @RequiredArgsConstructor
-public class FavoriteTeamsUpdateProcessor implements UpdateProcessor {
+public class FavoriteTeamsUpdateProcessor extends UpdateProcessor {
 
     private final BotController botController;
     private final FlagService flagService;

@@ -7,11 +7,11 @@ import lombok.NonNull;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-public interface UpdateProcessor {
+public abstract class UpdateProcessor {
 
-    void process(@NonNull Update update);
+    public abstract void process(@NonNull Update update);
 
-    default void deleteMenu(BotController botController, Update update) {
+    protected void deleteMenu(BotController botController, Update update) {
         if (update.hasCallbackQuery()) {
             botController.send(new DeleteMessage(valueOf(update.getCallbackQuery().getMessage().getChatId()),
                     update.getCallbackQuery().getMessage().getMessageId()));
@@ -19,7 +19,7 @@ public interface UpdateProcessor {
     }
 
     @Nullable
-    default String getChatId(@NonNull Update update) {
+    protected String getChatId(@NonNull Update update) {
         if (update.hasMessage()) {
             return valueOf(update.getMessage().getChatId());
         }
