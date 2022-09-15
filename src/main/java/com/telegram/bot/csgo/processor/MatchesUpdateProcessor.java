@@ -28,8 +28,7 @@ public class MatchesUpdateProcessor extends UpdateProcessor {
         }
     }
 
-    @SuppressWarnings("OverlyComplexBooleanExpression")
-    private boolean isMatchesCommand(Update update) {
+    private static boolean isMatchesCommand(Update update) {
         return (update.hasMessage() && MATCHES_COMMAND.equalsIgnoreCase(update.getMessage().getText()))
                 || (update.hasCallbackQuery() && MATCHES_COMMAND.equals(update.getCallbackQuery().getData()));
     }

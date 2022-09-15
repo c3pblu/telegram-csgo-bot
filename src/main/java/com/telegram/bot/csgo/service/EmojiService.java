@@ -24,7 +24,7 @@ public class EmojiService {
                 : emptyString(emojiCode);
     }
 
-    private String emptyString(EmojiCode emojiCode) {
+    private static String emptyString(EmojiCode emojiCode) {
         log.debug("Emoji '{}' is not found", emojiCode);
         return EMPTY_STRING;
     }

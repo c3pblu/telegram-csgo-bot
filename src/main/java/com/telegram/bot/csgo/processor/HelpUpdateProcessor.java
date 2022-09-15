@@ -5,7 +5,6 @@ import java.io.IOException;
 import static com.telegram.bot.csgo.helper.CommandHelper.HELP_COMMAND;
 import static com.telegram.bot.csgo.helper.CommandHelper.START_COMMAND;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.nio.file.Files.readString;
 import static org.telegram.telegrambots.meta.api.methods.ParseMode.MARKDOWN;
 import static org.telegram.telegrambots.meta.api.methods.send.SendMessage.builder;
 import com.telegram.bot.csgo.controller.BotController;
@@ -22,10 +21,10 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Slf4j
 public class HelpUpdateProcessor extends UpdateProcessor {
 
+    private static final String HELP_FILE_PATH = "help/message";
+
     private final BotController botController;
     private String helpText;
-
-    private static final String HELP_FILE_PATH = "help/message";
 
     @PostConstruct
     void init() {
@@ -44,17 +43,17 @@ public class HelpUpdateProcessor extends UpdateProcessor {
         }
     }
 
-    private boolean isHelpCommand(Update update) {
-        return update.hasMessage()
-                && (HELP_COMMAND.equalsIgnoreCase(update.getMessage().getText())
-                || START_COMMAND.equalsIgnoreCase(update.getMessage().getText()));
-    }
-
     private SendMessage helpMessage(String chatId) {
         return builder()
                 .parseMode(MARKDOWN)
                 .text(helpText)
                 .chatId(chatId)
                 .build();
+    }
+
+    private static boolean isHelpCommand(Update update) {
+        return update.hasMessage()
+                && (HELP_COMMAND.equalsIgnoreCase(update.getMessage().getText())
+                || START_COMMAND.equalsIgnoreCase(update.getMessage().getText()));
     }
 }

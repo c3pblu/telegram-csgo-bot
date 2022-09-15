@@ -63,12 +63,12 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 @Slf4j
 public class MatchesAdaptor {
 
+    private static final String LIVE_MATCHES_STR = "Live matches";
+    private static final String UPCOMING_MATCHES_STR = "Upcoming CS:GO matches";
+
     private final FavoriteTeamService favoriteTeamService;
     private final HttpService httpService;
     private final EmojiService emojiService;
-
-    private static final String LIVE_MATCHES_STR = "Live matches";
-    private static final String UPCOMING_MATCHES_STR = "Upcoming CS:GO matches";
 
     public SendMessage matches(String chatId, Document doc) {
         var message = prepareMessage(chatId, doc);
@@ -182,8 +182,7 @@ public class MatchesAdaptor {
 
     private StringBuilder getStars(Element match) {
         var stars = new StringBuilder();
-        var starsCount = match.select(STARS_FADED).size();
-        rangeClosed(0, 4 - starsCount)
+        rangeClosed(0, 4 - match.select(STARS_FADED).size())
                 .forEach(i -> stars.append(emojiService.getEmoji(STAR)));
         return stars;
     }

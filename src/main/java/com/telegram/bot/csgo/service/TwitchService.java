@@ -39,15 +39,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 @RequiredArgsConstructor
 public class TwitchService {
 
-    private final FlagService flagService;
-    private final HttpService httpService;
-    private final TwitchProperties twitchProperties;
-    private final EmojiService emojiService;
-    private final Map<String, String> chatPage = new ConcurrentHashMap<>();
-    private final ObjectMapper objectMapper = new ObjectMapper()
-            .setPropertyNamingStrategy(SNAKE_CASE);
-    private String accessToken;
-
     private static final String OAUTH_PREFIX = "OAuth ";
     private static final String BEARER_PREFIX = "Bearer ";
     private static final String CLIENT_ID_HEADER = "Client-ID";
@@ -61,6 +52,15 @@ public class TwitchService {
     private static final String STREAMS_STR = "Streams on Twitch:";
     private static final String NEXT_PAGE_TITLE = "Next 20 Streams »";
     private static final String NEXT_PAGE_QUESTION = "Go to next Page?";
+
+    private final FlagService flagService;
+    private final HttpService httpService;
+    private final TwitchProperties twitchProperties;
+    private final EmojiService emojiService;
+    private final Map<String, String> chatPage = new ConcurrentHashMap<>();
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .setPropertyNamingStrategy(SNAKE_CASE);
+    private String accessToken;
 
     public SendMessage getStreams(String chatId, boolean isNextPage) {
         if (accessToken == null || accessToken.isEmpty()) {

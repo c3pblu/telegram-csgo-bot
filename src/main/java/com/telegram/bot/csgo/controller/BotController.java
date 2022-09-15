@@ -2,8 +2,7 @@ package com.telegram.bot.csgo.controller;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import static java.util.concurrent.Executors.*;
+import static java.util.concurrent.Executors.newCachedThreadPool;
 import com.telegram.bot.csgo.config.properties.BotProperties;
 import com.telegram.bot.csgo.processor.UpdateProcessor;
 import com.telegram.bot.csgo.service.UpdateProcessingService;

@@ -33,14 +33,15 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @RequiredArgsConstructor
 public class QuoteUpdateProcessor extends UpdateProcessor {
 
+    private static final String QUOTE_URL = "https://api.forismatic.com/api/1.0/?method=getQuote&format=html&lang=ru";
+    private static final Character MENTION = '@';
+
     private final BotController botController;
     private final HttpService httpService;
     private final StickerService stickerService;
     private final BotProperties botProperties;
 
     private final Map<String, List<Sticker>> chatLastStickers = new ConcurrentHashMap<>();
-    private static final String QUOTE_URL = "https://api.forismatic.com/api/1.0/?method=getQuote&format=html&lang=ru";
-    private static final Character MENTION = '@';
 
     @Override
     public void process(@NonNull Update update) {
@@ -49,7 +50,7 @@ public class QuoteUpdateProcessor extends UpdateProcessor {
             var sticker = getSticker(chatId, botProperties.getMessage().getUniqCount());
             botController.sendSticker(sticker);
             var doc = httpService.getAsDocument(QUOTE_URL);
-            botController.send(quote(chatId, doc));
+            botController.send(createQuote(chatId, doc));
         }
     }
 
@@ -57,18 +58,6 @@ public class QuoteUpdateProcessor extends UpdateProcessor {
         return update.hasMessage()
                 && (startsWith(update.getMessage().getText(), MENTION + botProperties.getName())
                 || QUOTE_COMMAND.equalsIgnoreCase(update.getMessage().getText()));
-    }
-
-    private SendMessage quote(String chatId, Document doc) {
-        var text = new StringBuilder(doc.select(CITE).text());
-        var author = doc.select(SMALL).text();
-        if (isNotEmpty(author)) {
-            text.append(LINE_BRAKE)
-                    .append(BOLD)
-                    .append(author)
-                    .append(UNBOLD);
-        }
-        return new HtmlMessage(chatId, text.toString());
     }
 
     private SendSticker getSticker(String chatId, Integer uniqCount) {
@@ -93,4 +82,15 @@ public class QuoteUpdateProcessor extends UpdateProcessor {
                 .build();
     }
 
+    private static SendMessage createQuote(String chatId, Document doc) {
+        var text = new StringBuilder(doc.select(CITE).text());
+        var author = doc.select(SMALL).text();
+        if (isNotEmpty(author)) {
+            text.append(LINE_BRAKE)
+                    .append(BOLD)
+                    .append(author)
+                    .append(UNBOLD);
+        }
+        return new HtmlMessage(chatId, text.toString());
+    }
 }

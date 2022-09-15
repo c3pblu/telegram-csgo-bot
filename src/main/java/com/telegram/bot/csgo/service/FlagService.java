@@ -16,10 +16,10 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class FlagService {
 
-    private final FlagRepo flagRepo;
-
     private static final String DEFAULT_COUNTRY_FLAG = ":un:";
     private static final Pattern COUNTRY_CODE_PATTERN = Pattern.compile("[A-Z][A-Z]");
+
+    private final FlagRepo flagRepo;
 
     @Cacheable("flagUnicode")
     public String flagUnicodeFromCountry(String country) {

@@ -16,12 +16,12 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @RequiredArgsConstructor
 public class TopTeamsUpdateProcessor extends UpdateProcessor {
 
+    private static final String TEAMS_PATH = "/ranking/teams";
+    private static final Pattern TOP_TEAMS_PATTERN = Pattern.compile("(/top)([123]0)");
+
     private final BotController botController;
     private final HttpService httpService;
     private final TopTeamsAdaptor topTeamsAdaptor;
-
-    private static final String TEAMS_PATH = "/ranking/teams";
-    private static final Pattern TOP_TEAMS_PATTERN = Pattern.compile("(/top)([123]0)");
 
     @Override
     public void process(@NonNull Update update) {
@@ -32,7 +32,7 @@ public class TopTeamsUpdateProcessor extends UpdateProcessor {
                 botController.send(message);
             }
         }
-        if ((update.hasCallbackQuery())) {
+        if (update.hasCallbackQuery()) {
             var data = update.getCallbackQuery().getData();
             if (isTopTeamsCallback(data)) {
                 var message = prepareMessage(data, update);
@@ -51,16 +51,17 @@ public class TopTeamsUpdateProcessor extends UpdateProcessor {
         return null;
     }
 
-    private boolean isTopTeamsCommand(String text) {
-        return TOP_TEAMS_PATTERN.matcher(text).matches();
-    }
-
-    private boolean isTopTeamsCallback(String data) {
-        return data != null && TOP_TEAMS_PATTERN.matcher(data).matches();
-    }
-
     private SendMessage topTeams(String chatId, int count) {
         var doc = httpService.getAsDocument(HLTV_URL + TEAMS_PATH);
         return topTeamsAdaptor.topTeams(chatId, doc, count);
     }
+
+    private static boolean isTopTeamsCommand(String text) {
+        return TOP_TEAMS_PATTERN.matcher(text).matches();
+    }
+
+    private static boolean isTopTeamsCallback(String data) {
+        return data != null && TOP_TEAMS_PATTERN.matcher(data).matches();
+    }
+
 }

@@ -63,9 +63,9 @@ public class TopTeamsAdaptor {
             if (team.select(POSITION).text().equals(HASH + (count + 1))) {
                 break;
             }
-            var teamProfileURL = team.select(MORE).select(HLINK).attr(HREF);
-            log.debug("Team profile URL: {}", teamProfileURL);
-            var country = teamCountryService.getCountry(teamProfileURL);
+            var teamProfileUrl = team.select(MORE).select(HLINK).attr(HREF);
+            log.debug("Team profile URL: {}", teamProfileUrl);
+            var country = teamCountryService.getCountry(teamProfileUrl);
             var teamFlag = flagService.flagUnicodeFromCountry(country);
             var row = new StringBuilder();
             row.append(BOLD)

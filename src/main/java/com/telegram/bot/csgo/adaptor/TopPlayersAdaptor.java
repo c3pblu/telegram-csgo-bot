@@ -37,12 +37,12 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 @Slf4j
 public class TopPlayersAdaptor {
 
-    private final FlagService flagService;
-    private final EmojiService emojiService;
-
     private static final String TOP_PLAYERS_STR = "CS:GO World Top Players";
     private static final String TEAM_STR = "Team";
     private static final String TEAMS_STR = TEAM_STR + 's';
+
+    private final FlagService flagService;
+    private final EmojiService emojiService;
 
     public SendMessage topPlayers(String chatId, Document doc, Integer count) {
         var message = prepareMessage(doc, count);

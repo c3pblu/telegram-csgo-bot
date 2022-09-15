@@ -24,10 +24,10 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class WebClientHttpService implements HttpService {
 
-    private final WebClient webClient;
-
     private static final int RETRY_MAX_ATTEMPTS = 5;
     private static final Duration RETRY_DELAY = ofSeconds(60);
+
+    private final WebClient webClient;
 
     @Override
     public <R> R get(String uri, MultiValueMap<String, String> headers, Function<String, R> responseMapper) {
@@ -64,23 +64,23 @@ public class WebClientHttpService implements HttpService {
                         .filter(onlyTooManyRequest()));
     }
 
-    private Consumer<HttpHeaders> createHeaders(MultiValueMap<String, String> headers) {
+    private static Consumer<HttpHeaders> createHeaders(MultiValueMap<String, String> headers) {
         return httpHeaders -> ofNullable(headers)
                 .ifPresent(h -> httpHeaders.addAll(headers));
     }
 
-    private Predicate<HttpStatus> onTooManyRequestsStatus() {
+    private static Predicate<HttpStatus> onTooManyRequestsStatus() {
         return status -> status.value() == TOO_MANY_REQUESTS.code();
     }
 
-    private Function<ClientResponse, Mono<? extends Throwable>> processTooManyRequests() {
+    private static Function<ClientResponse, Mono<? extends Throwable>> processTooManyRequests() {
         return response -> {
             log.info("Too Many requests received. Sleeping for {} seconds", RETRY_DELAY.toSeconds());
             return Mono.error(new TooManyRequestsException());
         };
     }
 
-    private Predicate<? super Throwable> onlyTooManyRequest() {
+    private static Predicate<? super Throwable> onlyTooManyRequest() {
         return throwable -> throwable instanceof TooManyRequestsException;
     }
 }

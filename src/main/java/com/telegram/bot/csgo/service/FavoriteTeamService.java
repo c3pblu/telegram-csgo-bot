@@ -27,7 +27,7 @@ public class FavoriteTeamService {
         return unlinkName(teamName);
     }
 
-    private String unlinkName(String name) {
+    private static String unlinkName(String name) {
         return name.contains(DOT.toString())
                 ? name.replace(DOT, COMMA)
                 : name;

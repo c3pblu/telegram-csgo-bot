@@ -16,12 +16,12 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @RequiredArgsConstructor
 public class UpdateProcessingService implements Runnable {
 
+    private static final String TIMEOUT_MESSAGE = "Oops, you are too slow! Try again";
+
     private final BotController botController;
     private final BotProperties botProperties;
     private final List<UpdateProcessor> updateProcessors;
     private final Update update;
-
-    private static final String TIMEOUT_MESSAGE = "Oops, you are too slow! Try again";
 
     @Override
     public void run() {

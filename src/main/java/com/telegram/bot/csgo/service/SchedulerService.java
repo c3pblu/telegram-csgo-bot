@@ -17,14 +17,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class SchedulerService {
 
+    private static final String UPCOMING_MATCHES_MSG = "Upcoming matches:";
+    private static final String RESULTS_MSG = "Last results:";
+
     private final BotController botController;
     private final HttpService httpService;
     private final MatchesAdaptor matchesAdaptor;
     private final ResultsAdaptor resultsAdaptor;
     private final BotProperties botProperties;
-
-    private static final String UPCOMING_MATCHES_MSG = "Upcoming matches:";
-    private static final String RESULTS_MSG = "Last results:";
 
     @Scheduled(cron = "${bot.scheduler.matches-cron}")
     private void todayMatchesScheduler() {

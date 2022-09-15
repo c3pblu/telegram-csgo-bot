@@ -32,9 +32,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 @RequiredArgsConstructor
 public class MenuUpdateProcessor extends UpdateProcessor {
 
-    private final BotController botController;
-    private final EmojiService emojiService;
-
     private static final String MENU_TEXT = "Easy Peasy Lemon Squeezy!";
     private static final String MATCHES_STR = " Matches";
     private static final String STREAMS_STR = " Streams";
@@ -53,15 +50,14 @@ public class MenuUpdateProcessor extends UpdateProcessor {
     private static final String TOP_20_PLAYERS_STR = TOP_STR + TWENTY_STR + PLAYERS_STR;
     private static final String TOP_30_PLAYERS_STR = TOP_STR + THIRTY_STR + PLAYERS_STR;
 
+    private final BotController botController;
+    private final EmojiService emojiService;
+
     @Override
     public void process(@NonNull Update update) {
         if (isMenuCommand(update)) {
             botController.send(menuMessage(getChatId(update)));
         }
-    }
-
-    private boolean isMenuCommand(Update update) {
-        return update.hasMessage() && MENU_COMMAND.equalsIgnoreCase(update.getMessage().getText());
     }
 
     private SendMessage menuMessage(String chatId) {
@@ -115,5 +111,9 @@ public class MenuUpdateProcessor extends UpdateProcessor {
         return InlineKeyboardMarkup.builder()
                 .keyboard(List.of(row1, row2, row3, row4))
                 .build();
+    }
+
+    private static boolean isMenuCommand(Update update) {
+        return update.hasMessage() && MENU_COMMAND.equalsIgnoreCase(update.getMessage().getText());
     }
 }

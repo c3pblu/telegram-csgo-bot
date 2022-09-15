@@ -27,20 +27,19 @@ public class TwitchUpdateProcessor extends UpdateProcessor {
         }
     }
 
-    @SuppressWarnings("OverlyComplexBooleanExpression")
-    private boolean isTwitchCommand(Update update) {
-        return (update.hasMessage() && STREAMS_COMMAND.equalsIgnoreCase(update.getMessage().getText()))
-                || (update.hasCallbackQuery() && STREAMS_COMMAND.equals(update.getCallbackQuery().getData()));
-    }
-
-    private boolean isTwitchCallback(Update update) {
-        return update.hasCallbackQuery() && STREAMS_NEXT_PAGE_CALLBACK.equals(update.getCallbackQuery().getData());
-    }
-
     private void send(Update update, String chatId, boolean isNextPage) {
         botController.send(twitchService.getStreams(chatId, isNextPage));
         botController.send(twitchService.nextPage(chatId));
         deleteMenu(botController, update);
+    }
+
+    private static boolean isTwitchCommand(Update update) {
+        return (update.hasMessage() && STREAMS_COMMAND.equalsIgnoreCase(update.getMessage().getText()))
+                || (update.hasCallbackQuery() && STREAMS_COMMAND.equals(update.getCallbackQuery().getData()));
+    }
+
+    private static boolean isTwitchCallback(Update update) {
+        return update.hasCallbackQuery() && STREAMS_NEXT_PAGE_CALLBACK.equals(update.getCallbackQuery().getData());
     }
 
 }

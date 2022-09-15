@@ -32,17 +32,17 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @RequiredArgsConstructor
 public class FavoriteTeamsUpdateProcessor extends UpdateProcessor {
 
-    private final BotController botController;
-    private final FlagService flagService;
-    private final EmojiService emojiService;
-    private final FavoriteTeamRepo favoriteTeamsRepository;
-    private final FlagRepo flagRepository;
-
     private static final String REMOVED_STR = " removed";
     private static final String ADDED_UPDATED_STR = " added/updated";
     private static final String NOT_FOUND_STR = " is not found";
     private static final Pattern TEAMS_PLUS_PATTERN = Pattern.compile("(/teams\\+)((\\w*\\s*)*)(\\[)([A-Z]{2})(])");
     private static final Pattern TEAMS_MINUS_PATTERN = Pattern.compile("(/teams-)((\\w*\\s*)*)");
+
+    private final BotController botController;
+    private final FlagService flagService;
+    private final EmojiService emojiService;
+    private final FavoriteTeamRepo favoriteTeamsRepository;
+    private final FlagRepo flagRepository;
 
     @Override
     public void process(@NonNull Update update) {
@@ -111,20 +111,6 @@ public class FavoriteTeamsUpdateProcessor extends UpdateProcessor {
                 .build());
     }
 
-    @SuppressWarnings("OverlyComplexBooleanExpression")
-    private boolean isTeamCommand(Update update) {
-        return (update.hasMessage() && TEAMS_COMMAND.equalsIgnoreCase(update.getMessage().getText()))
-                || (update.hasCallbackQuery() && TEAMS_COMMAND.equals(update.getCallbackQuery().getData()));
-    }
-
-    private boolean isTeamsPlusCommand(Update update) {
-        return update.hasMessage() && TEAMS_PLUS_PATTERN.matcher(update.getMessage().getText()).matches();
-    }
-
-    private boolean isTeamsMinusCommand(Update update) {
-        return update.hasMessage() && TEAMS_MINUS_PATTERN.matcher(update.getMessage().getText()).matches();
-    }
-
     private SendMessage prepareMessage(String chatId) {
         var teams = favoriteTeamsRepository.findByChatId(chatId);
         if (teams.isEmpty()) {
@@ -155,5 +141,18 @@ public class FavoriteTeamsUpdateProcessor extends UpdateProcessor {
         return HtmlMessage.htmlBuilder().chatId(chatId)
                 .text(textMessage)
                 .build();
+    }
+
+    private static boolean isTeamCommand(Update update) {
+        return (update.hasMessage() && TEAMS_COMMAND.equalsIgnoreCase(update.getMessage().getText()))
+                || (update.hasCallbackQuery() && TEAMS_COMMAND.equals(update.getCallbackQuery().getData()));
+    }
+
+    private static boolean isTeamsPlusCommand(Update update) {
+        return update.hasMessage() && TEAMS_PLUS_PATTERN.matcher(update.getMessage().getText()).matches();
+    }
+
+    private static boolean isTeamsMinusCommand(Update update) {
+        return update.hasMessage() && TEAMS_MINUS_PATTERN.matcher(update.getMessage().getText()).matches();
     }
 }

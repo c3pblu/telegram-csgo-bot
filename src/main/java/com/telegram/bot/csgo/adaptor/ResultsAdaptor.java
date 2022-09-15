@@ -43,10 +43,10 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 @Slf4j
 public class ResultsAdaptor {
 
+    private static final String RESULTS_STR = "Results";
+
     private final FavoriteTeamService favoriteTeamService;
     private final EmojiService emojiService;
-
-    private static final String RESULTS_STR = "Results";
 
     public SendMessage results(String chatId, Document doc) {
         var message = prepareMessage(chatId, doc);

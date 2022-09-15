@@ -27,7 +27,6 @@ public class ResultsUpdateProcessor extends UpdateProcessor {
         }
     }
 
-    @SuppressWarnings("OverlyComplexBooleanExpression")
     private boolean isResultCommand(Update update) {
         return (update.hasMessage() && RESULTS_COMMAND.equalsIgnoreCase(update.getMessage().getText()))
                 || (update.hasCallbackQuery() && RESULTS_COMMAND.equals(update.getCallbackQuery().getData()));

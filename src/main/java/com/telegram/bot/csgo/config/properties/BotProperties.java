@@ -15,14 +15,12 @@ public final class BotProperties {
     private Message message;
     private Scheduler scheduler;
 
-
     @Getter
     @Setter
     public static class Message {
         private Long timeout;
         private Integer uniqCount;
     }
-
 
     @Getter
     @Setter

@@ -22,17 +22,12 @@ public class WebClientConfig {
     }
 
     @Bean
-    public ExchangeStrategies exchangeStrategies() {
-        return ExchangeStrategies.builder()
-                .codecs(codecs -> codecs.defaultCodecs()
-                        .maxInMemorySize(MAX_RESPONSE_BYTES))
-                .build();
-    }
-
-    @Bean
-    public WebClient webClient(ReactorClientHttpConnector clientHttpConnector, ExchangeStrategies exchangeStrategies) {
+    public WebClient webClient(ReactorClientHttpConnector clientHttpConnector) {
         return WebClient.builder()
-                .exchangeStrategies(exchangeStrategies)
+                .exchangeStrategies(ExchangeStrategies.builder()
+                        .codecs(codecs -> codecs.defaultCodecs()
+                                .maxInMemorySize(MAX_RESPONSE_BYTES))
+                        .build())
                 .clientConnector(clientHttpConnector)
                 .build();
     }

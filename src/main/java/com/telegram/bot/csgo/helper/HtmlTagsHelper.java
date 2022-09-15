@@ -65,7 +65,7 @@ public final class HtmlTagsHelper {
 
     public static final String HLINK = "a";
     public static final String HREF = "href";
-    public static final String DATA_UNIX= "data-unix";
+    public static final String DATA_UNIX = "data-unix";
     public static final String TEAM_WON = "team-won";
     public static final String IMG = "img";
     public static final String TITLE = "title";
