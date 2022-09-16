@@ -1,10 +1,12 @@
 package com.telegram.bot.csgo.service;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 import static com.vdurmont.emoji.EmojiParser.parseToUnicode;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.text.StringEscapeUtils.unescapeJava;
+import com.telegram.bot.csgo.domain.Flag;
 import com.telegram.bot.csgo.repository.FlagRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,10 @@ public class FlagService {
     private static final Pattern COUNTRY_CODE_PATTERN = Pattern.compile("[A-Z][A-Z]");
 
     private final FlagRepo flagRepo;
+
+    public Optional<Flag> getOneByCountryCode(String countryCode) {
+        return flagRepo.findByCode(countryCode);
+    }
 
     @Cacheable("flagUnicode")
     public String flagUnicodeFromCountry(String country) {

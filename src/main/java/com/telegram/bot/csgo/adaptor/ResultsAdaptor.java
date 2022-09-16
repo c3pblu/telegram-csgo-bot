@@ -69,9 +69,9 @@ public class ResultsAdaptor {
                     .append(UNBOLD)
                     .append(LINE_BRAKE);
             for (var resultCon : resultList.select(RESULT_CON)) {
-                var team1String = favoriteTeamService.favoriteTeam(chatId, resultCon.select(TEAM).get(0).text(),
+                var team1String = favoriteTeamService.highlightFavoriteTeam(chatId, resultCon.select(TEAM).get(0).text(),
                         false);
-                var team2String = favoriteTeamService.favoriteTeam(chatId, resultCon.select(TEAM).get(1).text(),
+                var team2String = favoriteTeamService.highlightFavoriteTeam(chatId, resultCon.select(TEAM).get(1).text(),
                         false);
                 if (resultCon.select(TEAM).get(0).hasClass(TEAM_WON)) {
                     textMessage.append(BOLD)

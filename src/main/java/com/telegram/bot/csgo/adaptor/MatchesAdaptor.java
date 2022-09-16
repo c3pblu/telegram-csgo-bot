@@ -95,11 +95,11 @@ public class MatchesAdaptor {
                         .append(UNLINK)
                         .append(LINE_BRAKE)
                         .append(favoriteTeamService
-                                .favoriteTeam(chatId, match.select(MATCH_TEAM_NAME).get(0).text(), true))
+                                .highlightFavoriteTeam(chatId, match.select(MATCH_TEAM_NAME).get(0).text(), true))
                         .append(WHITESPACE)
                         .append(emojiService.getEmoji(VS))
                         .append(WHITESPACE)
-                        .append(favoriteTeamService.favoriteTeam(chatId, match.select(MATCH_TEAM_NAME).get(1).text(),
+                        .append(favoriteTeamService.highlightFavoriteTeam(chatId, match.select(MATCH_TEAM_NAME).get(1).text(),
                                 true))
                         .append(WHITESPACE)
                         .append(LEFT_BRACKET)
@@ -153,11 +153,11 @@ public class MatchesAdaptor {
                     .append(MINUS)
                     .append(WHITESPACE);
             if (match.select(MATCH_INFO_EMPTY).isEmpty()) {
-                textMessage.append(favoriteTeamService.favoriteTeam(chatId, match.select(FIRST_TEAM).text(), true))
+                textMessage.append(favoriteTeamService.highlightFavoriteTeam(chatId, match.select(FIRST_TEAM).text(), true))
                         .append(WHITESPACE)
                         .append(emojiService.getEmoji(VS))
                         .append(WHITESPACE)
-                        .append(favoriteTeamService.favoriteTeam(chatId, match.select(SECOND_TEAM).text(), true))
+                        .append(favoriteTeamService.highlightFavoriteTeam(chatId, match.select(SECOND_TEAM).text(), true))
                         .append(WHITESPACE)
                         .append(LEFT_BRACKET)
                         .append(match.select(MATCH_META).text())

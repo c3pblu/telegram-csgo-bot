@@ -2,8 +2,6 @@ package com.telegram.bot.csgo.processor;
 
 import java.util.regex.Pattern;
 import static com.telegram.bot.csgo.helper.CommandHelper.TEAMS_COMMAND;
-import static com.telegram.bot.csgo.model.message.EmojiCode.INFO;
-import static com.telegram.bot.csgo.model.message.EmojiCode.SAD;
 import static com.telegram.bot.csgo.helper.MessageHelper.BOLD;
 import static com.telegram.bot.csgo.helper.MessageHelper.DOUBLE_LINE_BRAKE;
 import static com.telegram.bot.csgo.helper.MessageHelper.LEFT_SQUARE_BRACKET;
@@ -14,17 +12,19 @@ import static com.telegram.bot.csgo.helper.MessageHelper.TEAMS_HELP_MESSAGE;
 import static com.telegram.bot.csgo.helper.MessageHelper.TEAMS_YOUR_FAVORITE_MESSAGE;
 import static com.telegram.bot.csgo.helper.MessageHelper.UNBOLD;
 import static com.telegram.bot.csgo.helper.MessageHelper.WHITESPACE;
+import static com.telegram.bot.csgo.model.message.EmojiCode.INFO;
+import static com.telegram.bot.csgo.model.message.EmojiCode.SAD;
 import com.telegram.bot.csgo.controller.BotController;
 import com.telegram.bot.csgo.domain.FavoriteTeam;
 import com.telegram.bot.csgo.domain.Flag;
 import com.telegram.bot.csgo.model.message.HtmlMessage;
-import com.telegram.bot.csgo.repository.FavoriteTeamRepo;
-import com.telegram.bot.csgo.repository.FlagRepo;
 import com.telegram.bot.csgo.service.EmojiService;
+import com.telegram.bot.csgo.service.FavoriteTeamService;
 import com.telegram.bot.csgo.service.FlagService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -40,11 +40,11 @@ public class FavoriteTeamsUpdateProcessor extends UpdateProcessor {
 
     private final BotController botController;
     private final FlagService flagService;
+    private final FavoriteTeamService favoriteTeamService;
     private final EmojiService emojiService;
-    private final FavoriteTeamRepo favoriteTeamsRepository;
-    private final FlagRepo flagRepository;
 
     @Override
+    @Transactional
     public void process(@NonNull Update update) {
         var chatId = getChatId(update);
         if (isTeamCommand(update)) {
@@ -63,7 +63,7 @@ public class FavoriteTeamsUpdateProcessor extends UpdateProcessor {
         var matcher = TEAMS_MINUS_PATTERN.matcher(text);
         if (matcher.find()) {
             var teamName = matcher.group(2);
-            var team = favoriteTeamsRepository.findByChatIdAndName(chatId, teamName);
+            var team = favoriteTeamService.getOneByChatIdAndName(chatId, teamName);
             team.ifPresentOrElse(
                     t -> deleteAndSendMessage(chatId, t),
                     () -> sendEntryNotFount(chatId, teamName));
@@ -75,7 +75,7 @@ public class FavoriteTeamsUpdateProcessor extends UpdateProcessor {
         if (matcher.find()) {
             var countryCode = matcher.group(5);
             var teamName = matcher.group(2);
-            var flag = flagRepository.findByCode(countryCode);
+            var flag = flagService.getOneByCountryCode(countryCode);
             flag.ifPresentOrElse(
                     f -> saveAndSendMessage(chatId, teamName, f),
                     () -> sendEntryNotFount(chatId, countryCode));
@@ -83,7 +83,7 @@ public class FavoriteTeamsUpdateProcessor extends UpdateProcessor {
     }
 
     private void deleteAndSendMessage(String chatId, FavoriteTeam team) {
-        favoriteTeamsRepository.delete(team);
+        favoriteTeamService.delete(team);
         botController.send(HtmlMessage.htmlBuilder()
                 .chatId(chatId)
                 .text(BOLD + team.getName() + UNBOLD + REMOVED_STR)
@@ -91,13 +91,13 @@ public class FavoriteTeamsUpdateProcessor extends UpdateProcessor {
     }
 
     private void saveAndSendMessage(String chatId, String teamName, Flag flag) {
-        var team = favoriteTeamsRepository.findByChatIdAndName(chatId, teamName)
+        var team = favoriteTeamService.getOneByChatIdAndName(chatId, teamName)
                 .orElseGet(() -> FavoriteTeam.builder()
                         .chatId(chatId)
                         .name(teamName)
                         .build());
         team.setFlag(flag);
-        favoriteTeamsRepository.save(team);
+        favoriteTeamService.save(team);
         botController.send(HtmlMessage.htmlBuilder()
                 .chatId(chatId)
                 .text(BOLD + teamName + UNBOLD + ADDED_UPDATED_STR)
@@ -112,7 +112,7 @@ public class FavoriteTeamsUpdateProcessor extends UpdateProcessor {
     }
 
     private SendMessage prepareMessage(String chatId) {
-        var teams = favoriteTeamsRepository.findByChatId(chatId);
+        var teams = favoriteTeamService.getAllByChatId(chatId);
         if (teams.isEmpty()) {
             return HtmlMessage.htmlBuilder()
                     .chatId(chatId)
