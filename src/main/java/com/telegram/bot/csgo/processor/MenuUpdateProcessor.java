@@ -1,6 +1,15 @@
 package com.telegram.bot.csgo.processor;
 
+import com.telegram.bot.csgo.controller.BotController;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+
 import java.util.List;
+
 import static com.telegram.bot.csgo.helper.CommandHelper.MATCHES_COMMAND;
 import static com.telegram.bot.csgo.helper.CommandHelper.MENU_COMMAND;
 import static com.telegram.bot.csgo.helper.CommandHelper.RESULTS_COMMAND;
@@ -12,21 +21,14 @@ import static com.telegram.bot.csgo.helper.CommandHelper.TOP_20_CALLBACK;
 import static com.telegram.bot.csgo.helper.CommandHelper.TOP_20_PLAYERS_CALLBACK;
 import static com.telegram.bot.csgo.helper.CommandHelper.TOP_30_CALLBACK;
 import static com.telegram.bot.csgo.helper.CommandHelper.TOP_30_PLAYERS_CALLBACK;
-import static com.telegram.bot.csgo.model.message.EmojiCode.CUP;
-import static com.telegram.bot.csgo.model.message.EmojiCode.FIRE;
-import static com.telegram.bot.csgo.model.message.EmojiCode.MIL_MEDAL;
-import static com.telegram.bot.csgo.model.message.EmojiCode.SPORT_MEDAL;
-import static com.telegram.bot.csgo.model.message.EmojiCode.SUNGLASSES;
-import static com.telegram.bot.csgo.model.message.EmojiCode.TV;
+import static com.telegram.bot.csgo.model.message.Emoji.CUP;
+import static com.telegram.bot.csgo.model.message.Emoji.FIRE;
+import static com.telegram.bot.csgo.model.message.Emoji.MIL_MEDAL;
+import static com.telegram.bot.csgo.model.message.Emoji.SPORT_MEDAL;
+import static com.telegram.bot.csgo.model.message.Emoji.SUNGLASSES;
+import static com.telegram.bot.csgo.model.message.Emoji.TV;
+import static com.vdurmont.emoji.EmojiParser.parseToUnicode;
 import static org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton.builder;
-import com.telegram.bot.csgo.controller.BotController;
-import com.telegram.bot.csgo.service.EmojiService;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 @Component
 @RequiredArgsConstructor
@@ -51,7 +53,6 @@ public class MenuUpdateProcessor extends UpdateProcessor {
     private static final String TOP_30_PLAYERS_STR = TOP_STR + THIRTY_STR + PLAYERS_STR;
 
     private final BotController botController;
-    private final EmojiService emojiService;
 
     @Override
     public void process(@NonNull Update update) {
@@ -70,22 +71,22 @@ public class MenuUpdateProcessor extends UpdateProcessor {
 
     private InlineKeyboardMarkup createMenu() {
         var row1 = List.of(
-                builder().text(emojiService.getEmoji(FIRE) + MATCHES_STR)
+                builder().text(parseToUnicode(FIRE) + MATCHES_STR)
                         .callbackData(MATCHES_COMMAND)
                         .build(),
-                builder().text(emojiService.getEmoji(CUP) + RESULTS_STR)
+                builder().text(parseToUnicode(CUP) + RESULTS_STR)
                         .callbackData(RESULTS_COMMAND)
                         .build());
 
         var row2 = List.of(
-                builder().text(emojiService.getEmoji(SUNGLASSES) + FAVORITE_TEAMS_STR)
+                builder().text(parseToUnicode(SUNGLASSES) + FAVORITE_TEAMS_STR)
                         .callbackData(TEAMS_COMMAND)
                         .build(),
-                builder().text(emojiService.getEmoji(TV) + STREAMS_STR)
+                builder().text(parseToUnicode(TV) + STREAMS_STR)
                         .callbackData(STREAMS_COMMAND)
                         .build());
 
-        var milMedal = emojiService.getEmoji(MIL_MEDAL);
+        var milMedal = parseToUnicode(MIL_MEDAL);
         var row3 = List.of(
                 builder().text(milMedal + TOP_10_TEAMS_STR)
                         .callbackData(TOP_10_CALLBACK)
@@ -97,7 +98,7 @@ public class MenuUpdateProcessor extends UpdateProcessor {
                         .callbackData(TOP_30_CALLBACK)
                         .build());
 
-        var sportMedal = emojiService.getEmoji(SPORT_MEDAL);
+        var sportMedal = parseToUnicode(SPORT_MEDAL);
         var row4 = List.of(
                 builder().text(sportMedal + TOP_10_PLAYERS_STR)
                         .callbackData(TOP_10_PLAYERS_CALLBACK)

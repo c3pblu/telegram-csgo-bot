@@ -1,7 +1,15 @@
 package com.telegram.bot.csgo.adaptor;
 
+import com.telegram.bot.csgo.model.message.HtmlMessage;
+import com.telegram.bot.csgo.service.FlagService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.jsoup.nodes.Document;
+import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+
 import java.time.LocalDate;
-import static com.telegram.bot.csgo.model.message.EmojiCode.SPORT_MEDAL;
+
 import static com.telegram.bot.csgo.helper.HtmlTagsHelper.HLINK;
 import static com.telegram.bot.csgo.helper.HtmlTagsHelper.HREF;
 import static com.telegram.bot.csgo.helper.HtmlTagsHelper.IMG;
@@ -23,14 +31,8 @@ import static com.telegram.bot.csgo.helper.MessageHelper.LINK_HLTV;
 import static com.telegram.bot.csgo.helper.MessageHelper.UNBOLD;
 import static com.telegram.bot.csgo.helper.MessageHelper.UNLINK;
 import static com.telegram.bot.csgo.helper.MessageHelper.WHITESPACE;
-import com.telegram.bot.csgo.model.message.HtmlMessage;
-import com.telegram.bot.csgo.service.EmojiService;
-import com.telegram.bot.csgo.service.FlagService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.jsoup.nodes.Document;
-import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import static com.telegram.bot.csgo.model.message.Emoji.SPORT_MEDAL;
+import static com.vdurmont.emoji.EmojiParser.parseToUnicode;
 
 @Component
 @RequiredArgsConstructor
@@ -42,7 +44,6 @@ public class TopPlayersAdaptor {
     private static final String TEAMS_STR = TEAM_STR + 's';
 
     private final FlagService flagService;
-    private final EmojiService emojiService;
 
     public SendMessage topPlayers(String chatId, Document doc, Integer count) {
         var message = prepareMessage(doc, count);
@@ -53,7 +54,7 @@ public class TopPlayersAdaptor {
     public String prepareMessage(Document doc, Integer count) {
         var textMessage = new StringBuilder();
         var year = String.valueOf(LocalDate.now().getYear());
-        textMessage.append(emojiService.getEmoji(SPORT_MEDAL))
+        textMessage.append(parseToUnicode(SPORT_MEDAL))
                 .append(BOLD)
                 .append(TOP_PLAYERS_STR)
                 .append(WHITESPACE)

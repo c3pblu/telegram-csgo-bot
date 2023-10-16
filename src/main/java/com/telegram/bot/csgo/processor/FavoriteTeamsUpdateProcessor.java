@@ -1,6 +1,20 @@
 package com.telegram.bot.csgo.processor;
 
+import com.telegram.bot.csgo.controller.BotController;
+import com.telegram.bot.csgo.domain.FavoriteTeam;
+import com.telegram.bot.csgo.domain.Flag;
+import com.telegram.bot.csgo.model.message.HtmlMessage;
+import com.telegram.bot.csgo.service.FavoriteTeamService;
+import com.telegram.bot.csgo.service.FlagService;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Update;
+
 import java.util.regex.Pattern;
+
 import static com.telegram.bot.csgo.helper.CommandHelper.TEAMS_COMMAND;
 import static com.telegram.bot.csgo.helper.MessageHelper.BOLD;
 import static com.telegram.bot.csgo.helper.MessageHelper.DOUBLE_LINE_BRAKE;
@@ -12,21 +26,9 @@ import static com.telegram.bot.csgo.helper.MessageHelper.TEAMS_HELP_MESSAGE;
 import static com.telegram.bot.csgo.helper.MessageHelper.TEAMS_YOUR_FAVORITE_MESSAGE;
 import static com.telegram.bot.csgo.helper.MessageHelper.UNBOLD;
 import static com.telegram.bot.csgo.helper.MessageHelper.WHITESPACE;
-import static com.telegram.bot.csgo.model.message.EmojiCode.INFO;
-import static com.telegram.bot.csgo.model.message.EmojiCode.SAD;
-import com.telegram.bot.csgo.controller.BotController;
-import com.telegram.bot.csgo.domain.FavoriteTeam;
-import com.telegram.bot.csgo.domain.Flag;
-import com.telegram.bot.csgo.model.message.HtmlMessage;
-import com.telegram.bot.csgo.service.EmojiService;
-import com.telegram.bot.csgo.service.FavoriteTeamService;
-import com.telegram.bot.csgo.service.FlagService;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import static com.telegram.bot.csgo.model.message.Emoji.INFO;
+import static com.telegram.bot.csgo.model.message.Emoji.SAD;
+import static com.vdurmont.emoji.EmojiParser.parseToUnicode;
 
 @Component
 @RequiredArgsConstructor
@@ -41,7 +43,6 @@ public class FavoriteTeamsUpdateProcessor extends UpdateProcessor {
     private final BotController botController;
     private final FlagService flagService;
     private final FavoriteTeamService favoriteTeamService;
-    private final EmojiService emojiService;
 
     @Override
     @Transactional
@@ -116,14 +117,14 @@ public class FavoriteTeamsUpdateProcessor extends UpdateProcessor {
         if (teams.isEmpty()) {
             return HtmlMessage.htmlBuilder()
                     .chatId(chatId)
-                    .text(emojiService.getEmoji(INFO) +
+                    .text(parseToUnicode(INFO) +
                             TEAMS_YOUR_FAVORITE_MESSAGE + TEAMS_EMPTY_FAVORITE_MESSAGE +
-                            emojiService.getEmoji(SAD) + DOUBLE_LINE_BRAKE +
+                            parseToUnicode(SAD) + DOUBLE_LINE_BRAKE +
                             TEAMS_HELP_MESSAGE)
                     .build();
         }
         var textMessage = new StringBuilder();
-        textMessage.append(emojiService.getEmoji(INFO))
+        textMessage.append(parseToUnicode(INFO))
                 .append(TEAMS_YOUR_FAVORITE_MESSAGE);
         teams.forEach(team -> textMessage
                 .append(BOLD)

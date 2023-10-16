@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -69,7 +70,7 @@ public class WebClientHttpService implements HttpService {
                 .ifPresent(h -> httpHeaders.addAll(headers));
     }
 
-    private static Predicate<HttpStatus> onTooManyRequestsStatus() {
+    private static Predicate<HttpStatusCode> onTooManyRequestsStatus() {
         return status -> status.value() == TOO_MANY_REQUESTS.code();
     }
 

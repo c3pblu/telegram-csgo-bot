@@ -1,7 +1,19 @@
 package com.telegram.bot.csgo.adaptor;
 
-import java.time.ZoneOffset;
+import com.telegram.bot.csgo.model.message.HtmlMessage;
+import com.telegram.bot.csgo.service.FavoriteTeamService;
+import com.telegram.bot.csgo.service.http.HttpService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Locale;
+
 import static com.telegram.bot.csgo.helper.HtmlTagsHelper.DATA_UNIX;
 import static com.telegram.bot.csgo.helper.HtmlTagsHelper.FIRST_TEAM;
 import static com.telegram.bot.csgo.helper.HtmlTagsHelper.HLINK;
@@ -38,25 +50,15 @@ import static com.telegram.bot.csgo.helper.MessageHelper.RIGHT_BRACKET;
 import static com.telegram.bot.csgo.helper.MessageHelper.UNBOLD;
 import static com.telegram.bot.csgo.helper.MessageHelper.UNLINK;
 import static com.telegram.bot.csgo.helper.MessageHelper.WHITESPACE;
-import static com.telegram.bot.csgo.model.message.EmojiCode.CUP;
-import static com.telegram.bot.csgo.model.message.EmojiCode.EXCL_MARK;
-import static com.telegram.bot.csgo.model.message.EmojiCode.SQUARE;
-import static com.telegram.bot.csgo.model.message.EmojiCode.STAR;
-import static com.telegram.bot.csgo.model.message.EmojiCode.VS;
+import static com.telegram.bot.csgo.model.message.Emoji.CUP;
+import static com.telegram.bot.csgo.model.message.Emoji.EXCL_MARK;
+import static com.telegram.bot.csgo.model.message.Emoji.SQUARE;
+import static com.telegram.bot.csgo.model.message.Emoji.STAR;
+import static com.telegram.bot.csgo.model.message.Emoji.VS;
+import static com.vdurmont.emoji.EmojiParser.parseToUnicode;
 import static java.lang.Long.parseLong;
-import static java.time.LocalDateTime.ofEpochSecond;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.stream.IntStream.rangeClosed;
-import com.telegram.bot.csgo.model.message.HtmlMessage;
-import com.telegram.bot.csgo.service.EmojiService;
-import com.telegram.bot.csgo.service.FavoriteTeamService;
-import com.telegram.bot.csgo.service.http.HttpService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 @Component
 @RequiredArgsConstructor
@@ -68,7 +70,6 @@ public class MatchesAdaptor {
 
     private final FavoriteTeamService favoriteTeamService;
     private final HttpService httpService;
-    private final EmojiService emojiService;
 
     public SendMessage matches(String chatId, Document doc) {
         var message = prepareMessage(chatId, doc);
@@ -84,10 +85,10 @@ public class MatchesAdaptor {
             textMessage.append(BOLD)
                     .append(LIVE_MATCHES_STR)
                     .append(UNBOLD)
-                    .append(emojiService.getEmoji(EXCL_MARK))
+                    .append(parseToUnicode(EXCL_MARK))
                     .append(LINE_BRAKE);
             for (var match : matchesContainer.select(LIVE_MATCH)) {
-                textMessage.append(emojiService.getEmoji(CUP))
+                textMessage.append(parseToUnicode(CUP))
                         .append(LINK_HLTV)
                         .append(match.select(HLINK).attr(HREF))
                         .append(LINK_END)
@@ -97,7 +98,7 @@ public class MatchesAdaptor {
                         .append(favoriteTeamService
                                 .highlightFavoriteTeam(chatId, match.select(MATCH_TEAM_NAME).get(0).text(), true))
                         .append(WHITESPACE)
-                        .append(emojiService.getEmoji(VS))
+                        .append(parseToUnicode(VS))
                         .append(WHITESPACE)
                         .append(favoriteTeamService.highlightFavoriteTeam(chatId, match.select(MATCH_TEAM_NAME).get(1).text(),
                                 true))
@@ -143,11 +144,17 @@ public class MatchesAdaptor {
                 .append(LINE_BRAKE);
         for (var match : todayMatches.select(UPCOMING_MATCH)) {
             var unixTime = parseLong(match.select(MATCH_TIME).attr(DATA_UNIX));
-            var localTime = ofEpochSecond((unixTime / 1000) + 10800, 0, ZoneOffset.UTC);
+            var minskTime =  Instant.ofEpochMilli(unixTime).atZone(ZoneId.of("Europe/Minsk"));
+            var lisbonTime = Instant.ofEpochMilli(unixTime).atZone(ZoneId.of("Europe/Lisbon"));
             var formatter = ofPattern("HH:mm", Locale.ENGLISH);
-            var formattedTime = localTime.format(formatter);
+            var formattedMinskTime = minskTime.format(formatter);
+            var formattedLisbonTime = lisbonTime.format(formatter);
             textMessage.append(BOLD)
-                    .append(formattedTime)
+                    .append(formattedMinskTime)
+                    .append(WHITESPACE)
+                    .append(LEFT_BRACKET)
+                    .append(formattedLisbonTime)
+                    .append(RIGHT_BRACKET)
                     .append(UNBOLD)
                     .append(WHITESPACE)
                     .append(MINUS)
@@ -155,7 +162,7 @@ public class MatchesAdaptor {
             if (match.select(MATCH_INFO_EMPTY).isEmpty()) {
                 textMessage.append(favoriteTeamService.highlightFavoriteTeam(chatId, match.select(FIRST_TEAM).text(), true))
                         .append(WHITESPACE)
-                        .append(emojiService.getEmoji(VS))
+                        .append(parseToUnicode(VS))
                         .append(WHITESPACE)
                         .append(favoriteTeamService.highlightFavoriteTeam(chatId, match.select(SECOND_TEAM).text(), true))
                         .append(WHITESPACE)
@@ -168,7 +175,7 @@ public class MatchesAdaptor {
                         .append(WHITESPACE);
             }
             textMessage.append(getStars(match))
-                    .append(emojiService.getEmoji(SQUARE))
+                    .append(parseToUnicode(SQUARE))
                     .append(WHITESPACE)
                     .append(LINK_HLTV)
                     .append(match.select(HLINK).attr(HREF))
@@ -183,7 +190,7 @@ public class MatchesAdaptor {
     private StringBuilder getStars(Element match) {
         var stars = new StringBuilder();
         rangeClosed(0, 4 - match.select(STARS_FADED).size())
-                .forEach(i -> stars.append(emojiService.getEmoji(STAR)));
+                .forEach(i -> stars.append(parseToUnicode(STAR)));
         return stars;
     }
 }

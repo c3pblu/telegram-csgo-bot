@@ -1,6 +1,18 @@
 package com.telegram.bot.csgo.adaptor;
 
+import com.telegram.bot.csgo.model.message.Emoji;
+import com.telegram.bot.csgo.model.message.HtmlMessage;
+import com.telegram.bot.csgo.service.FlagService;
+import com.telegram.bot.csgo.service.TeamCountryService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+
 import java.util.stream.Collectors;
+
 import static com.telegram.bot.csgo.helper.HtmlTagsHelper.CHANGE;
 import static com.telegram.bot.csgo.helper.HtmlTagsHelper.HLINK;
 import static com.telegram.bot.csgo.helper.HtmlTagsHelper.HREF;
@@ -24,18 +36,8 @@ import static com.telegram.bot.csgo.helper.MessageHelper.RIGHT_SQUARE_BRACKET;
 import static com.telegram.bot.csgo.helper.MessageHelper.UNBOLD;
 import static com.telegram.bot.csgo.helper.MessageHelper.UNLINK;
 import static com.telegram.bot.csgo.helper.MessageHelper.WHITESPACE;
-import static com.telegram.bot.csgo.model.message.EmojiCode.MIL_MEDAL;
+import static com.vdurmont.emoji.EmojiParser.parseToUnicode;
 import static java.lang.String.join;
-import com.telegram.bot.csgo.model.message.HtmlMessage;
-import com.telegram.bot.csgo.service.EmojiService;
-import com.telegram.bot.csgo.service.FlagService;
-import com.telegram.bot.csgo.service.TeamCountryService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 @Component
 @RequiredArgsConstructor
@@ -44,7 +46,6 @@ public class TopTeamsAdaptor {
 
     private final TeamCountryService teamCountryService;
     private final FlagService flagService;
-    private final EmojiService emojiService;
 
     public SendMessage topTeams(String chatId, Document doc, Integer count) {
         var message = prepareMessage(doc, count);
@@ -54,7 +55,7 @@ public class TopTeamsAdaptor {
 
     public String prepareMessage(Document doc, Integer count) {
         var textMessage = new StringBuilder();
-        textMessage.append(emojiService.getEmoji(MIL_MEDAL))
+        textMessage.append(parseToUnicode(Emoji.MIL_MEDAL))
                 .append(BOLD)
                 .append(doc.select(REGIONAL_RANKING_HEADER).text())
                 .append(UNBOLD)

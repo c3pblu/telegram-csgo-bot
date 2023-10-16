@@ -35,7 +35,7 @@ public final class MessageHelper {
                     """;
     public static final String TEAMS_YOUR_FAVORITE_MESSAGE =
             """
-                    Your favorite teams:
+                     Your favorite teams:
                                 
                     """;
     public static final String TEAMS_EMPTY_FAVORITE_MESSAGE = "<b>You don't have favorite teams yet!</b> ";

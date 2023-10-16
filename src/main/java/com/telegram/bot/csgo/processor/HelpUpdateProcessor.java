@@ -1,13 +1,7 @@
 package com.telegram.bot.csgo.processor;
 
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import static com.telegram.bot.csgo.helper.CommandHelper.HELP_COMMAND;
-import static com.telegram.bot.csgo.helper.CommandHelper.START_COMMAND;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.telegram.telegrambots.meta.api.methods.ParseMode.MARKDOWN;
-import static org.telegram.telegrambots.meta.api.methods.send.SendMessage.builder;
 import com.telegram.bot.csgo.controller.BotController;
+import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +9,14 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
+import java.io.IOException;
+
+import static com.telegram.bot.csgo.helper.CommandHelper.HELP_COMMAND;
+import static com.telegram.bot.csgo.helper.CommandHelper.START_COMMAND;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.telegram.telegrambots.meta.api.methods.ParseMode.MARKDOWN;
+import static org.telegram.telegrambots.meta.api.methods.send.SendMessage.builder;
 
 @Component
 @RequiredArgsConstructor

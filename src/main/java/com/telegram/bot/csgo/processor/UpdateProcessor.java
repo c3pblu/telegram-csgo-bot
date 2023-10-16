@@ -1,11 +1,12 @@
 package com.telegram.bot.csgo.processor;
 
-import javax.annotation.Nullable;
-import static java.lang.String.valueOf;
 import com.telegram.bot.csgo.controller.BotController;
+import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
+import static java.lang.String.valueOf;
 
 public abstract class UpdateProcessor {
 

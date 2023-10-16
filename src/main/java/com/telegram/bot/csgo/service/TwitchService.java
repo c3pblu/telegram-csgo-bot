@@ -1,22 +1,5 @@
 package com.telegram.bot.csgo.service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import static com.fasterxml.jackson.databind.PropertyNamingStrategies.SNAKE_CASE;
-import static com.telegram.bot.csgo.helper.CommandHelper.STREAMS_NEXT_PAGE_CALLBACK;
-import static com.telegram.bot.csgo.helper.MessageHelper.BOLD;
-import static com.telegram.bot.csgo.helper.MessageHelper.EMPTY_STRING;
-import static com.telegram.bot.csgo.helper.MessageHelper.LEFT_BRACKET;
-import static com.telegram.bot.csgo.helper.MessageHelper.LINE_BRAKE;
-import static com.telegram.bot.csgo.helper.MessageHelper.LINK_END;
-import static com.telegram.bot.csgo.helper.MessageHelper.LINK_HLTV;
-import static com.telegram.bot.csgo.helper.MessageHelper.RIGHT_BRACKET;
-import static com.telegram.bot.csgo.helper.MessageHelper.UNBOLD;
-import static com.telegram.bot.csgo.helper.MessageHelper.UNLINK;
-import static com.telegram.bot.csgo.helper.MessageHelper.WHITESPACE;
-import static com.telegram.bot.csgo.model.message.EmojiCode.EXCL_MARK;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.telegram.bot.csgo.config.properties.TwitchProperties;
 import com.telegram.bot.csgo.model.message.HtmlMessage;
@@ -33,6 +16,27 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static com.fasterxml.jackson.databind.PropertyNamingStrategies.SNAKE_CASE;
+import static com.telegram.bot.csgo.helper.CommandHelper.STREAMS_NEXT_PAGE_CALLBACK;
+import static com.telegram.bot.csgo.helper.MessageHelper.BOLD;
+import static com.telegram.bot.csgo.helper.MessageHelper.EMPTY_STRING;
+import static com.telegram.bot.csgo.helper.MessageHelper.LEFT_BRACKET;
+import static com.telegram.bot.csgo.helper.MessageHelper.LINE_BRAKE;
+import static com.telegram.bot.csgo.helper.MessageHelper.LINK_END;
+import static com.telegram.bot.csgo.helper.MessageHelper.LINK_HLTV;
+import static com.telegram.bot.csgo.helper.MessageHelper.RIGHT_BRACKET;
+import static com.telegram.bot.csgo.helper.MessageHelper.UNBOLD;
+import static com.telegram.bot.csgo.helper.MessageHelper.UNLINK;
+import static com.telegram.bot.csgo.helper.MessageHelper.WHITESPACE;
+import static com.telegram.bot.csgo.model.message.Emoji.EXCL_MARK;
+import static com.vdurmont.emoji.EmojiParser.parseToUnicode;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @Service
 @Slf4j
@@ -56,9 +60,9 @@ public class TwitchService {
     private final FlagService flagService;
     private final HttpService httpService;
     private final TwitchProperties twitchProperties;
-    private final EmojiService emojiService;
     private final Map<String, String> chatPage = new ConcurrentHashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper()
+            .configure(FAIL_ON_UNKNOWN_PROPERTIES, false)
             .setPropertyNamingStrategy(SNAKE_CASE);
     private String accessToken;
 
@@ -128,7 +132,7 @@ public class TwitchService {
         textMessage.append(BOLD)
                 .append(LIVE_STR)
                 .append(UNBOLD)
-                .append(emojiService.getEmoji(EXCL_MARK))
+                .append(parseToUnicode(EXCL_MARK))
                 .append(BOLD)
                 .append(STREAMS_STR)
                 .append(UNBOLD)

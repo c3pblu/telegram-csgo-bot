@@ -6,56 +6,20 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <changeSet id="1" author="Siarhei Yurkin">
-        <comment>Create 'Emoji' table</comment>
-        <sql>
-            CREATE TABLE Emoji
-            (
-                `id`      INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-                `name`    VARCHAR(100) NOT NULL,
-                `unicode` VARCHAR(100) NOT NULL
-            );
-        </sql>
-    </changeSet>
-
-    <changeSet id="2" author="Siarhei Yurkin">
-        <comment>Insert values for 'Emoji' table</comment>
-        <sql>
-            INSERT INTO Emoji (name, unicode)
-            VALUES ('BOMB', '\\ud83d\\udca3'),
-                   ('CUP', '\\uD83C\\uDFC6'),
-                   ('DIAMOND_BLUE', '\\ud83d\\udd39'),
-                   ('DIAMOND_ORANGE', '\\ud83d\\udd38'),
-                   ('EXCL_MARK', '\\u2757'),
-                   ('FIRE', '\\uD83D\\uDD25'),
-                   ('HELM', '\\u26d1'),
-                   ('INFO', '\\u2139'),
-                   ('MIC', '\\ud83c\\udf99'),
-                   ('MIL_MEDAL', '\\ud83c\\udf96'),
-                   ('SAD', '\\u2639\\ufe0f'),
-                   ('SPORT_MEDAL', '\\ud83c\\udfc5'),
-                   ('SQUARE', '\\u25AB'),
-                   ('STAR', '\\u2b50\\ufe0f'),
-                   ('SUNGLASSES', '\\ud83d\\ude0e'),
-                   ('TV', '\\ud83d\\udcfa'),
-                   ('VS', '\\uD83C\\uDD9A');
-        </sql>
-    </changeSet>
-
-    <changeSet id="3" author="Siarhei Yurkin">
         <comment>Create 'Sticker' table</comment>
         <sql>
-            CREATE TABLE Sticker
+            CREATE TABLE sticker
             (
-                `id`   INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+                `id`   INTEGER PRIMARY KEY AUTOINCREMENT,
                 `code` VARCHAR(100) NOT NULL
             );
         </sql>
     </changeSet>
 
-    <changeSet id="4" author="Siarhei Yurkin">
+    <changeSet id="2" author="Siarhei Yurkin">
         <comment>Insert values for 'Sticker' table</comment>
         <sql>
-            INSERT INTO Sticker (code)
+            INSERT INTO sticker (code)
             VALUES ('CAADAgADIQAD9mOfG2LGtCrsw7bFFgQ'),
                    ('CAADAgADHgAD9mOfG7X25hWYzpI1FgQ'),
                    ('CAADAgADHwAD9mOfG_Ba2iIqOnazFgQ'),
@@ -79,12 +43,12 @@
         </sql>
     </changeSet>
 
-    <changeSet id="5" author="Siarhei Yurkin">
+    <changeSet id="3" author="Siarhei Yurkin">
         <comment>Create 'Flag' table</comment>
         <sql>
-            CREATE TABLE Flag
+            CREATE TABLE flag
             (
-                `id`         INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+                `id`         INTEGER PRIMARY KEY AUTOINCREMENT,
                 `name`       VARCHAR(100) NOT NULL,
                 `code`       VARCHAR(4)   NOT NULL,
                 `emoji_code` VARCHAR(4)   NOT NULL,
@@ -93,10 +57,10 @@
         </sql>
     </changeSet>
 
-    <changeSet id="6" author="Siarhei Yurkin">
+    <changeSet id="4" author="Siarhei Yurkin">
         <comment>Insert values for 'Flag' table</comment>
         <sql>
-            INSERT INTO Flag (name, code, emoji_code, unicode)
+            INSERT INTO flag (name, code, emoji_code, unicode)
             VALUES ('Aland Islands', 'AX', ':ax:', ''),
                    ('Albania', 'AL', ':al:', ''),
                    ('Algeria', 'DZ', ':dz:', ''),
@@ -349,12 +313,12 @@
         </sql>
     </changeSet>
 
-    <changeSet id="7" author="Siarhei Yurkin">
+    <changeSet id="5" author="Siarhei Yurkin">
         <comment>Create 'FavoriteTeam' table</comment>
         <sql>
-            CREATE TABLE FavoriteTeam
+            CREATE TABLE favorite_team
             (
-                `id`      INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+                `id`      INTEGER PRIMARY KEY AUTOINCREMENT,
                 `chat_id` VARCHAR(50) NOT NULL,
                 `name`    VARCHAR(100) NOT NULL,
                 `flag_id` INT UNSIGNED NOT NULL,

@@ -18,20 +18,16 @@ spring:
   liquibase:
     change-log: classpath:db/changelog.xml
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/bot}
-    username: ${DB_USER:bot}
-    password: ${DB_PASS:changeme}
+    url: ${DB_URL:jdbc:sqlite:/opt/app/csgo-bot/db/my.db}
   jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
     properties:
       hibernate:
         show_sql: ${DB_DEBUG_SQL:false}
         format_sql: true
     hibernate:
       ddl-auto: validate
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
 logging:
   level:
-    root: ${ROOT_LOGGING_LEVEL:INFO}
-    com.telegram.bot.csgo: ${BOT_LOGGING_LEVEL:DEBUG}
+    com.telegram.bot.csgo: DEBUG

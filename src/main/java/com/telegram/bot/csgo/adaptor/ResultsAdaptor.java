@@ -1,8 +1,14 @@
 package com.telegram.bot.csgo.adaptor;
 
-import static com.telegram.bot.csgo.model.message.EmojiCode.CUP;
-import static com.telegram.bot.csgo.model.message.EmojiCode.SQUARE;
-import static com.telegram.bot.csgo.model.message.EmojiCode.STAR;
+import com.telegram.bot.csgo.model.message.HtmlMessage;
+import com.telegram.bot.csgo.service.FavoriteTeamService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+
 import static com.telegram.bot.csgo.helper.HtmlTagsHelper.EVENT;
 import static com.telegram.bot.csgo.helper.HtmlTagsHelper.HLINK;
 import static com.telegram.bot.csgo.helper.HtmlTagsHelper.HREF;
@@ -28,15 +34,10 @@ import static com.telegram.bot.csgo.helper.MessageHelper.RIGHT_SQUARE_BRACKET;
 import static com.telegram.bot.csgo.helper.MessageHelper.UNBOLD;
 import static com.telegram.bot.csgo.helper.MessageHelper.UNLINK;
 import static com.telegram.bot.csgo.helper.MessageHelper.WHITESPACE;
-import com.telegram.bot.csgo.model.message.HtmlMessage;
-import com.telegram.bot.csgo.service.EmojiService;
-import com.telegram.bot.csgo.service.FavoriteTeamService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import static com.telegram.bot.csgo.model.message.Emoji.CUP;
+import static com.telegram.bot.csgo.model.message.Emoji.SQUARE;
+import static com.telegram.bot.csgo.model.message.Emoji.STAR;
+import static com.vdurmont.emoji.EmojiParser.parseToUnicode;
 
 @Component
 @RequiredArgsConstructor
@@ -46,7 +47,6 @@ public class ResultsAdaptor {
     private static final String RESULTS_STR = "Results";
 
     private final FavoriteTeamService favoriteTeamService;
-    private final EmojiService emojiService;
 
     public SendMessage results(String chatId, Document doc) {
         var message = prepareMessage(chatId, doc);
@@ -62,7 +62,7 @@ public class ResultsAdaptor {
             if (headerText.isEmpty()) {
                 headerText = doc.select(TAB_HOLDER).select(TAB).get(featuredNum++).text();
             }
-            textMessage.append(emojiService.getEmoji(CUP))
+            textMessage.append(parseToUnicode(CUP))
                     .append(WHITESPACE)
                     .append(BOLD)
                     .append(headerText)
@@ -99,7 +99,7 @@ public class ResultsAdaptor {
                         .append(RIGHT_BRACKET)
                         .append(WHITESPACE)
                         .append(getStars(resultCon))
-                        .append(emojiService.getEmoji(SQUARE))
+                        .append(parseToUnicode(SQUARE))
                         .append(WHITESPACE)
                         .append(LINK_HLTV).append(resultCon.select(HLINK).attr(HREF))
                         .append(LINK_END)
@@ -119,7 +119,7 @@ public class ResultsAdaptor {
     private StringBuilder getStars(Element match) {
         var stars = new StringBuilder();
         match.select(STARS).select(I)
-                .forEach(star -> stars.append(emojiService.getEmoji(STAR)));
+                .forEach(star -> stars.append(parseToUnicode(STAR)));
         return stars;
     }
 }
